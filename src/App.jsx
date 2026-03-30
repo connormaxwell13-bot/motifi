@@ -315,6 +315,26 @@ function Home({ onStart }) {
 }
 
 function Results({ results, answers, onBack }) {
+  const [explanations, setExplanations] = useState({})
+  const [loading, setLoading] = useState({})
+
+  React.useEffect(() => {
+    results.forEach((car, i) => {
+      setLoading(prev => ({ ...prev, [i]: true }))
+      fetch('/api/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ car, answers }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          setExplanations(prev => ({ ...prev, [i]: data.explanation }))
+          setLoading(prev => ({ ...prev, [i]: false }))
+        })
+        .catch(() => setLoading(prev => ({ ...prev, [i]: false })))
+    })
+  }, [results])
+
   if (results.length === 0) {
     return (
       <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: '#0F1D35', minHeight: '100vh', color: '#F5F7FA' }}>
@@ -358,6 +378,20 @@ function Results({ results, answers, onBack }) {
                   <div style={{ fontSize: '11px', color: '#A8B8CC', marginBottom: '4px' }}>Match score</div>
                   <div style={{ fontSize: '28px', fontWeight: '900', color: '#00C896' }}>{Math.round(car.scores.finalScore * 10)}%</div>
                 </div>
+              </div>
+
+              {/* LLM Explanation */}
+              <div style={{ backgroundColor: '#0F1D35', borderRadius: '10px', padding: '16px', marginBottom: '16px', minHeight: '60px', display: 'flex', alignItems: 'center' }}>
+                {loading[i] ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ width: '16px', height: '16px', border: '2px solid #00C896', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                    <span style={{ fontSize: '13px', color: '#A8B8CC' }}>Analysing your match...</span>
+                  </div>
+                ) : (
+                  <p style={{ fontSize: '14px', lineHeight: '1.7', color: '#F5F7FA', margin: 0 }}>
+                    {explanations[i] || 'Analysis unavailable.'}
+                  </p>
+                )}
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '16px' }}>
@@ -404,6 +438,12 @@ function Results({ results, answers, onBack }) {
           ))}
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   )
 }
