@@ -1,13 +1,12 @@
-export const config = { runtime: 'edge' }
-
-export default async function handler(req) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response('Method not allowed', { status: 405 })
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { car, answers } = await req.json()
+  try {
+    const { car, answers } = req.body
 
-  const prompt = `You are Motifi, an intelligent UK used car advisor. Write a short, honest, personalised explanation of why this car is a good match for this user. Use plain English. Be direct and specific. Maximum 3 sentences. Do not start with "This car" or "The ${car.make}".
+    const prompt = `You are Motifi, an intelligent UK used car advisor. Write a short, honest, personalised explanation of why this car is a good match for this user. Use plain English. Be direct and specific. Maximum 3 sentences. Do not start with "This car" or "The ${car.make}".
 
 User profile:
 - Budget: £${answers.budgetMin} to £${answers.budgetMax}
@@ -33,24 +32,25 @@ Car details:
 
 Write the explanation now:`
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 200,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  })
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
 
-  const data = await response.json()
-  const explanation = data.content?.[0]?.text || ''
+    const data = await response.json()
+    const explanation = data.content?.[0]?.text || ''
+    return res.status(200).json({ explanation })
 
-  return new Response(JSON.stringify({ explanation }), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+  } catch (error) {
+    return res.status(500).json({ explanation: '' })
+  }
 }
