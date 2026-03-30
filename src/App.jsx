@@ -353,4 +353,14 @@ function Results({ answers, onBack }) {
       </nav>
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '60px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '48px', marginBottom: '24px' }}>🎯</div>
-        <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '16px' }}>Your answers are in.</h2>
+      <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '16px' }}>Your answers are in.</h2>
+        <p style={{ fontSize: '16px', color: '#A8B8CC', lineHeight: '1.6', marginBottom: '32px' }}>
+          Your recommendations are coming in Session 3.
+        </p>
+        <button onClick={onBack} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '10px', padding: '14px 28px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+          ← Start again
+        </button>
+      </div>
+    </div>
+  )
+}
