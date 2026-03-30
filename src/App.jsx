@@ -290,26 +290,161 @@ export default function App() {
 function Home({ onStart }) {
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: '#0F1D35', minHeight: '100vh', color: '#F5F7FA' }}>
-      <nav style={{ backgroundColor: '#1A2E50', padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
-        <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '8px', padding: '10px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>Find my car</button>
+
+      {/* Nav */}
+      <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, padding: '0 32px', height: '72px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+        <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '8px', padding: '10px 22px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>Find my car</button>
       </nav>
-      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '80px 24px 60px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', backgroundColor: '#1A2E50', borderRadius: '20px', padding: '6px 16px', fontSize: '12px', fontWeight: '500', color: '#00C896', letterSpacing: '0.05em', marginBottom: '32px' }}>INTELLIGENT CAR MATCHING</div>
-        <h1 style={{ fontSize: '52px', fontWeight: '900', lineHeight: '1.1', letterSpacing: '-0.04em', marginBottom: '24px' }}>The smarter way to find your <span style={{ color: '#00C896' }}>next car.</span></h1>
-        <p style={{ fontSize: '18px', fontWeight: '400', lineHeight: '1.6', color: '#A8B8CC', marginBottom: '40px', maxWidth: '520px', margin: '0 auto 40px' }}>Answer a few simple questions. We match you to the right used car — with the true cost of ownership made clear from the start.</p>
-        <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '10px', padding: '16px 36px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>Find my car →</button>
-      </div>
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px 80px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-        {[{ title: 'Smart matching', body: 'We ask the right questions and score every car in our database against your answers.' }, { title: 'True cost, not just sticker price', body: 'Insurance, fuel, tax and running costs are built into every recommendation.' }, { title: 'Three clear choices', body: 'No endless scrolling. Just your three best matches, explained in plain English.' }].map((card, i) => (
-          <div key={i} style={{ backgroundColor: '#1A2E50', borderRadius: '12px', padding: '28px 24px' }}>
-            <div style={{ width: '32px', height: '3px', backgroundColor: '#00C896', borderRadius: '2px', marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '10px' }}>{card.title}</h3>
-            <p style={{ fontSize: '14px', fontWeight: '400', lineHeight: '1.6', color: '#A8B8CC' }}>{card.body}</p>
+
+      {/* Hero */}
+      <div style={{ position: 'relative', height: '92vh', minHeight: '600px', overflow: 'hidden' }}>
+        <img
+          src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1800&q=80"
+          alt="Car on road"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(15,29,53,0.95) 40%, rgba(15,29,53,0.4) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', padding: '0 8%', paddingTop: '72px' }}>
+          <div style={{ maxWidth: '600px' }}>
+            <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.15)', border: '1px solid rgba(0,200,150,0.4)', borderRadius: '20px', padding: '5px 14px', fontSize: '12px', fontWeight: '500', color: '#00C896', letterSpacing: '0.06em', marginBottom: '28px' }}>
+              INTELLIGENT CAR MATCHING
+            </div>
+            <h1 style={{ fontSize: 'clamp(36px, 5vw, 60px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', marginBottom: '24px' }}>
+              The smarter way<br />to find your<br /><span style={{ color: '#00C896' }}>next car.</span>
+            </h1>
+            <p style={{ fontSize: '18px', fontWeight: '400', lineHeight: '1.7', color: '#A8B8CC', marginBottom: '36px', maxWidth: '440px' }}>
+              Answer a few simple questions. We score every car in our database against your answers and surface your three best matches — with the true cost of ownership made clear.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+              <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '10px', padding: '16px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
+                Find my car →
+              </button>
+              <button onClick={onStart} style={{ backgroundColor: 'transparent', color: '#F5F7FA', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: '10px', padding: '16px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '500', fontSize: '16px', cursor: 'pointer' }}>
+                How it works
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: '32px', marginTop: '48px' }}>
+              {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['Free', 'Always']].map(([val, label]) => (
+                <div key={label}>
+                  <div style={{ fontSize: '22px', fontWeight: '900', color: '#00C896' }}>{val}</div>
+                  <div style={{ fontSize: '12px', color: '#A8B8CC', marginTop: '2px' }}>{label}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        ))}
+        </div>
       </div>
-      <div style={{ borderTop: '1px solid #1A2E50', padding: '24px', textAlign: 'center', fontSize: '13px', color: '#4A6080' }}>© 2026 Motifi · The smarter way to find your next car</div>
+
+      {/* How it works */}
+      <div style={{ backgroundColor: '#0F1D35', padding: '80px 8%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '500', color: '#00C896', letterSpacing: '0.06em', marginBottom: '14px' }}>HOW IT WORKS</div>
+          <h2 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: '900', letterSpacing: '-0.03em', lineHeight: '1.1' }}>From questions to your perfect car<br />in under 3 minutes.</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '24px', maxWidth: '1000px', margin: '0 auto' }}>
+          {[
+            { step: '01', title: 'Tell us about yourself', body: 'Budget, driving habits, space needs, fuel preference. Simple questions, no jargon.' },
+            { step: '02', title: 'We score every car', body: 'Our engine scores 105+ cars across 6 dimensions — budget fit, running costs, safety and more.' },
+            { step: '03', title: 'Get your three matches', body: 'Your top three cars, ranked by match score, with a plain-English explanation for each.' },
+            { step: '04', title: 'Know the real cost', body: 'Insurance band, MPG, depreciation and ownership stress — all surfaced upfront.' },
+          ].map(({ step, title, body }) => (
+            <div key={step} style={{ backgroundColor: '#1A2E50', borderRadius: '16px', padding: '32px 28px', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ fontSize: '64px', fontWeight: '900', color: 'rgba(0,200,150,0.08)', position: 'absolute', top: '12px', right: '20px', lineHeight: 1 }}>{step}</div>
+              <div style={{ fontSize: '13px', fontWeight: '700', color: '#00C896', marginBottom: '14px', letterSpacing: '0.02em' }}>{step}</div>
+              <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '10px', lineHeight: '1.3' }}>{title}</h3>
+              <p style={{ fontSize: '14px', lineHeight: '1.7', color: '#A8B8CC' }}>{body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Social proof strip */}
+      <div style={{ backgroundColor: '#1A2E50', padding: '40px 8%' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '32px', textAlign: 'center' }}>
+          {[
+            { stat: '£15,000', label: 'Average UK used car purchase' },
+            { stat: '3 mins', label: 'Average time to your results' },
+            { stat: '105+', label: 'Cars in our database' },
+            { stat: '6', label: 'Scoring dimensions per car' },
+          ].map(({ stat, label }) => (
+            <div key={label}>
+              <div style={{ fontSize: '32px', fontWeight: '900', color: '#00C896', letterSpacing: '-0.02em' }}>{stat}</div>
+              <div style={{ fontSize: '13px', color: '#A8B8CC', marginTop: '6px' }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Photo break */}
+      <div style={{ position: 'relative', height: '400px', overflow: 'hidden' }}>
+        <img
+          src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1800&q=80"
+          alt="Cars on motorway"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(15,29,53,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 8%' }}>
+          <div>
+            <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', marginBottom: '20px' }}>
+              No more platform-hopping.<br />No more guesswork.
+            </h2>
+            <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '10px', padding: '14px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+              Find my car →
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Articles */}
+      <div style={{ backgroundColor: '#0F1D35', padding: '80px 8%' }}>
+        <div style={{ marginBottom: '40px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '500', color: '#00C896', letterSpacing: '0.06em', marginBottom: '14px' }}>FROM THE MOTIFI GUIDE</div>
+          <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: '900', letterSpacing: '-0.03em' }}>Everything you need to know<br />before buying a used car.</h2>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+          {[
+            {
+              img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
+              tag: 'BUYING GUIDE',
+              title: 'The true cost of owning a used car in 2026',
+              body: 'Sticker price is just the start. Insurance, fuel, tax, servicing and depreciation all add up — here\'s how to calculate the real number before you commit.',
+            },
+            {
+              img: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=800&q=80',
+              tag: 'RELIABILITY',
+              title: 'Which used cars are the most reliable?',
+              body: 'Reliability varies enormously by make and model. We break down which cars consistently score highest for long-term ownership peace of mind.',
+            },
+            {
+              img: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&q=80',
+              tag: 'ELECTRIC',
+              title: 'Should your next used car be electric?',
+              body: 'Used EVs are now genuinely affordable. But are they right for your driving pattern? We look at the real-world case for and against going electric.',
+            },
+          ].map(({ img, tag, title, body }) => (
+            <div key={title} style={{ backgroundColor: '#1A2E50', borderRadius: '16px', overflow: 'hidden', cursor: 'pointer' }}>
+              <div style={{ height: '200px', overflow: 'hidden' }}>
+                <img src={img} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease' }} />
+              </div>
+              <div style={{ padding: '24px' }}>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#00C896', letterSpacing: '0.06em', marginBottom: '10px' }}>{tag}</div>
+                <h3 style={{ fontSize: '17px', fontWeight: '700', lineHeight: '1.4', marginBottom: '10px' }}>{title}</h3>
+                <p style={{ fontSize: '13px', lineHeight: '1.7', color: '#A8B8CC' }}>{body}</p>
+                <div style={{ marginTop: '16px', fontSize: '13px', fontWeight: '600', color: '#00C896' }}>Read more →</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div style={{ backgroundColor: '#1A2E50', padding: '40px 8%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+          <div style={{ fontSize: '13px', color: '#4A6080' }}>© 2026 Motifi · The smarter way to find your next car</div>
+        </div>
+      </div>
+
     </div>
   )
 }
