@@ -9,10 +9,3 @@ export default {
   },
   plugins: [],
 }
-```
-
-**Config File 2**
-
-Filename:
-```
-postcss.config.js
