@@ -319,6 +319,14 @@ function Results({ results, answers, onBack }) {
   const [loading, setLoading] = useState({})
 
   React.useEffect(() => {
+    // Log to Supabase
+    fetch('/api/log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answers, results }),
+    }).catch(err => console.error('Logging failed:', err))
+
+    // Get LLM explanations
     results.forEach((car, i) => {
       setLoading(prev => ({ ...prev, [i]: true }))
 fetch('/api/explain', {
