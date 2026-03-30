@@ -353,4 +353,4 @@ function Results({ answers, onBack }) {
       </nav>
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '60px 24px', textAlign: 'center' }}>
         <div style={{ fontSize: '48px', marginBottom: '24px' }}>🎯</div>
-        <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '16px' }}>Your answers are in
+        <h2 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '16px' }}>Your answers are in.</h2>
