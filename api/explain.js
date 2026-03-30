@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const data = JSON.parse(raw)
     console.log('Parsed data:', JSON.stringify(data))
 
-    const text = data?.content?.[0]?.text
+    const text = (data?.content?.[0]?.text || '').replace(/^#+\s*/gm, '').trim()
 
     res.status(200).json({ explanation: text || 'No explanation available.' })
   } catch (err) {
