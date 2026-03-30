@@ -6,29 +6,34 @@ export default async function handler(req, res) {
 
   const { car, answers } = req.body
 
-  const prompt = `You are Motifi, a UK used car advisor. Write 2-3 sentences explaining why this car suits this user. Be specific and direct.
+  const prompt = `You are a UK used car advisor. Write 2 sentences explaining why the ${car.make} ${car.model} suits this user. They have a budget of £${answers.budgetMax}, drive ${answers.driving}, and need ${answers.space} space.`
 
-User: budget £${answers.budgetMin}-£${answers.budgetMax}, drives ${answers.driving}, needs ${answers.space} space, mileage ${answers.mileage}, reliability preference ${answers.reliability}.
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 150,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    })
 
-Car: ${car.make} ${car.model}, ${car.segment}, ${car.fuelType}, MPG ${car.mpgBand}, boot ${car.bootSize}, insurance ${car.insuranceBand}, reliability tier ${car.reliabilityTier}, price from £${car.price}.`
+    const raw = await response.text()
+    console.log('Anthropic raw response:', raw)
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5',
-      max_tokens: 150,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  })
+    const data = JSON.parse(raw)
+    console.log('Parsed data:', JSON.stringify(data))
 
-  const data = await response.json()
-  const text = data?.content?.[0]?.text ?? 'No explanation available.'
-  
-  res.setHeader('Content-Type', 'application/json')
-  res.status(200).end(JSON.stringify({ explanation: text }))
+    const text = data?.content?.[0]?.text
+
+    res.status(200).json({ explanation: text || 'No explanation available.' })
+  } catch (err) {
+    console.error('Error:', err.message)
+    res.status(200).json({ explanation: 'Error: ' + err.message })
+  }
 }
