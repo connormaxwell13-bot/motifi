@@ -304,13 +304,16 @@ function Home({ onStart }) {
         <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '5px 14px', fontSize: '12px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '28px' }}>
           FREE · NO SIGN-UP REQUIRED
         </div>
-        <h1 style={{ fontSize: 'clamp(36px, 6vw, 68px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: '#F5F7FA', marginBottom: '20px', maxWidth: '800px', margin: '0 auto 20px' }}>
-          Find your perfect used car.<br /><span style={{ color: '#00C896' }}>In under 3 minutes.</span>
+        <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: '#F5F7FA', maxWidth: '800px', margin: '0 auto 16px' }}>
+          Find your perfect used car.
         </h1>
-        <p style={{ fontSize: '18px', lineHeight: '1.7', color: '#A8B8CC', maxWidth: '480px', margin: '0 auto 40px' }}>
+        <p style={{ fontSize: 'clamp(15px, 2vw, 18px)', lineHeight: '1.7', color: '#A8B8CC', maxWidth: '480px', margin: '0 auto 12px' }}>
           Answer a few simple questions. We do the matching — surfacing your three best options with the true cost of ownership made clear.
         </p>
-        <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '12px', padding: '18px 48px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '18px', cursor: 'pointer', display: 'inline-block' }}>
+        <p style={{ fontSize: '14px', color: '#4A7060', maxWidth: '480px', margin: '0 auto 32px', lineHeight: '1.6' }}>
+          Unlike comparison sites, Motifi doesn't show you a list — it tells you which car is right for <em>you</em>, and why.
+        </p>
+        <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '50px', padding: '16px 40px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer', display: 'inline-block' }}>
           Find my car →
         </button>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '56px', flexWrap: 'wrap' }}>
