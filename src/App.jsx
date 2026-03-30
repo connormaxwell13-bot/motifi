@@ -321,17 +321,25 @@ function Results({ results, answers, onBack }) {
   React.useEffect(() => {
     results.forEach((car, i) => {
       setLoading(prev => ({ ...prev, [i]: true }))
-      fetch('/api/explain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ car, answers }),
-      })
-        .then(r => r.json())
-        .then(data => {
-          setExplanations(prev => ({ ...prev, [i]: data.explanation }))
-          setLoading(prev => ({ ...prev, [i]: false }))
-        })
-        .catch(() => setLoading(prev => ({ ...prev, [i]: false })))
+fetch('/api/explain', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ car, answers }),
+})
+  .then(r => r.text())
+  .then(text => {
+    try {
+      const data = JSON.parse(text)
+      setExplanations(prev => ({ ...prev, [i]: data.explanation || 'Analysis unavailable.' }))
+    } catch {
+      setExplanations(prev => ({ ...prev, [i]: text || 'Analysis unavailable.' }))
+    }
+    setLoading(prev => ({ ...prev, [i]: false }))
+  })
+  .catch(() => {
+    setExplanations(prev => ({ ...prev, [i]: 'Analysis unavailable.' }))
+    setLoading(prev => ({ ...prev, [i]: false }))
+  })
     })
   }, [results])
 
