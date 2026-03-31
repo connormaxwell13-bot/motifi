@@ -343,9 +343,9 @@ function Results({ results, answers, onBack }) {
 
                 {/* True cost of ownership */}
                 <div style={{ margin: '0 28px 20px', backgroundColor: C.midnight, borderRadius: '14px', padding: '20px 24px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>
-                    {isFinance ? 'ESTIMATED MONTHLY COMMITMENT' : 'ESTIMATED YEAR 1 COST'}
-                  </div>
+                 <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>
+  COST OF OWNERSHIP
+</div>
 
                  {isFinance ? (
   <div>
@@ -387,13 +387,37 @@ function Results({ results, answers, onBack }) {
         </div>
       ))}
     </div>
-    <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div>
-        <div style={{ fontSize: '13px', color: C.muted }}>Total monthly estimate</div>
-        <div style={{ fontSize: '11px', color: C.dim, marginTop: '2px' }}>Finance over 48 months at 9.9% APR</div>
+  <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  <div>
+    <div style={{ fontSize: '13px', color: C.muted }}>Total monthly estimate</div>
+    <div style={{ fontSize: '11px', color: C.dim, marginTop: '2px' }}>Finance over 48 months at 9.9% APR</div>
+  </div>
+  <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>~£{costs.totalMonthlyMin}–£{costs.totalMonthlyMax}/mo</span>
+</div>
+
+{/* 48-month total */}
+<div style={{ backgroundColor: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '10px', padding: '14px 16px' }}>
+  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>TOTAL COST OVER 48 MONTHS</div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+    {[
+      { label: 'Deposit', value: `£${Number(costs.deposit).toLocaleString()}` },
+      { label: 'Finance payments', value: `~£${Number(costs.financeMonthly * 48).toLocaleString()}` },
+      { label: 'Insurance (4 yrs)', value: `~£${Number(costs.insuranceMonthly * 48).toLocaleString()}` },
+      { label: 'Road tax (4 yrs)', value: `£${Number(costs.roadTax * 4).toLocaleString()}` },
+    ].map(({ label, value }) => (
+      <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
+        <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
       </div>
-      <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>~£{costs.totalMonthlyMin}–£{costs.totalMonthlyMax}/mo</span>
-    </div>
+    ))}
+  </div>
+  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <span style={{ fontSize: '13px', color: C.muted }}>48-month total estimate</span>
+    <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>
+      ~£{Number(costs.deposit + (costs.financeMonthly * 48) + (costs.insuranceMonthly * 48) + (costs.roadTax * 4)).toLocaleString()}
+    </span>
+  </div>
+</div>
   </div>
                   ) : (
                     <div>
