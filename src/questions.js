@@ -102,6 +102,12 @@ export const questions = [
     options: ['Yes', 'No', 'Indifferent'],
   },
   {
+  {
     id: 'email',
     question: 'Want us to send you your results?',
-    type: 'e
+    type: 'email',
+    optional: true,
+    hint: 'Enter your email to save your matches. We will never spam you.',
+    placeholder: 'your@email.com',
+  },
+]
