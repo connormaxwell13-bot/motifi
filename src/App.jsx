@@ -542,8 +542,7 @@ const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encode
     <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
     <div style={{ fontSize: '14px', color: C.muted }}>{car.generation} · {car.fuelType} · {car.transmission}</div>
   </div>
-  <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '480px', height: '240px', overflow: 'hidden' }}>
-    <img
+<div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '360px', height: '200px', overflow: 'hidden' }}>    <img
       src={imaginUrl}
       alt={`${car.make} ${car.model}`}
       style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom right' }}
