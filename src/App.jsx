@@ -536,7 +536,7 @@ const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encode
       </nav>
 
       {/* Hero banner */}
-<div style={{ backgroundColor: C.navy, padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}>
+<div style={{ backgroundColor: '#1A2E50', padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}>
   <div style={{ flex: 1, paddingTop: '32px', paddingBottom: '32px', zIndex: 2 }}>
     <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.segment?.toUpperCase()}</div>
     <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
