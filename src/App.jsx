@@ -523,7 +523,8 @@ function CarPage({ car, answers, onBack }) {
   const cargurusUrl = `https://www.cargurus.com/Cars/new/nl#listing=searchNarrowed;zip=${postcode};makeId=${encodeURIComponent(car.make)}`
   const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
   const financeUrl = `https://www.zuto.com/apply/`
-  const imageQuery = encodeURIComponent(`${car.make} ${car.model} car`)
+ const generationYear = car.generation?.split(/[-–]/)[0]?.trim() || '2020'
+const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
 
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, minHeight: '100vh', color: C.midnight }}>
@@ -537,7 +538,7 @@ function CarPage({ car, answers, onBack }) {
       {/* Hero image */}
       <div style={{ position: 'relative', height: '280px', overflow: 'hidden', backgroundColor: C.navy }}>
         <img
-          src={`https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80`}
+          src={imaginUrl}
           alt={`${car.make} ${car.model}`}
           style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }}
         />
