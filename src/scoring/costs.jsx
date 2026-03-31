@@ -1,4 +1,3 @@
-// ── ROAD TAX ──────────────────────────────────────────────────────────
 export function getRoadTax(car) {
   const fuel = (car.fuelType || '').toLowerCase()
   if (fuel.includes('electric')) return 0
@@ -6,19 +5,17 @@ export function getRoadTax(car) {
   return 190
 }
 
-// ── INSURANCE COST RANGE ──────────────────────────────────────────────
 export function getInsuranceCostRange(car) {
   const bands = {
-    Low:       { min: 600,  max: 900  },
-    Medium:    { min: 900,  max: 1400 },
-    High:      { min: 1400, max: 2200 },
+    Low: { min: 600, max: 900 },
+    Medium: { min: 900, max: 1400 },
+    High: { min: 1400, max: 2200 },
     'Very High': { min: 2200, max: 3500 },
   }
   return bands[car.insuranceBand] || { min: 900, max: 1400 }
 }
 
-// ── FINANCE CALCULATOR ────────────────────────────────────────────────
-export function calculateFinance(carPrice, deposit, termMonths = 48, apr = 9.9) {
+export function calculateFinance(carPrice, deposit, termMonths, apr) {
   const loanAmount = carPrice - deposit
   if (loanAmount <= 0) return { monthly: 0, total: 0 }
   const monthlyRate = apr / 100 / 12
@@ -30,7 +27,6 @@ export function calculateFinance(carPrice, deposit, termMonths = 48, apr = 9.9) 
   }
 }
 
-// ── YEAR 1 TOTAL COST ─────────────────────────────────────────────────
 export function getYearOneCost(car, answers) {
   const price = parseFloat(car.price) || 0
   const roadTax = getRoadTax(car)
@@ -50,10 +46,9 @@ export function getYearOneCost(car, answers) {
     }
   }
 
-  // HP or PCP
   const deposit = parseFloat(answers.deposit) || Math.round(price * 0.10)
   const term = 48
-  const finance = calculateFinance(price, deposit, term)
+  const finance = calculateFinance(price, deposit, term, 9.9)
   const monthlyInsurance = Math.round((insurance.min + insurance.max) / 2 / 12)
   const monthlyRoadTax = Math.round(roadTax / 12)
   const totalMonthly = finance.monthly + monthlyInsurance + monthlyRoadTax
@@ -61,35 +56,17 @@ export function getYearOneCost(car, answers) {
   return {
     method: purchaseMethod,
     carPrice: price,
+    deposit,
+    financeMonthly: finance.monthly,
     roadTax,
+    roadTaxMonthly: monthlyRoadTax,
     insuranceMin: insurance.min,
     insuranceMax: insurance.max,
-    yearOneMin: Math.round(price + roadTax + insurance.min),
-    yearOneMax: Math.round(price + roadTax + insurance.max),
-    monthly: null,
+    insuranceMonthly: monthlyInsurance,
+    totalMonthlyMin: totalMonthly - 50,
+    totalMonthlyMax: totalMonthly + 50,
+    yearOneMin: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.min),
+    yearOneMax: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.max),
+    monthly: totalMonthly,
   }
-}
-
-const deposit = parseFloat(answers.deposit) || Math.round(price * 0.10)
-const term = 48
-const finance = calculateFinance(price, deposit, term)
-const monthlyInsurance = Math.round((insurance.min + insurance.max) / 2 / 12)
-const monthlyRoadTax = Math.round(roadTax / 12)
-const totalMonthly = finance.monthly + monthlyInsurance + monthlyRoadTax
-
-return {
-  method: purchaseMethod,
-  carPrice: price,
-  deposit,
-  financeMonthly: finance.monthly,
-  roadTax,
-  roadTaxMonthly: monthlyRoadTax,
-  insuranceMin: insurance.min,
-  insuranceMax: insurance.max,
-  insuranceMonthly: monthlyInsurance,
-  totalMonthlyMin: totalMonthly - 50,
-  totalMonthlyMax: totalMonthly + 50,
-  yearOneMin: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.min),
-  yearOneMax: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.max),
-  monthly: totalMonthly,
 }
