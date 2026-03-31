@@ -250,7 +250,7 @@ function Home({ onStart }) {
   )
 }
 
-function Results({ results, answers, onBack }) {
+function Results({ results, answers, onBack, onSelectCar }) {
   const [explanations, setExplanations] = useState({})
   const [loading, setLoading] = useState({})
 
