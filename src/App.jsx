@@ -65,9 +65,10 @@ export default function App() {
     setScreen('home')
   }
 
-  if (screen === 'home') return <Home onStart={() => setScreen('questions')} />
+  if (screen === 'home') return <Home onStart={() => setScreen('questions')} onCompare={() => setScreen('compare')} />
   if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
   if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack={() => setScreen('results')} />
+if (screen === 'compare') return <CompareFlow onBack={() => setScreen('home')} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
 
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
@@ -140,7 +141,7 @@ export default function App() {
     </div>
   )
 }
-function Home({ onStart }) {
+function Home({ onStart, onCompare }) {
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, color: C.midnight }}>
       <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, padding: '0 5%', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
