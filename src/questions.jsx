@@ -102,7 +102,6 @@ export const questions = [
     options: ['Yes', 'No', 'Indifferent'],
   },
   {
-  {
     id: 'email',
     question: 'Want us to send you your results?',
     type: 'email',
