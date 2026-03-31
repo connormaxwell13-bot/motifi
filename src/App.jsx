@@ -22,7 +22,8 @@ function getTop3(answers) {
 }
 
 export default function App() {
-  const [screen, setScreen] = useState('home')
+const [screen, setScreen] = useState('home')
+const [selectedCar, setSelectedCar] = useState(null)
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
   const [results, setResults] = useState([])
@@ -65,8 +66,8 @@ export default function App() {
   }
 
   if (screen === 'home') return <Home onStart={() => setScreen('questions')} />
-  if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} />
-
+if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
+if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack={() => setScreen('results')} />
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
       <nav style={{ backgroundColor: C.navy, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
