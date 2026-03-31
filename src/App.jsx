@@ -152,7 +152,11 @@ function Home({ onStart }) {
         <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: C.offwhite, maxWidth: '800px', margin: '0 auto 16px' }}>Find your perfect used car.</h1>
         <p style={{ fontSize: 'clamp(15px, 2vw, 18px)', lineHeight: '1.7', color: C.muted, maxWidth: '480px', margin: '0 auto 12px' }}>Answer a few simple questions. We do the matching — surfacing your three best options with the true cost of ownership made clear.</p>
         <p style={{ fontSize: '14px', color: '#4A8070', maxWidth: '480px', margin: '0 auto 32px', lineHeight: '1.6' }}>Unlike comparison sites, Motifi doesn't show you a list — it tells you which car is right for <em>you</em>, and why.</p>
-        <button onClick={onStart} style={{ backgroundColor: C.teal, color: C.midnight, border: 'none', borderRadius: '50px', padding: '16px 40px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>Find my car →</button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+  <button onClick={onStart} style={{ backgroundColor: C.teal, color: C.midnight, border: 'none', borderRadius: '50px', padding: '16px 40px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>Find my car →</button>
+  <button onClick={onCompare} style={{ backgroundColor: 'transparent', color: C.offwhite, border: `2px solid ${C.teal}`, borderRadius: '50px', padding: '16px 40px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>Compare cars →</button>
+</div>
+<p style={{ fontSize: '13px', color: C.dim, marginTop: '12px' }}>Already know what you're looking for?</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '56px', flexWrap: 'wrap' }}>
           {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['Free', 'Always free']].map(([val, label]) => (
             <div key={label} style={{ textAlign: 'center' }}>
