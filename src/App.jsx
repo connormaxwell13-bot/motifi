@@ -491,6 +491,11 @@ function Results({ results, answers, onBack, onSelectCar }) {
                       You may also want to consider estates or SUVs if space is a priority for you.
                     </div>
                   )}
+                  <button
+  onClick={(e) => { e.stopPropagation(); onSelectCar(car); }}
+  style={{ width: '100%', marginTop: '16px', backgroundColor: i === 0 ? C.teal : C.offwhite, color: i === 0 ? C.midnight : C.midnight, border: i === 0 ? 'none' : `1px solid #E8ECF0`, borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+  View full details →
+</button>
                 </div>
               </div>
             )
