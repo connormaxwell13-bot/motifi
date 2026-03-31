@@ -6,8 +6,11 @@ export default async function handler(req, res) {
 
   const { car, answers } = req.body
 
-  const prompt = `You are a UK used car advisor. Write 2 sentences explaining why the ${car.make} ${car.model} suits this user. They have a budget of £${answers.budgetMax}, drive ${answers.driving}, and need ${answers.space} space.`
+const prompt = `You are Motifi, a UK used car advisor. Write 2-3 sentences explaining why this car suits this user. Be specific and direct. Do NOT start with the car's name or make. Start with what makes it right for this person.
 
+User: budget £${answers.budgetMin}-£${answers.budgetMax}, drives ${answers.driving}, needs ${answers.space} space, mileage ${answers.mileage}, reliability preference ${answers.reliability}.
+
+Car: ${car.make} ${car.model}, ${car.segment}, ${car.fuelType}, MPG ${car.mpgBand}, boot ${car.bootSize}, insurance ${car.insuranceBand}, reliability tier ${car.reliabilityTier}, price from £${car.price}.`
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
