@@ -313,7 +313,7 @@ function Results({ results, answers, onBack }) {
             const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.purchaseMethod)
 
             return (
-              <div key={i} style={{ backgroundColor: C.white, borderRadius: '20px', overflow: 'hidden', border: i === 0 ? `2px solid ${C.teal}` : '1px solid #E8ECF0', boxShadow: i === 0 ? '0 4px 24px rgba(0,200,150,0.08)' : 'none' }}>
+              <div key={i} onClick={() => onSelectedCar (car)} style={{ backgroundColor: C.white, borderRadius: '20px', overflow: 'hidden', border: i === 0 ? `2px solid ${C.teal}` : '1px solid #E8ECF0', boxShadow: i === 0 ? '0 4px 24px rgba(0,200,150,0.08)' : 'none' }}>
 
                 {/* Card header */}
                 <div style={{ padding: '28px 28px 0' }}>
