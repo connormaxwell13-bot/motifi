@@ -59,4 +59,38 @@ export function getYearOneCost(car, answers) {
   const totalMonthly = finance.monthly + monthlyInsurance + monthlyRoadTax
 
   return {
-    method: p
+    method: purchaseMethod,
+    carPrice: price,
+    roadTax,
+    insuranceMin: insurance.min,
+    insuranceMax: insurance.max,
+    yearOneMin: Math.round(price + roadTax + insurance.min),
+    yearOneMax: Math.round(price + roadTax + insurance.max),
+    monthly: null,
+  }
+}
+
+const deposit = parseFloat(answers.deposit) || Math.round(price * 0.10)
+const term = 48
+const finance = calculateFinance(price, deposit, term)
+const monthlyInsurance = Math.round((insurance.min + insurance.max) / 2 / 12)
+const monthlyRoadTax = Math.round(roadTax / 12)
+const totalMonthly = finance.monthly + monthlyInsurance + monthlyRoadTax
+
+return {
+  method: purchaseMethod,
+  carPrice: price,
+  deposit,
+  financeMonthly: finance.monthly,
+  roadTax,
+  roadTaxMonthly: monthlyRoadTax,
+  insuranceMin: insurance.min,
+  insuranceMax: insurance.max,
+  insuranceMonthly: monthlyInsurance,
+  totalMonthlyMin: totalMonthly - 50,
+  totalMonthlyMax: totalMonthly + 50,
+  yearOneMin: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.min),
+  yearOneMax: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.max),
+  monthly: totalMonthly,
+}
+}
