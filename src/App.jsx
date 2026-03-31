@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import carsData from './data/cars.json'
 import { questions } from './questions.jsx'
-import { applyHardFilters } from './scoring/filters.js'
-import { scoreAllCars } from './scoring/engine.js'
-import { getYearOneCost } from './scoring/costs.js'
+import { applyHardFilters } from './scoring/filters.jsx'
+import { scoreAllCars } from './scoring/engine.jsx'
+import { getYearOneCost } from './scoring/costs.jsx'
 
 const C = {
   midnight: '#0F1D35',
