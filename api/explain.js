@@ -29,8 +29,12 @@ export default async function handler(req, res) {
     const data = JSON.parse(raw)
     console.log('Parsed data:', JSON.stringify(data))
 
-    const text = (data?.content?.[0]?.text || '').replace(/^#+\s*/gm, '').trim()
-
+const raw = (data?.content?.[0]?.text || '').replace(/^#+\s*/gm, '').trim()
+const text = raw.replace(/^(the\s+)?[\w\s]+(:|,)?\s*/i, s => {
+  const lower = s.toLowerCase().trim().replace(/[:,]$/, '')
+  const carName = `${car.make} ${car.model}`.toLowerCase()
+  return lower.includes(carName.split(' ')[0].toLowerCase()) ? '' : s
+})
     res.status(200).json({ explanation: text || 'No explanation available.' })
   } catch (err) {
     console.error('Error:', err.message)
