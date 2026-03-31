@@ -433,10 +433,33 @@ function Results({ results, answers, onBack }) {
                           </div>
                         ))}
                       </div>
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', color: C.muted }}>Year 1 total estimate</span>
-                        <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>£{costs.yearOneMin.toLocaleString()}–£{costs.yearOneMax.toLocaleString()}</span>
-                      </div>
+                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+  <span style={{ fontSize: '13px', color: C.muted }}>Year 1 total estimate</span>
+  <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>£{costs.yearOneMin.toLocaleString()}–£{costs.yearOneMax.toLocaleString()}</span>
+</div>
+
+{/* Cash 4-year total */}
+<div style={{ backgroundColor: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '10px', padding: '14px 16px' }}>
+  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>TOTAL COST OVER 4 YEARS</div>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+    {[
+      { label: 'Car price', value: `£${Number(costs.carPrice).toLocaleString()}` },
+      { label: 'Insurance (4 yrs)', value: `~£${Number(costs.insuranceMin * 4).toLocaleString()}–£${Number(costs.insuranceMax * 4).toLocaleString()}` },
+      { label: 'Road tax (4 yrs)', value: `£${Number(costs.roadTax * 4).toLocaleString()}` },
+    ].map(({ label, value }) => (
+      <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
+        <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+      </div>
+    ))}
+  </div>
+  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <span style={{ fontSize: '13px', color: C.muted }}>4-year total estimate</span>
+    <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>
+      ~£{Number(costs.carPrice + (costs.insuranceMin * 4) + (costs.roadTax * 4)).toLocaleString()}–£{Number(costs.carPrice + (costs.insuranceMax * 4) + (costs.roadTax * 4)).toLocaleString()}
+    </span>
+  </div>
+</div>
                     </div>
                   )}
                 </div>
