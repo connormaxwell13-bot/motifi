@@ -298,7 +298,7 @@ function Results({ results, answers, onBack, onSelectCar }) {
                     <div>
                       <div style={{ fontSize: '11px', fontWeight: '700', color: i === 0 ? C.teal : '#8A9AB0', letterSpacing: '0.06em', marginBottom: '6px' }}>{labels[i].toUpperCase()}</div>
                       <h3 style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.02em', color: C.midnight }}>{car.make} {car.model}</h3>
-                      <div style={{ fontSize: '13px', color: '#8A9AB0', marginTop: '4px' }}>{car.generation} · {car.segment} · <span style={{ color: C.teal, fontWeight: '700' }}>From £{Number(car.price).toLocaleString()}</span></div>
+                      <div style={{ fontSize: '13px', color: '#8A9AB0', marginTop: '4px' }}>{car.generation} · {car.segment} · <span style={{ color: C.teal, fontWeight: '700' }}>Avg. £{Number(car.price).toLocaleString()}</span></div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '11px', color: '#8A9AB0', marginBottom: '4px' }}>Match score</div>
