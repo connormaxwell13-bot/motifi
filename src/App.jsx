@@ -363,7 +363,6 @@ function Results({ results, answers, onBack, onSelectCar }) {
                     )}
                   </div>
                 </div>
-</div> 
                 {/* True cost of ownership */}
                 <div style={{ margin: '0 28px 20px', backgroundColor: C.midnight, borderRadius: '14px', padding: '20px 24px' }}>
                  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>
