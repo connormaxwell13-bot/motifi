@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import carsData from './data/cars.json'
-import { questions } from './questions.js'
+import { questions } from './questions.jsx'
 import { applyHardFilters } from './scoring/filters.js'
 import { scoreAllCars } from './scoring/engine.js'
 import { getYearOneCost } from './scoring/costs.js'
