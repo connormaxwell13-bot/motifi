@@ -33,8 +33,8 @@ Car: ${car.make} ${car.model}, ${car.segment}, ${car.fuelType}, MPG ${car.mpgBan
     console.log('Parsed data:', JSON.stringify(data))
 
 const raw = (data?.content?.[0]?.text || '').replace(/^#+\s*/gm, '').trim()
-const text = raw.replace(/^(the\s+)?[\w\s]+(:|,)?\s*/i, s => {
-  const lower = s.toLowerCase().trim().replace(/[:,]$/, '')
+const text = (data?.content?.[0]?.text || '').replace(/^#+\s*/gm, '').trim()
+    const lower = s.toLowerCase().trim().replace(/[:,]$/, '')
   const carName = `${car.make} ${car.model}`.toLowerCase()
   return lower.includes(carName.split(' ')[0].toLowerCase()) ? '' : s
 })
