@@ -93,4 +93,3 @@ return {
   yearOneMax: Math.round(deposit + (finance.monthly * 12) + roadTax + insurance.max),
   monthly: totalMonthly,
 }
-}
