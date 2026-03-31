@@ -535,20 +535,22 @@ const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encode
         <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back to results</button>
       </nav>
 
-      {/* Hero image */}
-      <div style={{ position: 'relative', height: '280px', overflow: 'hidden', backgroundColor: C.navy }}>
-        <img
-          src={imaginUrl}
-          alt={`${car.make} ${car.model}`}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(15,29,53,0.9) 0%, rgba(15,29,53,0.3) 100%)' }} />
-        <div style={{ position: 'absolute', bottom: '28px', left: '5%', right: '5%' }}>
-          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '8px' }}>{car.segment?.toUpperCase()}</div>
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '4px' }}>{car.make} {car.model}</h1>
-          <div style={{ fontSize: '14px', color: C.muted }}>{car.generation} · {car.fuelType} · {car.transmission}</div>
-        </div>
-      </div>
+      {/* Hero banner */}
+<div style={{ backgroundColor: C.navy, padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}>
+  <div style={{ flex: 1, paddingTop: '32px', paddingBottom: '32px', zIndex: 2 }}>
+    <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.segment?.toUpperCase()}</div>
+    <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
+    <div style={{ fontSize: '14px', color: C.muted }}>{car.generation} · {car.fuelType} · {car.transmission}</div>
+  </div>
+  <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '480px', height: '240px', overflow: 'hidden' }}>
+    <img
+      src={imaginUrl}
+      alt={`${car.make} ${car.model}`}
+      style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom right' }}
+      onError={(e) => { e.target.style.display = 'none' }}
+    />
+  </div>
+</div>
 
       <div style={{ maxWidth: '780px', margin: '0 auto', padding: '32px 24px 80px' }}>
 
