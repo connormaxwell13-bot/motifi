@@ -604,3 +604,251 @@ function CarPage({ car, answers, onBack }) {
     </div>
   )
 }
+function CompareFlow({ onBack, onSelectCar }) {
+  const [step, setStep] = useState('details')
+  const [answers, setAnswers] = useState({})
+  const [selectedCars, setSelectedCars] = useState([])
+  const [brandFilter, setBrandFilter] = useState('')
+  const [bodyFilter, setBodyFilter] = useState('')
+  const [results, setResults] = useState([])
+
+  const brands = [...new Set(carsData.map(c => c.make))].sort()
+  const bodyTypes = [...new Set(carsData.map(c => c.bodyType))].sort()
+
+  const filteredCars = carsData.filter(car => {
+    const matchBrand = !brandFilter || car.make === brandFilter
+    const matchBody = !bodyFilter || (car.bodyType || '').toLowerCase().includes(bodyFilter.toLowerCase())
+    return matchBrand && matchBody
+  }).sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
+
+  function toggleCar(car) {
+    const key = `${car.make} ${car.model} ${car.generation}`
+    const exists = selectedCars.find(c => `${c.make} ${c.model} ${c.generation}` === key)
+    if (exists) {
+      setSelectedCars(prev => prev.filter(c => `${c.make} ${c.model} ${c.generation}` !== key))
+    } else if (selectedCars.length < 3) {
+      setSelectedCars(prev => [...prev, car])
+    }
+  }
+
+  function handleCompare() {
+    setResults(selectedCars)
+    setStep('results')
+  }
+
+  const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.purchaseMethod)
+
+  if (step === 'results') {
+    return (
+      <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, minHeight: '100vh', color: C.midnight }}>
+        <nav style={{ backgroundColor: C.midnight, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
+          <button onClick={() => setStep('select')} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
+        </nav>
+        <div style={{ backgroundColor: C.midnight, padding: '48px 5% 56px', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>YOUR COMPARISON</div>
+          <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', color: C.offwhite, lineHeight: '1.2' }}>Here's how your chosen cars compare.</h2>
+        </div>
+        <div style={{ maxWidth: '780px', margin: '0 auto', padding: '40px 24px 80px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {results.map((car, i) => {
+              const costs = getYearOneCost(car, answers)
+              return (
+                <div key={i} style={{ backgroundColor: C.white, borderRadius: '20px', overflow: 'hidden', border: '1px solid #E8ECF0' }}>
+                  <div style={{ padding: '28px 28px 0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                      <div>
+                        <h3 style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.02em', color: C.midnight }}>{car.make} {car.model}</h3>
+                        <div style={{ fontSize: '13px', color: '#8A9AB0', marginTop: '4px' }}>{car.generation} · {car.segment} · <span style={{ color: C.teal, fontWeight: '700' }}>Avg. £{Number(car.price).toLocaleString()}</span></div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px', marginBottom: '20px' }}>
+                      {[
+                        { label: 'MPG', value: car.mpgBand },
+                        { label: 'Boot size', value: car.bootSize },
+                        { label: 'Insurance risk', value: car.insuranceBand },
+                        { label: 'Reliability', value: `Tier ${car.reliabilityTier}` },
+                        { label: 'Safety', value: `Tier ${car.safetyTier}` },
+                        { label: 'Ownership stress', value: car.ownershipStress },
+                      ].map(({ label, value }) => (
+                        <div key={label} style={{ backgroundColor: C.offwhite, borderRadius: '8px', padding: '10px 12px' }}>
+                          <div style={{ fontSize: '10px', color: '#8A9AB0', marginBottom: '3px' }}>{label}</div>
+                          <div style={{ fontSize: '13px', fontWeight: '600', color: C.midnight }}>{value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ margin: '0 28px 28px', backgroundColor: C.midnight, borderRadius: '14px', padding: '20px 24px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>COST OF OWNERSHIP</div>
+                    {isFinance ? (
+                      <div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+                          {[
+                            { label: 'Deposit', value: `£${Number(costs.deposit).toLocaleString()}` },
+                            { label: 'Finance/mo', value: `~£${costs.financeMonthly}` },
+                            { label: 'Insurance/mo', value: `~£${costs.insuranceMonthly}` },
+                            { label: 'Road tax/mo', value: costs.roadTax === 0 ? 'Free' : `£${costs.roadTaxMonthly}` },
+                          ].map(({ label, value }) => (
+                            <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '10px 12px' }}>
+                              <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '13px', color: C.muted }}>Monthly total (48 months)</span>
+                          <span style={{ fontSize: '18px', fontWeight: '900', color: C.teal }}>~£{costs.totalMonthlyMin}–£{costs.totalMonthlyMax}/mo</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '13px', color: C.muted }}>48-month total</span>
+                          <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>~£{Number(costs.deposit + (costs.financeMonthly * 48) + (costs.insuranceMonthly * 48) + (costs.roadTax * 4)).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+                          {[
+                            { label: 'Car price', value: `£${Number(car.price).toLocaleString()}` },
+                            { label: 'Road tax/yr', value: costs.roadTax === 0 ? 'Free (EV)' : `£${costs.roadTax}` },
+                            { label: 'Insurance/yr', value: `£${costs.insuranceMin}–£${costs.insuranceMax}` },
+                          ].map(({ label, value }) => (
+                            <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '10px 12px' }}>
+                              <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '13px', color: C.muted }}>Year 1 total</span>
+                          <span style={{ fontSize: '18px', fontWeight: '900', color: C.teal }}>£{costs.yearOneMin.toLocaleString()}–£{costs.yearOneMax.toLocaleString()}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '13px', color: C.muted }}>4-year total</span>
+                          <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>~£{Number(costs.carPrice + (costs.insuranceMin * 4) + (costs.roadTax * 4)).toLocaleString()}–£{Number(costs.carPrice + (costs.insuranceMax * 4) + (costs.roadTax * 4)).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ padding: '0 28px 28px' }}>
+                    <button onClick={() => onSelectCar(car)} style={{ width: '100%', backgroundColor: C.offwhite, color: C.midnight, border: '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+                      View full details →
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <div style={{ textAlign: 'center', marginTop: '40px' }}>
+            <p style={{ fontSize: '12px', color: '#8A9AB0', marginBottom: '8px' }}>Cost estimates are indicative. Insurance based on risk band. Finance calculated at 9.9% APR over 48 months.</p>
+            <button onClick={onBack} style={{ backgroundColor: C.midnight, color: C.offwhite, border: 'none', borderRadius: '10px', padding: '14px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer', marginTop: '8px' }}>Start again</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (step === 'select') {
+    return (
+      <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
+        <nav style={{ backgroundColor: C.navy, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
+          <button onClick={() => setStep('details')} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
+        </nav>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px 80px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>COMPARE CARS</div>
+          <h2 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em', marginBottom: '8px' }}>Select up to 3 cars to compare.</h2>
+          <p style={{ fontSize: '14px', color: C.muted, marginBottom: '32px' }}>Filter by brand or body type to narrow the list.</p>
+
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)} style={{ flex: '1', minWidth: '140px', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', outline: 'none' }}>
+              <option value=''>All brands</option>
+              {brands.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+            <select value={bodyFilter} onChange={e => setBodyFilter(e.target.value)} style={{ flex: '1', minWidth: '140px', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', outline: 'none' }}>
+              <option value=''>All body types</option>
+              {['Hatchback', 'Saloon', 'Estate', 'SUV', 'Crossover', 'MPV', 'Coupe', 'Van'].map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+
+          {selectedCars.length > 0 && (
+            <div style={{ backgroundColor: C.navy, borderRadius: '10px', padding: '12px 16px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '11px', color: C.teal, fontWeight: '600', marginBottom: '8px' }}>SELECTED ({selectedCars.length}/3)</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {selectedCars.map(car => (
+                  <div key={`${car.make}${car.model}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: '600' }}>{car.make} {car.model}</span>
+                    <button onClick={() => toggleCar(car)} style={{ backgroundColor: 'transparent', color: C.muted, border: 'none', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', marginBottom: '24px' }}>
+            {filteredCars.map(car => {
+              const key = `${car.make} ${car.model} ${car.generation}`
+              const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generation}` === key)
+              const disabled = !selected && selectedCars.length >= 3
+              return (
+                <button key={key} onClick={() => !disabled && toggleCar(car)} style={{ backgroundColor: selected ? C.teal : C.navy, color: selected ? C.midnight : disabled ? C.dim : C.offwhite, border: `1.5px solid ${selected ? C.teal : '#2A4060'}`, borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: selected ? '700' : '400', cursor: disabled ? 'not-allowed' : 'pointer', textAlign: 'left', opacity: disabled ? 0.5 : 1 }}>
+                  <span style={{ fontWeight: '600' }}>{car.make} {car.model}</span>
+                  <span style={{ fontSize: '12px', marginLeft: '8px', opacity: 0.7 }}>{car.generation}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          <button onClick={handleCompare} disabled={selectedCars.length < 1} style={{ width: '100%', backgroundColor: selectedCars.length > 0 ? C.teal : '#1A2E50', color: selectedCars.length > 0 ? C.midnight : C.dim, border: 'none', borderRadius: '10px', padding: '16px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: selectedCars.length > 0 ? 'pointer' : 'not-allowed' }}>
+            Compare {selectedCars.length > 0 ? `${selectedCars.length} car${selectedCars.length > 1 ? 's' : ''}` : 'cars'} →
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
+      <nav style={{ backgroundColor: C.navy, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
+        <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
+      </nav>
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>COMPARE CARS</div>
+        <h2 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em', marginBottom: '8px' }}>Already know what you're looking for?</h2>
+        <p style={{ fontSize: '14px', color: C.muted, marginBottom: '32px', lineHeight: '1.6' }}>Tell us a bit about yourself and we'll show you the true cost of ownership for each car you choose.</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>Your postcode</label>
+            <input type="text" placeholder="e.g. SW1A 1AA" value={answers.postcode || ''} onChange={e => setAnswers(p => ({ ...p, postcode: e.target.value }))} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '14px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>How are you planning to pay?</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {['Cash', 'Part exchange', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].map(opt => {
+                const selected = answers.purchaseMethod === opt
+                return (
+                  <button key={opt} onClick={() => setAnswers(p => ({ ...p, purchaseMethod: opt }))} style={{ backgroundColor: selected ? C.teal : C.navy, color: selected ? C.midnight : C.offwhite, border: `1.5px solid ${selected ? C.teal : '#2A4060'}`, borderRadius: '10px', padding: '14px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: selected ? '700' : '400', cursor: 'pointer', textAlign: 'left' }}>
+                    {opt}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {isFinance && (
+            <div>
+              <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>Deposit amount (£)</label>
+              <input type="number" placeholder="e.g. 2000" value={answers.deposit || ''} onChange={e => setAnswers(p => ({ ...p, deposit: e.target.value }))} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '14px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }} />
+            </div>
+          )}
+
+          <button onClick={() => setStep('select')} disabled={!answers.purchaseMethod} style={{ backgroundColor: answers.purchaseMethod ? C.teal : '#1A2E50', color: answers.purchaseMethod ? C.midnight : C.dim, border: 'none', borderRadius: '10px', padding: '16px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: answers.purchaseMethod ? 'pointer' : 'not-allowed', marginTop: '8px' }}>
+            Choose my cars →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
