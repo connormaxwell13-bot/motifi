@@ -22,8 +22,8 @@ function getTop3(answers) {
 }
 
 export default function App() {
-const [screen, setScreen] = useState('home')
-const [selectedCar, setSelectedCar] = useState(null)
+  const [screen, setScreen] = useState('home')
+  const [selectedCar, setSelectedCar] = useState(null)
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState({})
   const [results, setResults] = useState([])
@@ -66,8 +66,9 @@ const [selectedCar, setSelectedCar] = useState(null)
   }
 
   if (screen === 'home') return <Home onStart={() => setScreen('questions')} />
-if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
-if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack={() => setScreen('results')} />
+  if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
+  if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack={() => setScreen('results')} />
+
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
       <nav style={{ backgroundColor: C.navy, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -76,28 +77,22 @@ if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack
         </div>
         <div style={{ fontSize: '13px', color: C.muted }}>{step + 1} of {visibleQuestions.length}</div>
       </nav>
-
       <div style={{ height: '3px', backgroundColor: C.navy }}>
         <div style={{ height: '100%', width: `${progress}%`, backgroundColor: C.teal, transition: 'width 0.3s ease' }} />
       </div>
-
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '60px 24px' }}>
         {current.dataOnly && (
           <div style={{ display: 'inline-block', backgroundColor: C.navy, borderRadius: '20px', padding: '4px 12px', fontSize: '11px', fontWeight: '500', color: C.teal, letterSpacing: '0.05em', marginBottom: '20px' }}>
             FOR PERSONALISATION ONLY
           </div>
         )}
-
         <h2 style={{ fontSize: '28px', fontWeight: '700', lineHeight: '1.3', letterSpacing: '-0.02em', marginBottom: '8px' }}>
           {current.question}
         </h2>
-
         {current.hint && (
           <p style={{ fontSize: '14px', color: C.muted, marginBottom: '32px', lineHeight: '1.6' }}>{current.hint}</p>
         )}
-
         <div style={{ marginTop: current.hint ? '0' : '32px' }}>
-
           {current.type === 'single' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {current.options.map(opt => {
@@ -110,15 +105,12 @@ if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack
               })}
             </div>
           )}
-
           {current.type === 'text' && (
             <input type="text" placeholder={current.placeholder} value={answers[current.id] || ''} onChange={e => handleAnswer(e.target.value)} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '16px 20px', fontFamily: 'Satoshi, sans-serif', fontSize: '16px', outline: 'none', boxSizing: 'border-box' }} />
           )}
-
           {current.type === 'email' && (
             <input type="email" placeholder={current.placeholder} value={answers.email || ''} onChange={e => handleAnswer(e.target.value)} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '16px 20px', fontFamily: 'Satoshi, sans-serif', fontSize: '16px', outline: 'none', boxSizing: 'border-box' }} />
           )}
-
           {current.type === 'budget' && (
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               {[{ key: 'budgetMin', label: 'Minimum budget', placeholder: '5000' }, { key: 'budgetMax', label: 'Maximum budget', placeholder: '15000' }].map(({ key, label, placeholder }) => (
@@ -129,16 +121,13 @@ if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack
               ))}
             </div>
           )}
-
           {current.type === 'deposit' && (
             <div>
               <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>Deposit amount (£)</label>
               <input type="number" placeholder="e.g. 2000" value={answers.deposit || ''} onChange={e => setAnswers(prev => ({ ...prev, deposit: e.target.value }))} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '16px 20px', fontFamily: 'Satoshi, sans-serif', fontSize: '16px', outline: 'none', boxSizing: 'border-box' }} />
             </div>
           )}
-
         </div>
-
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '40px' }}>
           <button onClick={handleBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '14px 24px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', fontWeight: '500', cursor: 'pointer' }}>
             Back
@@ -151,7 +140,6 @@ if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack
     </div>
   )
 }
-
 function Home({ onStart }) {
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, color: C.midnight }}>
@@ -159,7 +147,6 @@ function Home({ onStart }) {
         <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
         <button onClick={onStart} style={{ backgroundColor: C.teal, color: C.midnight, border: 'none', borderRadius: '8px', padding: '10px 22px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>Find my car</button>
       </nav>
-
       <div style={{ backgroundColor: C.midnight, padding: '140px 5% 100px', textAlign: 'center' }}>
         <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '5px 14px', fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '28px' }}>FREE · NO SIGN-UP REQUIRED</div>
         <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: C.offwhite, maxWidth: '800px', margin: '0 auto 16px' }}>Find your perfect used car.</h1>
@@ -175,7 +162,6 @@ function Home({ onStart }) {
           ))}
         </div>
       </div>
-
       <div style={{ backgroundColor: C.offwhite, padding: '80px 5%' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '52px' }}>
@@ -200,7 +186,6 @@ function Home({ onStart }) {
           </div>
         </div>
       </div>
-
       <div style={{ backgroundColor: C.navy, padding: '56px 5%' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '40px', textAlign: 'center' }}>
           {[['£15,000', 'Average UK used car purchase'], ['3 mins', 'Average time to your results'], ['105+', 'Cars in our database'], ['0', 'Sign-ups required']].map(({ 0: stat, 1: label }) => (
@@ -211,7 +196,6 @@ function Home({ onStart }) {
           ))}
         </div>
       </div>
-
       <div style={{ backgroundColor: C.offwhite, padding: '80px 5%' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ marginBottom: '40px' }}>
@@ -220,7 +204,7 @@ function Home({ onStart }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
             {[
-              { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', tag: 'BUYING GUIDE', title: 'The true cost of owning a used car in 2026', body: 'Sticker price is just the start. Insurance, fuel, tax and depreciation all add up — here\'s how to calculate the real number.' },
+              { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', tag: 'BUYING GUIDE', title: 'The true cost of owning a used car in 2026', body: "Sticker price is just the start. Insurance, fuel, tax and depreciation all add up — here's how to calculate the real number." },
               { img: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=800&q=80', tag: 'RELIABILITY', title: 'Which used cars are the most reliable?', body: 'Reliability varies enormously by make and model. We break down which cars score highest for long-term ownership.' },
               { img: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&q=80', tag: 'ELECTRIC', title: 'Should your next used car be electric?', body: 'Used EVs are now genuinely affordable. But are they right for your driving pattern? We look at the real-world case.' },
             ].map(({ img, tag, title, body }) => (
@@ -239,7 +223,6 @@ function Home({ onStart }) {
           </div>
         </div>
       </div>
-
       <div style={{ backgroundColor: C.midnight, padding: '36px 5%' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div style={{ fontSize: '20px', fontWeight: '900', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
@@ -249,7 +232,6 @@ function Home({ onStart }) {
     </div>
   )
 }
-
 function Results({ results, answers, onBack, onSelectCar }) {
   const [explanations, setExplanations] = useState({})
   const [loading, setLoading] = useState({})
@@ -300,22 +282,17 @@ function Results({ results, answers, onBack, onSelectCar }) {
         <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
         <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>Start again</button>
       </nav>
-
       <div style={{ backgroundColor: C.midnight, padding: '48px 5% 56px', textAlign: 'center' }}>
         <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>YOUR RESULTS</div>
         <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', color: C.offwhite, lineHeight: '1.2' }}>Based on what you told us,<br />here are your best matches.</h2>
       </div>
-
       <div style={{ maxWidth: '780px', margin: '0 auto', padding: '40px 24px 80px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           {results.map((car, i) => {
             const costs = getYearOneCost(car, answers)
             const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.purchaseMethod)
-
             return (
-              <div key={i} onClick={() => onSelectedCar (car)} style={{ backgroundColor: C.white, borderRadius: '20px', overflow: 'hidden', border: i === 0 ? `2px solid ${C.teal}` : '1px solid #E8ECF0', boxShadow: i === 0 ? '0 4px 24px rgba(0,200,150,0.08)' : 'none' }}>
-
-                {/* Card header */}
+              <div key={i} style={{ backgroundColor: C.white, borderRadius: '20px', overflow: 'hidden', border: i === 0 ? `2px solid ${C.teal}` : '1px solid #E8ECF0', boxShadow: i === 0 ? '0 4px 24px rgba(0,200,150,0.08)' : 'none' }}>
                 <div style={{ padding: '28px 28px 0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
                     <div>
@@ -323,35 +300,11 @@ function Results({ results, answers, onBack, onSelectCar }) {
                       <h3 style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.02em', color: C.midnight }}>{car.make} {car.model}</h3>
                       <div style={{ fontSize: '13px', color: '#8A9AB0', marginTop: '4px' }}>{car.generation} · {car.segment} · <span style={{ color: C.teal, fontWeight: '700' }}>From £{Number(car.price).toLocaleString()}</span></div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '11px', color: '#8A9AB0', marginBottom: '4px' }}>Match score</div>
-                        <div style={{ fontSize: '32px', fontWeight: '900', color: C.teal }}>{Math.round(car.scores.finalScore * 10)}%</div>
-                      </div>
-                      <div style={{ backgroundColor: C.offwhite, border: '1px solid #E8ECF0', borderRadius: '8px', padding: '8px 14px', textAlign: 'right' }}>
-                        <div style={{ fontSize: '10px', color: '#8A9AB0', marginBottom: '2px' }}>Price from</div>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: C.midnight }}>£{Number(car.price).toLocaleString()}</div>
-                      </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '11px', color: '#8A9AB0', marginBottom: '4px' }}>Match score</div>
+                      <div style={{ fontSize: '32px', fontWeight: '900', color: C.teal }}>{Math.round(car.scores.finalScore * 10)}%</div>
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '11px', color: '#8A9AB0', marginBottom: '4px' }}>Match score</div>
-                        <div style={{ fontSize: '32px', fontWeight: '900', color: C.teal }}>{Math.round(car.scores.finalScore * 10)}%</div>
-                      </div>
-                      <div style={{ backgroundColor: C.offwhite, border: '1px solid #E8ECF0', borderRadius: '8px', padding: '8px 14px', textAlign: 'right' }}>
-                        <div style={{ fontSize: '10px', color: '#8A9AB0', marginBottom: '2px' }}>Price from</div>
-                        <div style={{ fontSize: '15px', fontWeight: '700', color: C.midnight }}>£{Number(car.price).toLocaleString()}</div>
-                      </div>
-                    </div>
-                   
-  <div style={{ backgroundColor: C.offwhite, borderRadius: '8px', padding: '8px 14px', textAlign: 'right' }}>
-    <div style={{ fontSize: '10px', color: '#8A9AB0', marginBottom: '2px' }}>Price from</div>
-    <div style={{ fontSize: '15px', fontWeight: '700', color: C.midnight }}>£{Number(car.price).toLocaleString()}</div>
-  </div>
-</div>
                   </div>
-
-                  {/* LLM explanation */}
                   <div style={{ backgroundColor: C.offwhite, borderRadius: '10px', padding: '16px', marginBottom: '20px', minHeight: '56px', display: 'flex', alignItems: 'center' }}>
                     {loading[i] ? (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -363,84 +316,71 @@ function Results({ results, answers, onBack, onSelectCar }) {
                     )}
                   </div>
                 </div>
-                {/* True cost of ownership */}
                 <div style={{ margin: '0 28px 20px', backgroundColor: C.midnight, borderRadius: '14px', padding: '20px 24px' }}>
-                 <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>
-  COST OF OWNERSHIP
-</div>
-
-                 {isFinance ? (
-  <div>
-    {/* On the road cost — day one */}
-    <div style={{ backgroundColor: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.2)', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px' }}>
-      <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>ON THE ROAD — DAY ONE COST</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
-        {[
-          { label: 'Deposit', value: `£${Number(costs.deposit).toLocaleString()}` },
-          { label: 'First month finance', value: `~£${costs.financeMonthly}` },
-          { label: 'First month insurance', value: `~£${costs.insuranceMonthly}` },
-          { label: 'Annual road tax', value: costs.roadTax === 0 ? 'Free (EV)' : `£${costs.roadTax}` },
-        ].map(({ label, value }) => (
-          <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '10px 12px' }}>
-            <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: C.offwhite }}>{value}</div>
-          </div>
-        ))}
-      </div>
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '12px', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '12px', color: C.muted }}>Day one total estimate</span>
-        <span style={{ fontSize: '16px', fontWeight: '900', color: C.teal }}>
-          ~£{(costs.deposit + costs.financeMonthly + costs.insuranceMonthly + costs.roadTax).toLocaleString()}
-        </span>
-      </div>
-    </div>
-
-    {/* Monthly breakdown */}
-    <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>MONTHLY OVER 48 MONTHS</div>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-      {[
-        { label: 'Finance (48 months)', value: `~£${costs.financeMonthly}/mo` },
-        { label: 'Insurance est.', value: `~£${costs.insuranceMonthly}/mo` },
-        { label: 'Road tax', value: `£${costs.roadTaxMonthly}/mo` },
-      ].map(({ label, value }) => (
-        <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px' }}>
-          <div style={{ fontSize: '11px', color: C.muted, marginBottom: '4px' }}>{label}</div>
-          <div style={{ fontSize: '15px', fontWeight: '700', color: C.offwhite }}>{value}</div>
-        </div>
-      ))}
-    </div>
-  <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <div>
-    <div style={{ fontSize: '13px', color: C.muted }}>Total monthly estimate</div>
-    <div style={{ fontSize: '11px', color: C.dim, marginTop: '2px' }}>Finance over 48 months at 9.9% APR</div>
-  </div>
-  <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>~£{costs.totalMonthlyMin}–£{costs.totalMonthlyMax}/mo</span>
-</div>
-
-{/* 48-month total */}
-<div style={{ backgroundColor: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '10px', padding: '14px 16px' }}>
-  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>TOTAL COST OVER 48 MONTHS</div>
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
-    {[
-      { label: 'Deposit', value: `£${Number(costs.deposit).toLocaleString()}` },
-      { label: 'Finance payments', value: `~£${Number(costs.financeMonthly * 48).toLocaleString()}` },
-      { label: 'Insurance (4 yrs)', value: `~£${Number(costs.insuranceMonthly * 48).toLocaleString()}` },
-      { label: 'Road tax (4 yrs)', value: `£${Number(costs.roadTax * 4).toLocaleString()}` },
-    ].map(({ label, value }) => (
-      <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
-        <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
-      </div>
-    ))}
-  </div>
-  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <span style={{ fontSize: '13px', color: C.muted }}>48-month total estimate</span>
-    <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>
-      ~£{Number(costs.deposit + (costs.financeMonthly * 48) + (costs.insuranceMonthly * 48) + (costs.roadTax * 4)).toLocaleString()}
-    </span>
-  </div>
-</div>
-  </div>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>COST OF OWNERSHIP</div>
+                  {isFinance ? (
+                    <div>
+                      <div style={{ backgroundColor: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.2)', borderRadius: '10px', padding: '14px 16px', marginBottom: '16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>ON THE ROAD — DAY ONE COST</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px' }}>
+                          {[
+                            { label: 'Deposit', value: `£${Number(costs.deposit).toLocaleString()}` },
+                            { label: 'First month finance', value: `~£${costs.financeMonthly}` },
+                            { label: 'First month insurance', value: `~£${costs.insuranceMonthly}` },
+                            { label: 'Annual road tax', value: costs.roadTax === 0 ? 'Free (EV)' : `£${costs.roadTax}` },
+                          ].map(({ label, value }) => (
+                            <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: '8px', padding: '10px 12px' }}>
+                              <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+                              <div style={{ fontSize: '14px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '12px', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '12px', color: C.muted }}>Day one total estimate</span>
+                          <span style={{ fontSize: '16px', fontWeight: '900', color: C.teal }}>~£{(costs.deposit + costs.financeMonthly + costs.insuranceMonthly + costs.roadTax).toLocaleString()}</span>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>MONTHLY OVER 48 MONTHS</div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '16px' }}>
+                        {[
+                          { label: 'Finance (48 months)', value: `~£${costs.financeMonthly}/mo` },
+                          { label: 'Insurance est.', value: `~£${costs.insuranceMonthly}/mo` },
+                          { label: 'Road tax', value: `£${costs.roadTaxMonthly}/mo` },
+                        ].map(({ label, value }) => (
+                          <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px' }}>
+                            <div style={{ fontSize: '11px', color: C.muted, marginBottom: '4px' }}>{label}</div>
+                            <div style={{ fontSize: '15px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontSize: '13px', color: C.muted }}>Total monthly estimate</div>
+                          <div style={{ fontSize: '11px', color: C.dim, marginTop: '2px' }}>Finance over 48 months at 9.9% APR</div>
+                        </div>
+                        <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>~£{costs.totalMonthlyMin}–£{costs.totalMonthlyMax}/mo</span>
+                      </div>
+                      <div style={{ backgroundColor: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '10px', padding: '14px 16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>TOTAL COST OVER 48 MONTHS</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+                          {[
+                            { label: 'Deposit', value: `£${Number(costs.deposit).toLocaleString()}` },
+                            { label: 'Finance payments', value: `~£${Number(costs.financeMonthly * 48).toLocaleString()}` },
+                            { label: 'Insurance (4 yrs)', value: `~£${Number(costs.insuranceMonthly * 48).toLocaleString()}` },
+                            { label: 'Road tax (4 yrs)', value: `£${Number(costs.roadTax * 4).toLocaleString()}` },
+                          ].map(({ label, value }) => (
+                            <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
+                              <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '13px', color: C.muted }}>48-month total estimate</span>
+                          <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>~£{Number(costs.deposit + (costs.financeMonthly * 48) + (costs.insuranceMonthly * 48) + (costs.roadTax * 4)).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '16px' }}>
@@ -455,38 +395,32 @@ function Results({ results, answers, onBack, onSelectCar }) {
                           </div>
                         ))}
                       </div>
-                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-  <span style={{ fontSize: '13px', color: C.muted }}>Year 1 total estimate</span>
-  <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>£{costs.yearOneMin.toLocaleString()}–£{costs.yearOneMax.toLocaleString()}</span>
-</div>
-
-{/* Cash 4-year total */}
-<div style={{ backgroundColor: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '10px', padding: '14px 16px' }}>
-  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>TOTAL COST OVER 4 YEARS</div>
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
-    {[
-      { label: 'Car price', value: `£${Number(costs.carPrice).toLocaleString()}` },
-      { label: 'Insurance (4 yrs)', value: `~£${Number(costs.insuranceMin * 4).toLocaleString()}–£${Number(costs.insuranceMax * 4).toLocaleString()}` },
-      { label: 'Road tax (4 yrs)', value: `£${Number(costs.roadTax * 4).toLocaleString()}` },
-    ].map(({ label, value }) => (
-      <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
-        <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
-      </div>
-    ))}
-  </div>
-  <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <span style={{ fontSize: '13px', color: C.muted }}>4-year total estimate</span>
-    <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>
-      ~£{Number(costs.carPrice + (costs.insuranceMin * 4) + (costs.roadTax * 4)).toLocaleString()}–£{Number(costs.carPrice + (costs.insuranceMax * 4) + (costs.roadTax * 4)).toLocaleString()}
-    </span>
-  </div>
-</div>
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '14px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', color: C.muted }}>Year 1 total estimate</span>
+                        <span style={{ fontSize: '20px', fontWeight: '900', color: C.teal }}>£{costs.yearOneMin.toLocaleString()}–£{costs.yearOneMax.toLocaleString()}</span>
+                      </div>
+                      <div style={{ backgroundColor: 'rgba(0,200,150,0.06)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '10px', padding: '14px 16px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.05em', marginBottom: '10px' }}>TOTAL COST OVER 4 YEARS</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', marginBottom: '12px' }}>
+                          {[
+                            { label: 'Car price', value: `£${Number(costs.carPrice).toLocaleString()}` },
+                            { label: 'Insurance (4 yrs)', value: `~£${Number(costs.insuranceMin * 4).toLocaleString()}–£${Number(costs.insuranceMax * 4).toLocaleString()}` },
+                            { label: 'Road tax (4 yrs)', value: `£${Number(costs.roadTax * 4).toLocaleString()}` },
+                          ].map(({ label, value }) => (
+                            <div key={label} style={{ backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
+                              <div style={{ fontSize: '10px', color: C.muted, marginBottom: '3px' }}>{label}</div>
+                              <div style={{ fontSize: '13px', fontWeight: '700', color: C.offwhite }}>{value}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: '13px', color: C.muted }}>4-year total estimate</span>
+                          <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>~£{Number(costs.carPrice + (costs.insuranceMin * 4) + (costs.roadTax * 4)).toLocaleString()}–£{Number(costs.carPrice + (costs.insuranceMax * 4) + (costs.roadTax * 4)).toLocaleString()}</span>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
-
-                {/* Score breakdown */}
                 <div style={{ padding: '0 28px 28px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: car.bodySpaceConflict ? '16px' : '0' }}>
                     {[
@@ -506,29 +440,24 @@ function Results({ results, answers, onBack, onSelectCar }) {
                       </div>
                     ))}
                   </div>
-
                   {car.bodySpaceConflict && (
-                    <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#92400E', lineHeight: '1.5' }}>
+                    <div style={{ backgroundColor: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#92400E', lineHeight: '1.5', marginTop: '16px' }}>
                       You may also want to consider estates or SUVs if space is a priority for you.
                     </div>
                   )}
-                  <button
-  onClick={(e) => { e.stopPropagation(); onSelectCar(car); }}
-  style={{ width: '100%', marginTop: '16px', backgroundColor: i === 0 ? C.teal : C.offwhite, color: i === 0 ? C.midnight : C.midnight, border: i === 0 ? 'none' : `1px solid #E8ECF0`, borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
-  View full details →
-</button>
+                  <button onClick={(e) => { e.stopPropagation(); onSelectCar(car); }} style={{ width: '100%', marginTop: '16px', backgroundColor: i === 0 ? C.teal : C.offwhite, color: C.midnight, border: i === 0 ? 'none' : '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>
+                    View full details →
+                  </button>
                 </div>
               </div>
             )
           })}
         </div>
-
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
           <p style={{ fontSize: '12px', color: '#8A9AB0', marginBottom: '8px' }}>Cost estimates are indicative. Insurance based on risk band. Finance calculated at 9.9% APR over 48 months.</p>
           <button onClick={onBack} style={{ backgroundColor: C.midnight, color: C.offwhite, border: 'none', borderRadius: '10px', padding: '14px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer', marginTop: '8px' }}>Start a new search</button>
         </div>
       </div>
-
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
@@ -538,43 +467,30 @@ function CarPage({ car, answers, onBack }) {
   const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.purchaseMethod)
   const postcode = (answers.postcode || '').replace(/\s/g, '')
   const radius = (answers.radius || 'Up to 25 miles').replace(/\D/g, '') || '25'
-
   const autotraderUrl = `https://www.autotrader.co.uk/car-search?make=${encodeURIComponent(car.make)}&model=${encodeURIComponent(car.model)}&postcode=${postcode}&radius=${radius}&year-from=${car.generation?.split(/[-–]/)[0]?.trim() || ''}`
   const ebayUrl = `https://www.ebay.co.uk/sch/Cars/9801/i.html?_nkw=${encodeURIComponent(car.make + ' ' + car.model)}`
-  const cargurusUrl = `https://www.cargurus.com/Cars/new/nl#listing=searchNarrowed;zip=${postcode};makeId=${encodeURIComponent(car.make)}`
   const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
   const financeUrl = `https://www.zuto.com/apply/`
- const generationYear = car.generation?.split(/[-–]/)[0]?.trim() || '2020'
-const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
+  const generationYear = car.generation?.split(/[-–]/)[0]?.trim() || '2020'
+  const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
 
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, minHeight: '100vh', color: C.midnight }}>
-
-      {/* Nav */}
       <nav style={{ backgroundColor: C.midnight, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
         <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back to results</button>
       </nav>
-
-      {/* Hero banner */}
-<div style={{ backgroundColor: '#1A2E50', padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden', position: 'relative' }}>
-  <div style={{ flex: 1, paddingTop: '32px', paddingBottom: '32px', zIndex: 2 }}>
-    <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.segment?.toUpperCase()}</div>
-    <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
-    <div style={{ fontSize: '14px', color: C.muted }}>{car.generation} · {car.fuelType} · {car.transmission}</div>
-  </div>
-<div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '360px', height: '200px', overflow: 'hidden' }}>    <img
-      src={imaginUrl}
-      alt={`${car.make} ${car.model}`}
-style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom right', mixBlendMode: 'multiply' }}
-                                                                                                                                                            onError={(e) => { e.target.style.display = 'none' }}
-    />
-  </div>
-</div>
-
+      <div style={{ backgroundColor: '#1A2E50', padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' }}>
+        <div style={{ flex: 1, paddingTop: '32px', paddingBottom: '32px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.segment?.toUpperCase()}</div>
+          <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
+          <div style={{ fontSize: '14px', color: C.muted }}>{car.generation} · {car.fuelType} · {car.transmission}</div>
+        </div>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '360px', height: '200px', overflow: 'hidden' }}>
+          <img src={imaginUrl} alt={`${car.make} ${car.model}`} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom right' }} onError={(e) => { e.target.style.display = 'none' }} />
+        </div>
+      </div>
       <div style={{ maxWidth: '780px', margin: '0 auto', padding: '32px 24px 80px' }}>
-
-        {/* Key specs */}
         <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
           <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>KEY SPECS</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
@@ -595,8 +511,6 @@ style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'b
             ))}
           </div>
         </div>
-
-        {/* Cost of ownership */}
         <div style={{ backgroundColor: C.midnight, borderRadius: '16px', padding: '24px', marginBottom: '20px' }}>
           <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>COST OF OWNERSHIP</div>
           {isFinance ? (
@@ -620,9 +534,7 @@ style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'b
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', color: C.muted }}>48-month total estimate</span>
-                <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>
-                  ~£{Number(costs.deposit + (costs.financeMonthly * 48) + (costs.insuranceMonthly * 48) + (costs.roadTax * 4)).toLocaleString()}
-                </span>
+                <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>~£{Number(costs.deposit + (costs.financeMonthly * 48) + (costs.insuranceMonthly * 48) + (costs.roadTax * 4)).toLocaleString()}</span>
               </div>
             </div>
           ) : (
@@ -645,60 +557,44 @@ style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'b
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '13px', color: C.muted }}>4-year total estimate</span>
-                <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>
-                  ~£{Number(costs.carPrice + (costs.insuranceMin * 4) + (costs.roadTax * 4)).toLocaleString()}–£{Number(costs.carPrice + (costs.insuranceMax * 4) + (costs.roadTax * 4)).toLocaleString()}
-                </span>
+                <span style={{ fontSize: '22px', fontWeight: '900', color: C.teal }}>~£{Number(costs.carPrice + (costs.insuranceMin * 4) + (costs.roadTax * 4)).toLocaleString()}–£{Number(costs.carPrice + (costs.insuranceMax * 4) + (costs.roadTax * 4)).toLocaleString()}</span>
               </div>
             </div>
           )}
         </div>
-
-        {/* Find this car */}
         <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
           <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>FIND THIS CAR NEAR YOU</div>
-          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>
-            Search live listings within {answers.radius || '25 miles'} of {answers.postcode || 'your location'}.
-          </p>
+          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Search live listings within {answers.radius || '25 miles'} of {answers.postcode || 'your location'}.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
               { label: 'Search on AutoTrader', url: autotraderUrl, primary: true },
               { label: 'Search on eBay Motors', url: ebayUrl, primary: false },
             ].map(({ label, url, primary }) => (
-              <a key={label} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: primary ? C.teal : C.offwhite, color: primary ? C.midnight : C.midnight, border: primary ? 'none' : '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
+              <a key={label} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: primary ? C.teal : C.offwhite, color: C.midnight, border: primary ? 'none' : '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
                 {label} →
               </a>
             ))}
           </div>
         </div>
-
-        {/* Insurance */}
         <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
           <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>GET AN INSURANCE QUOTE</div>
-          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>
-            Based on your car's insurance risk band ({car.insuranceBand}), estimated annual cost is £{costs.insuranceMin}–£{costs.insuranceMax}. Get a personalised quote below.
-          </p>
+          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Based on your car's insurance risk band ({car.insuranceBand}), estimated annual cost is £{costs.insuranceMin}–£{costs.insuranceMax}. Get a personalised quote below.</p>
           <a href={insuranceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: C.offwhite, color: C.midnight, border: '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
             Compare insurance quotes →
           </a>
         </div>
-
-        {/* Finance — only if HP or PCP */}
         {isFinance && (
           <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
             <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>GET A FINANCE QUOTE</div>
-            <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>
-              Based on a £{Number(costs.deposit).toLocaleString()} deposit over 48 months, estimated monthly finance is ~£{costs.financeMonthly}. Get a personalised quote below.
-            </p>
+            <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Based on a £{Number(costs.deposit).toLocaleString()} deposit over 48 months, estimated monthly finance is ~£{costs.financeMonthly}. Get a personalised quote below.</p>
             <a href={financeUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: C.offwhite, color: C.midnight, border: '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
               Get a finance quote →
             </a>
           </div>
         )}
-
         <div style={{ textAlign: 'center', marginTop: '32px' }}>
           <button onClick={onBack} style={{ backgroundColor: C.midnight, color: C.offwhite, border: 'none', borderRadius: '10px', padding: '14px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>← Back to your results</button>
         </div>
-
       </div>
     </div>
   )
