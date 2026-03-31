@@ -22,7 +22,7 @@ Car: ${car.make} ${car.model}, ${car.segment}, ${car.fuelType}, MPG ${car.mpgBan
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5',
-        max_tokens: 150,
+        max_tokens: 200,
         messages: [{ role: 'user', content: prompt }],
       }),
     })
