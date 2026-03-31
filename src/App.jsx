@@ -323,6 +323,16 @@ function Results({ results, answers, onBack, onSelectCar }) {
                       <h3 style={{ fontSize: '24px', fontWeight: '900', letterSpacing: '-0.02em', color: C.midnight }}>{car.make} {car.model}</h3>
                       <div style={{ fontSize: '13px', color: '#8A9AB0', marginTop: '4px' }}>{car.generation} · {car.segment}</div>
                     </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '11px', color: '#8A9AB0', marginBottom: '4px' }}>Match score</div>
+                        <div style={{ fontSize: '32px', fontWeight: '900', color: C.teal }}>{Math.round(car.scores.finalScore * 10)}%</div>
+                      </div>
+                      <div style={{ backgroundColor: C.offwhite, border: '1px solid #E8ECF0', borderRadius: '8px', padding: '8px 14px', textAlign: 'right' }}>
+                        <div style={{ fontSize: '10px', color: '#8A9AB0', marginBottom: '2px' }}>Price from</div>
+                        <div style={{ fontSize: '15px', fontWeight: '700', color: C.midnight }}>£{Number(car.price).toLocaleString()}</div>
+                      </div>
+                    </div>
                     <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
   <div style={{ textAlign: 'right' }}>
