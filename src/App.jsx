@@ -202,7 +202,7 @@ function Home({ onStart, onCompare }) {
     <img
       src="/hero.jpg"
       alt="Car driving"
-      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%' }}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 50%' }}
     />
     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,29,53,0.4) 0%, rgba(15,29,53,0) 30%, rgba(15,29,53,0) 70%, rgba(245,247,250,0.8) 100%)' }} />
   </div>
