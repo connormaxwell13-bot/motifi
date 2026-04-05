@@ -160,7 +160,7 @@ function Home({ onStart, onCompare }) {
 <div style={{ backgroundColor: '#0F1D35', paddingTop: '68px', position: 'relative', overflow: 'hidden' }}>
 
   {/* Text content */}
-  <div style={{ padding: '48px 5% 32px', maxWidth: '560px' }}>
+  <div style={{ padding: '48px 5% 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
     <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '11px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '20px' }}>
       FREE · NO SIGN-UP REQUIRED
     </div>
