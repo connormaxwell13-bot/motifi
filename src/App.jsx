@@ -142,98 +142,167 @@ if (screen === 'compare') return <CompareFlow onBack={() => setScreen('home')} o
   )
 }
 function Home({ onStart, onCompare }) {
+  const [activeTab, setActiveTab] = React.useState('find')
+
   return (
-    <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, color: C.midnight }}>
+    <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: '#F5F7FA', color: '#0F1D35' }}>
+
+      {/* Nav */}
       <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, padding: '0 5%', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
-        <button onClick={onStart} style={{ backgroundColor: C.teal, color: C.midnight, border: 'none', borderRadius: '8px', padding: '10px 22px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>Find my car</button>
+        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button style={{ backgroundColor: 'transparent', color: '#F5F7FA', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: '8px', padding: '9px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '500', fontSize: '14px', cursor: 'pointer' }}>How it works</button>
+          <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '8px', padding: '9px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>Get started</button>
+        </div>
       </nav>
-      <div style={{ backgroundColor: C.midnight, padding: '140px 5% 100px', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '5px 14px', fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '28px' }}>FREE · NO SIGN-UP REQUIRED</div>
-        <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: C.offwhite, maxWidth: '800px', margin: '0 auto 16px' }}>Find your perfect used car.</h1>
-        <p style={{ fontSize: 'clamp(15px, 2vw, 18px)', lineHeight: '1.7', color: C.muted, maxWidth: '480px', margin: '0 auto 12px' }}>Answer a few simple questions. We do the matching — surfacing your three best options with the true cost of ownership made clear.</p>
-        <p style={{ fontSize: '14px', color: '#4A8070', maxWidth: '480px', margin: '0 auto 32px', lineHeight: '1.6' }}>Unlike comparison sites, Motifi doesn't show you a list — it tells you which car is right for <em>you</em>, and why.</p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-  <button onClick={onStart} style={{ backgroundColor: C.teal, color: C.midnight, border: 'none', borderRadius: '50px', padding: '16px 40px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>Find my car →</button>
-  <button onClick={onCompare} style={{ backgroundColor: 'transparent', color: C.offwhite, border: `2px solid ${C.teal}`, borderRadius: '50px', padding: '16px 40px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>Compare cars →</button>
-</div>
-<p style={{ fontSize: '13px', color: C.dim, marginTop: '12px' }}>Already know what you're looking for?</p>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginTop: '56px', flexWrap: 'wrap' }}>
-          {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['Free', 'Always free']].map(([val, label]) => (
-            <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '26px', fontWeight: '900', color: C.teal }}>{val}</div>
-              <div style={{ fontSize: '12px', color: C.muted, marginTop: '3px' }}>{label}</div>
-            </div>
-          ))}
+
+      {/* Hero */}
+      <div style={{ backgroundColor: '#0F1D35', paddingTop: '68px', position: 'relative', overflow: 'hidden' }}>
+
+        {/* Text content */}
+        <div style={{ padding: '48px 5% 0', maxWidth: '620px' }}>
+          <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '11px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '20px' }}>
+            FREE · NO SIGN-UP REQUIRED
+          </div>
+          <h1 style={{ fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: '#F5F7FA', marginBottom: '16px' }}>
+            The smarter way to find your <span style={{ color: '#00C896' }}>next car.</span>
+          </h1>
+          <p style={{ fontSize: '16px', color: '#A8B8CC', lineHeight: '1.7', marginBottom: '28px', maxWidth: '480px' }}>
+            Answer a few questions. Get three personalised matches — with the true cost of ownership made clear from the start.
+          </p>
+        </div>
+
+        {/* CTA Card */}
+        <div style={{ margin: '0 5%', backgroundColor: '#F5F7FA', borderRadius: '16px 16px 0 0', padding: '24px 24px 0', position: 'relative', zIndex: 2 }}>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', backgroundColor: '#E8ECF0', borderRadius: '10px', padding: '4px', marginBottom: '16px' }}>
+            {[['find', 'Find my car'], ['compare', 'Compare cars']].map(([key, label]) => (
+              <button key={key} onClick={() => setActiveTab(key)} style={{ flex: 1, padding: '11px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: activeTab === key ? '#0F1D35' : 'transparent', color: activeTab === key ? '#F5F7FA' : '#5A7090', transition: 'all 0.15s ease' }}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <button onClick={activeTab === 'find' ? onStart : onCompare} style={{ width: '100%', backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '10px', padding: '16px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: 'pointer', marginBottom: '10px' }}>
+            {activeTab === 'find' ? 'Find my perfect car →' : 'Compare cars now →'}
+          </button>
+
+          <p style={{ fontSize: '12px', color: '#8A9AB0', textAlign: 'center', marginBottom: '20px' }}>
+            {activeTab === 'find' ? 'Already know what you want? Switch to Compare cars above.' : 'Not sure what you want? Switch to Find my car above.'}
+          </p>
+
+          {/* Stats inside card */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #E8ECF0', paddingTop: '16px', paddingBottom: '20px', gap: '8px' }}>
+            {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['3 mins', 'To your results'], ['Free', 'Always']].map(([val, label]) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '20px', fontWeight: '900', color: '#0F1D35', letterSpacing: '-0.02em' }}>{val}</div>
+                <div style={{ fontSize: '11px', color: '#8A9AB0', marginTop: '2px' }}>{label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Car image */}
+        <div style={{ position: 'relative', height: '320px', overflow: 'hidden', marginTop: '-1px' }}>
+          <img
+            src="https://images.unsplash.com/photo-1617469767053-d3b523a0b982?w=1400&q=80"
+            alt="Car on road"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%' }}
+          />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(245,247,250,0.15) 0%, rgba(15,29,53,0.0) 40%, rgba(15,29,53,0.0) 60%, rgba(245,247,250,0.6) 100%)' }} />
         </div>
       </div>
-      <div style={{ backgroundColor: C.offwhite, padding: '80px 5%' }}>
+
+      {/* How it works */}
+      <div style={{ backgroundColor: '#F5F7FA', padding: '72px 5%' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '52px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>HOW IT WORKS</div>
-            <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', color: C.midnight, lineHeight: '1.15' }}>Three steps to your best match.</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '24px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '700', color: '#00C896', letterSpacing: '0.08em', marginBottom: '12px' }}>HOW IT WORKS</div>
+          <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', color: '#0F1D35', lineHeight: '1.15', marginBottom: '48px' }}>Three steps to your best match.</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
             {[
-              { n: '1', title: 'Tell us what matters', body: 'Budget, driving habits, how much space you need, fuel preference. Simple questions, no jargon, no sign-up.' },
+              { n: '1', title: 'Tell us what matters', body: 'Budget, driving habits, space, fuel. Simple questions — no jargon, no sign-up required.' },
               { n: '2', title: 'We score every car', body: 'Our engine scores 105+ cars across 6 dimensions — budget fit, running costs, safety, reliability and more.' },
-              { n: '3', title: 'Get three clear matches', body: 'Your top three cars ranked by match score, each with a plain-English explanation and true cost of ownership.' },
+              { n: '3', title: 'Get three clear matches', body: 'Ranked by score, with a plain-English explanation and true cost of ownership for each.' },
             ].map(({ n, title, body }) => (
-              <div key={n} style={{ backgroundColor: C.white, borderRadius: '16px', padding: '32px', border: '1px solid #E8ECF0' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: C.midnight, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', fontWeight: '900', color: C.teal, marginBottom: '20px' }}>{n}</div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: C.midnight, marginBottom: '10px' }}>{title}</h3>
+              <div key={n} style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', padding: '32px', border: '1px solid #E8ECF0' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: '#0F1D35', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '900', color: '#00C896', marginBottom: '20px' }}>{n}</div>
+                <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#0F1D35', marginBottom: '10px', lineHeight: '1.3' }}>{title}</h3>
                 <p style={{ fontSize: '14px', lineHeight: '1.75', color: '#5A7090' }}>{body}</p>
               </div>
             ))}
           </div>
           <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <button onClick={onStart} style={{ backgroundColor: C.midnight, color: C.offwhite, border: 'none', borderRadius: '10px', padding: '14px 36px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>Start matching →</button>
+            <button onClick={onStart} style={{ backgroundColor: '#0F1D35', color: '#F5F7FA', border: 'none', borderRadius: '10px', padding: '14px 36px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>Start matching →</button>
           </div>
         </div>
       </div>
-      <div style={{ backgroundColor: C.navy, padding: '56px 5%' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '40px', textAlign: 'center' }}>
-          {[['£15,000', 'Average UK used car purchase'], ['3 mins', 'Average time to your results'], ['105+', 'Cars in our database'], ['0', 'Sign-ups required']].map(({ 0: stat, 1: label }) => (
+
+      {/* Dark stats strip */}
+      <div style={{ backgroundColor: '#1A2E50', padding: '52px 5%' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '32px', textAlign: 'center' }}>
+          {[
+            { stat: '7.5M', label: 'Transactions' },
+            { stat: '£15,500', label: 'Avg sales price' },
+            { stat: '£503', label: 'Avg annual saving' },
+            { stat: '0', label: 'Sign-ups required' },
+          ].map(({ stat, label }) => (
             <div key={label}>
-              <div style={{ fontSize: '34px', fontWeight: '900', color: C.teal, letterSpacing: '-0.02em' }}>{stat}</div>
-              <div style={{ fontSize: '13px', color: C.muted, marginTop: '6px' }}>{label}</div>
+              <div style={{ fontSize: '36px', fontWeight: '900', color: '#00C896', letterSpacing: '-0.02em' }}>{stat}</div>
+              <div style={{ fontSize: '13px', color: '#A8B8CC', marginTop: '6px' }}>{label}</div>
             </div>
           ))}
         </div>
       </div>
-      <div style={{ backgroundColor: C.offwhite, padding: '80px 5%' }}>
+
+      {/* Editorial section */}
+      <div style={{ backgroundColor: '#F5F7FA', padding: '72px 5%' }}>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '40px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>FROM THE MOTIFI GUIDE</div>
-            <h2 style={{ fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: '900', letterSpacing: '-0.03em', color: C.midnight }}>Everything you need to know before buying a used car.</h2>
-          </div>
+          <h2 style={{ fontSize: 'clamp(24px, 3vw, 38px)', fontWeight: '900', letterSpacing: '-0.03em', color: '#0F1D35', lineHeight: '1.2', marginBottom: '8px' }}>
+            Everything you need to know<br />before buying a used car.
+          </h2>
+          <div style={{ fontSize: '13px', color: '#00C896', fontWeight: '600', marginBottom: '36px' }}>The latest news.</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
             {[
               { img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80', tag: 'BUYING GUIDE', title: 'The true cost of owning a used car in 2026', body: "Sticker price is just the start. Insurance, fuel, tax and depreciation all add up — here's how to calculate the real number." },
               { img: 'https://images.unsplash.com/photo-1609521263047-f8f205293f24?w=800&q=80', tag: 'RELIABILITY', title: 'Which used cars are the most reliable?', body: 'Reliability varies enormously by make and model. We break down which cars score highest for long-term ownership.' },
               { img: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=800&q=80', tag: 'ELECTRIC', title: 'Should your next used car be electric?', body: 'Used EVs are now genuinely affordable. But are they right for your driving pattern? We look at the real-world case.' },
             ].map(({ img, tag, title, body }) => (
-              <div key={title} style={{ backgroundColor: C.white, borderRadius: '16px', overflow: 'hidden', border: '1px solid #E8ECF0', cursor: 'pointer' }}>
+              <div key={title} style={{ backgroundColor: '#FFFFFF', borderRadius: '16px', overflow: 'hidden', border: '1px solid #E8ECF0' }}>
                 <div style={{ height: '180px', overflow: 'hidden' }}>
                   <img src={img} alt={title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ padding: '24px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '10px' }}>{tag}</div>
-                  <h3 style={{ fontSize: '16px', fontWeight: '700', lineHeight: '1.4', marginBottom: '8px', color: C.midnight }}>{title}</h3>
+                  <div style={{ fontSize: '11px', fontWeight: '700', color: '#00C896', letterSpacing: '0.06em', marginBottom: '10px' }}>{tag}</div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '700', lineHeight: '1.4', marginBottom: '8px', color: '#0F1D35' }}>{title}</h3>
                   <p style={{ fontSize: '13px', lineHeight: '1.7', color: '#5A7090' }}>{body}</p>
-                  <div style={{ marginTop: '16px', fontSize: '13px', fontWeight: '700', color: C.midnight }}>Read more →</div>
+                  <div style={{ marginTop: '16px', fontSize: '13px', fontWeight: '700', color: '#0F1D35' }}>Read more →</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
-      <div style={{ backgroundColor: C.midnight, padding: '36px 5%' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <div style={{ fontSize: '20px', fontWeight: '900', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
-          <div style={{ fontSize: '13px', color: C.dim }}>© 2026 Motifi · The smarter way to find your next car</div>
+
+      {/* Footer */}
+      <div style={{ backgroundColor: '#0F1D35', padding: '40px 5%' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', paddingBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+              {['Find My Car', 'Compare Cars', 'How It Works', 'About Us', 'Contact Us', 'Terms & Conditions', 'Privacy Policy'].map(link => (
+                <span key={link} style={{ fontSize: '13px', color: '#A8B8CC', cursor: 'pointer' }}>{link}</span>
+              ))}
+            </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+            <div style={{ fontSize: '12px', color: '#4A6080' }}>© 2026 Motifi · The smarter way to find your next car</div>
+          </div>
         </div>
       </div>
+
     </div>
   )
 }
