@@ -172,7 +172,7 @@ function Home({ onStart, onCompare }) {
     </p>
 
     {/* CTA Card — contained, centred */}
-    <div style={{ backgroundColor: '#F5F7FA', borderRadius: '16px', padding: '20px', marginBottom: '0', maxWidth: '520px' }}>
+    <div style={{ backgroundColor: '#F5F7FA', borderRadius: '16px', padding: '20px', marginBottom: '0', width: '100%', maxWidth: '560px' }}>
       <div style={{ display: 'flex', backgroundColor: '#E8ECF0', borderRadius: '10px', padding: '4px', marginBottom: '14px' }}>
         {[['find', 'Find my car'], ['compare', 'Compare cars']].map(([key, label]) => (
           <button key={key} onClick={() => setActiveTab(key)} style={{ flex: 1, padding: '10px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: '700', borderRadius: '8px', border: 'none', cursor: 'pointer', backgroundColor: activeTab === key ? '#0F1D35' : 'transparent', color: activeTab === key ? '#F5F7FA' : '#5A7090', transition: 'all 0.15s ease' }}>
