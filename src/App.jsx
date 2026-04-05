@@ -200,7 +200,7 @@ function Home({ onStart, onCompare }) {
   {/* Car image — full width, dramatic side shot */}
   <div style={{ position: 'relative', height: '340px', overflow: 'hidden' }}>
     <img
-      src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=1600&q=80"
+      src="/hero.jpg"
       alt="Car driving"
       style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 55%' }}
     />
