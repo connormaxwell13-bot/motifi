@@ -302,6 +302,8 @@ function Home({ onStart, onCompare }) {
       </div>
       <div style={{ fontSize: '12px', color: '#4A6080' }}>© 2026 Motifi · The smarter way to find your next car</div>
     </div>
+  </div>
+</div>
 
     </div>
   )
