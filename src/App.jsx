@@ -199,7 +199,7 @@ function Home({ onStart, onCompare }) {
   </div>
 
   {/* Car image — full width, outside padded container */}
-  <div style={{ marginTop: '-60px', height: '650px', position: 'relative' }}>
+  <div style={{ marginTop: '-120px', height: '650px', position: 'relative' }}>
     <img
       src="dextar-vision-IB7loQ5s334-unsplash.jpg"
       alt="Car driving"
