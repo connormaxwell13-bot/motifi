@@ -301,8 +301,6 @@ function Home({ onStart, onCompare }) {
     </div>
   </div>
 </div>
-              
-      </div>
 
     </div>
   )
