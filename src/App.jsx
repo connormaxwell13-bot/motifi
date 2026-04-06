@@ -199,13 +199,13 @@ function Home({ onStart, onCompare }) {
   </div>
 
   {/* Car image — full width, outside padded container */}
-  <div style={{ marginTop: '-120px', height: '650px', position: 'relative' }}>
+  <div style={{ marginTop: '-120px', height: '650px', position: 'relative' , backgroundColor: '#F5F7FA' }}>
     <img
       src="dextar-vision-IB7loQ5s334-unsplash.jpg"
       alt="Car driving"
-      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 50%', borderRadius: '0 0 20px 20px', display: 'block' }}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 50%', borderRadius: '0 0 40px 40px', display: 'block' }}
     />
-    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,29,53,0.6) 0%, rgba(15,29,53,0) 60%)', borderRadius: '0 0 20px 20px' }} />
+    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,29,53,0.6) 0%, rgba(15,29,53,0) 60%)', borderRadius: '0 0 40px 40px' }} />
   </div>
 
 </div>
