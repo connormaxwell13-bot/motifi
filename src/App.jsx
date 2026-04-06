@@ -286,7 +286,7 @@ function Home({ onStart, onCompare }) {
       </div>
 
       {/* Footer */}
-<div style={{ backgroundColor: '#0F1D35', padding: '40px 6%' }}>
+<div style={{ backgroundColor: '#0F1D35', padding: '40px 5%' }}>
   <div style={{ maxWidth: '960px', margin: '0 auto' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', paddingBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
       <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
