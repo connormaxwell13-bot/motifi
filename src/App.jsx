@@ -217,7 +217,7 @@ function Home({ onStart, onCompare }) {
 
       {/* How it works */}
       <div style={{ backgroundColor: '#F5F7FA', padding: '72px 5%' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+        <div style={{ margin: '0 auto' }}>
           <div style={{ fontSize: '12px', fontWeight: '700', color: '#00C896', letterSpacing: '0.08em', marginBottom: '12px' }}>HOW IT WORKS</div>
           <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', color: '#0F1D35', lineHeight: '1.15', marginBottom: '48px' }}>Three steps to your best match.</h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
@@ -241,7 +241,7 @@ function Home({ onStart, onCompare }) {
 
       {/* Dark stats strip */}
       <div style={{ backgroundColor: '#1A2E50', padding: '52px 5%' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '32px', textAlign: 'center' }}>
+        <div style={{ margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '32px', textAlign: 'center' }}>
           {[
             { stat: '7.5M', label: 'Transactions' },
             { stat: '£15,500', label: 'Avg sales price' },
@@ -258,7 +258,7 @@ function Home({ onStart, onCompare }) {
 
       {/* Editorial section */}
       <div style={{ backgroundColor: '#F5F7FA', padding: '72px 5%' }}>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+        <div style={{ margin: '0 auto' }}>
           <h2 style={{ fontSize: 'clamp(24px, 3vw, 38px)', fontWeight: '900', letterSpacing: '-0.03em', color: '#0F1D35', lineHeight: '1.2', marginBottom: '8px' }}>
             Everything you need to know<br />before buying a used car.
           </h2>
@@ -287,7 +287,7 @@ function Home({ onStart, onCompare }) {
 
       {/* Footer */}
 <div style={{ backgroundColor: '#0F1D35', padding: '40px 5%' }}>
-  <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+  <div style={{ margin: '0 auto' }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', paddingBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
       <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
       <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
