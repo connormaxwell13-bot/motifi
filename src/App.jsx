@@ -286,7 +286,21 @@ function Home({ onStart, onCompare }) {
       </div>
 
       {/* Footer */}
-      <div style={{ backgroundColor: '#0F1D35', padding: '40px 5%' }}>
+<div style={{ backgroundColor: '#0F1D35', padding: '40px 6%' }}>
+  <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', paddingBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+        {['Find My Car', 'Compare Cars', 'How It Works', 'About Us', 'Contact Us', 'Terms & Conditions', 'Privacy Policy'].map(link => (
+          <span key={link} style={{ fontSize: '13px', color: '#A8B8CC', cursor: 'pointer' }}>{link}</span>
+        ))}
+      </div>
+    </div>
+    <div style={{ paddingTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ fontSize: '12px', color: '#4A6080' }}>© 2026 Motifi · The smarter way to find your next car</div>
+    </div>
+  </div>
+</div>
         <div style={{ maxWidth: '960px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', paddingBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
