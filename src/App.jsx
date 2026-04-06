@@ -301,12 +301,6 @@ function Home({ onStart, onCompare }) {
     </div>
   </div>
 </div>
-        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', paddingBottom: '28px', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
-            <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-              {['Find My Car', 'Compare Cars', 'How It Works', 'About Us', 'Contact Us', 'Terms & Conditions', 'Privacy Policy'].map(link => (
-                <span key={link} style={{ fontSize: '13px', color: '#A8B8CC', cursor: 'pointer' }}>{link}</span>
               ))}
             </div>
           </div>
