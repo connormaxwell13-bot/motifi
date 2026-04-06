@@ -201,7 +201,7 @@ function Home({ onStart, onCompare }) {
   {/* Car image — full width, outside padded container */}
   <div style={{ marginTop: '-60px', height: '650px', position: 'relative' }}>
     <img
-      src="/hero2.jpg"
+      src="/public/dextar-vision-IB7loQ5s334-unsplash.jpg"
       alt="Car driving"
       style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 50%', borderRadius: '0 0 20px 20px', display: 'block' }}
     />
