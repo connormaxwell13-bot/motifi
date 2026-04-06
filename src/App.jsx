@@ -157,7 +157,7 @@ function Home({ onStart, onCompare }) {
       </nav>
 
     {/* Hero */}
-<div style={{ backgroundColor: '#0F1D35', paddingTop: '68px', overflow: 'hidden' }}>
+<div style={{ backgroundColor: '#0F1D35', paddingTop: '68px' }}>
 
   {/* Padded content */}
   <div style={{ padding: '32px 5% 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
