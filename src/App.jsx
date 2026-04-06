@@ -158,7 +158,7 @@ function Home({ onStart, onCompare }) {
 
     {/* Hero */}
 <div style={{ backgroundColor: '#0F1D35', paddingTop: '68px' }}>
-  <div style={{ padding: '32px 6% 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+  <div style={{ padding: '32px 5% 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
 
     {/* Badge */}
     <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '11px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '20px' }}>
@@ -202,7 +202,7 @@ function Home({ onStart, onCompare }) {
       </div>
 
       {/* Car image — underlays the card, rounded bottom corners */}
-      <div style={{ marginTop: '-60px', height: '520px', position: 'relative', marginLeft: 'calc(-6% - 0px)', marginRight: 'calc(-6% - 0px)', width: '100vw', position: 'relative', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw' }}>
+      <div style={{ marginTop: '-60px', height: '520px', position: 'relative', marginLeft: '-5%', marginRight: '-5%' }}>
         <img
           src="/hero2.jpg"
           alt="Car driving"
