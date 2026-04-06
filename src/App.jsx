@@ -149,7 +149,7 @@ function Home({ onStart, onCompare }) {
 
       {/* Nav */}
       <nav style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, padding: '0 5%', height: '68px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
+        <div style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '-0.02em', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button style={{ backgroundColor: 'transparent', color: '#F5F7FA', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: '8px', padding: '9px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '500', fontSize: '14px', cursor: 'pointer' }}>How it works</button>
           <button onClick={onStart} style={{ backgroundColor: '#00C896', color: '#0F1D35', border: 'none', borderRadius: '8px', padding: '9px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>Get started</button>
