@@ -158,7 +158,7 @@ function Home({ onStart, onCompare }) {
 
     {/* Hero */}
 <div style={{ backgroundColor: '#0F1D35', paddingTop: '68px' }}>
-  <div style={{ padding: '32px 4% 0' }}>
+  <div style={{ padding: '32px 6% 0' }}>
 
     {/* Badge */}
     <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '11px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '20px' }}>
