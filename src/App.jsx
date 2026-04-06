@@ -157,64 +157,61 @@ function Home({ onStart, onCompare }) {
       </nav>
 
     {/* Hero */}
-<div style={{ backgroundColor: '#0F1D35', paddingTop: '68px', position: 'relative' }}>
-  <div style={{ padding: '32px 5% 0', position: 'relative' }}>
+<div style={{ backgroundColor: '#0F1D35', paddingTop: '68px' }}>
+  <div style={{ padding: '32px 4% 0' }}>
 
-    {/* Badge + headline + subtext */}
-    <div style={{ marginBottom: '24px' }}>
-      <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '11px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '20px' }}>
-        FREE · NO SIGN-UP REQUIRED
-      </div>
-      <h1 style={{ fontSize: 'clamp(32px, 5vw, 54px)', fontWeight: '900', lineHeight: '1.05', letterSpacing: '-0.04em', color: '#F5F7FA', marginBottom: '16px', maxWidth: '640px' }}>
-        The smarter way to find your <span style={{ color: '#00C896' }}>next car.</span>
-      </h1>
-      <p style={{ fontSize: '16px', color: '#A8B8CC', lineHeight: '1.7', maxWidth: '520px' }}>
-        Answer a few questions. Get three personalised matches — with the true cost of ownership made clear.
-      </p>
+    {/* Badge */}
+    <div style={{ display: 'inline-block', backgroundColor: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.3)', borderRadius: '20px', padding: '4px 14px', fontSize: '11px', fontWeight: '600', color: '#00C896', letterSpacing: '0.06em', marginBottom: '20px' }}>
+      FREE · NO SIGN-UP REQUIRED
     </div>
 
-    {/* Large white CTA card — overlaps the image */}
-    <div style={{ backgroundColor: '#FFFFFF', borderRadius: '24px', padding: '32px', maxWidth: '680px', position: 'relative', zIndex: 3, boxShadow: '0 8px 48px rgba(0,0,0,0.3)' }}>
+    {/* Headline */}
+    <h1 style={{ fontSize: 'clamp(40px, 6vw, 72px)', fontWeight: '900', lineHeight: '1.03', letterSpacing: '-0.04em', color: '#F5F7FA', marginBottom: '16px', maxWidth: '700px' }}>
+      The smarter way to find your <span style={{ color: '#00C896' }}>next car.</span>
+    </h1>
+    <p style={{ fontSize: '17px', color: '#A8B8CC', lineHeight: '1.7', maxWidth: '520px', marginBottom: '28px' }}>
+      Answer a few questions. Get three personalised matches — with the true cost of ownership made clear.
+    </p>
 
-      {/* Tab toggle */}
-      <div style={{ display: 'flex', backgroundColor: '#F0F2F5', borderRadius: '12px', padding: '5px', marginBottom: '20px' }}>
-        {[['find', 'Find my car'], ['compare', 'Compare cars']].map(([key, label]) => (
-          <button key={key} onClick={() => setActiveTab(key)} style={{ flex: 1, padding: '13px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', fontWeight: '700', borderRadius: '9px', border: 'none', cursor: 'pointer', backgroundColor: activeTab === key ? '#0F1D35' : 'transparent', color: activeTab === key ? '#F5F7FA' : '#8A9AB0', transition: 'all 0.15s ease' }}>
-            {label}
-          </button>
-        ))}
+    {/* Hero image + CTA card stacked */}
+    <div style={{ position: 'relative', borderRadius: '0 0 20px 20px', overflow: 'hidden' }}>
+
+      {/* CTA Card — sits on top, 92% wide */}
+      <div style={{ width: '92%', backgroundColor: '#FFFFFF', borderRadius: '20px', padding: '28px', position: 'relative', zIndex: 3, margin: '0 auto' }}>
+        <div style={{ display: 'flex', backgroundColor: '#F0F2F5', borderRadius: '12px', padding: '5px', marginBottom: '18px' }}>
+          {[['find', 'Find my car'], ['compare', 'Compare cars']].map(([key, label]) => (
+            <button key={key} onClick={() => setActiveTab(key)} style={{ flex: 1, padding: '13px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', fontWeight: '700', borderRadius: '9px', border: 'none', cursor: 'pointer', backgroundColor: activeTab === key ? '#0F1D35' : 'transparent', color: activeTab === key ? '#F5F7FA' : '#8A9AB0', transition: 'all 0.15s ease' }}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <button onClick={activeTab === 'find' ? onStart : onCompare} style={{ width: '100%', backgroundColor: '#FFFFFF', color: '#0F1D35', border: '1.5px solid #D0D5DD', borderRadius: '12px', padding: '18px', fontFamily: 'Satoshi, sans-serif', fontWeight: '600', fontSize: '16px', cursor: 'pointer', marginBottom: '12px' }}>
+          {activeTab === 'find' ? 'Find my perfect car →' : 'Compare cars now →'}
+        </button>
+        <p style={{ fontSize: '12px', color: '#8A9AB0', textAlign: 'center', marginBottom: '20px' }}>
+          {activeTab === 'find' ? 'Already know what you want? Switch to Compare cars above.' : 'Not sure? Switch to Find my car above.'}
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #E8ECF0', paddingTop: '18px', gap: '8px' }}>
+          {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['3 mins', 'To your results'], ['Free', 'Always']].map(([val, label]) => (
+            <div key={label} style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '22px', fontWeight: '900', color: '#0F1D35', letterSpacing: '-0.02em' }}>{val}</div>
+              <div style={{ fontSize: '11px', color: '#8A9AB0', marginTop: '3px' }}>{label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Outlined CTA button */}
-      <button onClick={activeTab === 'find' ? onStart : onCompare} style={{ width: '100%', backgroundColor: '#FFFFFF', color: '#0F1D35', border: '1.5px solid #D0D5DD', borderRadius: '12px', padding: '18px', fontFamily: 'Satoshi, sans-serif', fontWeight: '600', fontSize: '16px', cursor: 'pointer', marginBottom: '12px', textAlign: 'center' }}>
-        {activeTab === 'find' ? 'Find my perfect car →' : 'Compare cars now →'}
-      </button>
-
-      <p style={{ fontSize: '12px', color: '#8A9AB0', textAlign: 'center', marginBottom: '24px' }}>
-        {activeTab === 'find' ? 'Already know what you want? Switch to Compare cars above.' : 'Not sure? Switch to Find my car above.'}
-      </p>
-
-      {/* Stats inside card */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #E8ECF0', paddingTop: '20px', gap: '8px' }}>
-        {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['3 mins', 'To your results'], ['Free', 'Always']].map(([val, label]) => (
-          <div key={label} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '22px', fontWeight: '900', color: '#0F1D35', letterSpacing: '-0.02em' }}>{val}</div>
-            <div style={{ fontSize: '11px', color: '#8A9AB0', marginTop: '3px' }}>{label}</div>
-          </div>
-        ))}
+      {/* Car image — underlays the card, rounded bottom corners */}
+      <div style={{ marginTop: '-60px', height: '420px', position: 'relative' }}>
+        <img
+          src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=80"
+          alt="Car driving"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 50%', borderRadius: '0 0 20px 20px', display: 'block' }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,29,53,0.6) 0%, rgba(15,29,53,0) 60%)', borderRadius: '0 0 20px 20px' }} />
       </div>
-    </div>
 
-    {/* Car image — sits behind/below the card */}
-    <div style={{ position: 'relative', height: '420px', marginTop: '-180px', borderRadius: '0 0 0 0', overflow: 'hidden' }}>
-      <img
-        src="/hero.jpg"
-        alt="Car driving"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 45%' }}
-      />
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(15,29,53,0.85) 0%, rgba(15,29,53,0.2) 50%, rgba(15,29,53,0.0) 100%)' }} />
     </div>
-
   </div>
 </div>
 
