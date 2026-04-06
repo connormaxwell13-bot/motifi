@@ -202,7 +202,7 @@ function Home({ onStart, onCompare }) {
       </div>
 
       {/* Car image — underlays the card, rounded bottom corners */}
-      <div style={{ marginTop: '-60px', height: '420px', position: 'relative' }}>
+      <div style={{ marginTop: '-60px', height: '420px', position: 'relative', marginLeft: '-6%', marginRight: '-6%' }}>
         <img
           src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&q=80"
           alt="Car driving"
