@@ -310,11 +310,6 @@ function Home({ onStart, onCompare }) {
               ))}
             </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '24px', flexWrap: 'wrap', gap: '12px' }}>
-            <div style={{ fontSize: '20px', fontWeight: '900', color: '#F5F7FA' }}>Mo<span style={{ color: '#00C896' }}>ti</span>fi</div>
-            <div style={{ fontSize: '12px', color: '#4A6080' }}>© 2026 Motifi · The smarter way to find your next car</div>
-          </div>
-        </div>
       </div>
 
     </div>
