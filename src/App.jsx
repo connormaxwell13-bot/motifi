@@ -157,7 +157,7 @@ function Home({ onStart, onCompare }) {
       </nav>
 
     {/* Hero */}
-<div style={{ backgroundColor: '#0F1D35', paddingTop: '68px' }}>
+<div style={{ background: 'linear-gradient(to bottom, #0F1D35 70%, #F5F7FA 100%)', paddingTop: '68px' }}>
 
   {/* Padded content */}
   <div style={{ padding: '32px 5% 0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
