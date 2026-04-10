@@ -188,7 +188,7 @@ function Home({ onStart, onCompare }) {
         {activeTab === 'find' ? 'Already know what you want? Switch to Compare cars above.' : 'Not sure? Switch to Find my car above.'}
       </p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid #E8ECF0', paddingTop: '18px', gap: '8px' }}>
-        {[['105+', 'Cars rated'], ['6', 'Scoring dimensions'], ['3 mins', 'To your results'], ['Free', 'Always']].map(([val, label]) => (
+        {[['170+', 'Cars rated'], ['6', 'Scoring dimensions'], ['3 mins', 'To your results'], ['Free', 'Always']].map(([val, label]) => (
           <div key={label} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '22px', fontWeight: '900', color: '#0F1D35', letterSpacing: '-0.02em' }}>{val}</div>
             <div style={{ fontSize: '11px', color: '#8A9AB0', marginTop: '3px' }}>{label}</div>
