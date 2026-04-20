@@ -4,6 +4,7 @@ import { questions } from './questions.jsx'
 import { applyHardFilters } from './scoring/filters.jsx'
 import { scoreAllCars } from './scoring/engine.jsx'
 import { getYearOneCost } from './scoring/costs.jsx'
+import ChatInterface from './ChatInterface'
 
 const C = {
   midnight: '#0F1D35',
