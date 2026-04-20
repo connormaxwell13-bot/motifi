@@ -5,6 +5,40 @@ import { applyHardFilters } from './scoring/filters.jsx'
 import { scoreAllCars } from './scoring/engine.jsx'
 import { getYearOneCost } from './scoring/costs.jsx'
 import ChatInterface from './ChatInterface'
+function RadarChart({ scores }) {
+  const cx = 110, cy = 110, maxR = 85
+  const axes = [
+    { label: 'Budget', key: 'budgetScore', angle: 0 },
+    { label: 'Driving', key: 'drivingScore', angle: 60 },
+    { label: 'Running', key: 'runningScore', angle: 120 },
+    { label: 'Safety', key: 'safetyScore', angle: 180 },
+    { label: 'Deprec.', key: 'depreciationScore', angle: 240 },
+    { label: 'Ownership', key: 'ownershipScore', angle: 300 },
+  ]
+  function pt(angle, r) {
+    const rad = (angle - 90) * Math.PI / 180
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)]
+  }
+  const dataPoints = axes.map(a => pt(a.angle, (scores[a.key] / 10) * maxR))
+  const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ') + ' Z'
+  return (
+    <svg viewBox="0 0 220 220" width="180" height="180" style={{ display: 'block', margin: '0 auto 16px' }}>
+      {[0.25,0.5,0.75,1].map(lv => {
+        const pts = axes.map(a => pt(a.angle, maxR * lv))
+        return <path key={lv} d={pts.map((p,i) => `${i===0?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')+' Z'} fill="none" stroke="rgba(168,184,204,0.15)" strokeWidth="1"/>
+      })}
+      {axes.map(a => { const [x,y]=pt(a.angle,maxR); return <line key={a.key} x1={cx} y1={cy} x2={x} y2={y} stroke="rgba(168,184,204,0.15)" strokeWidth="1"/> })}
+      <path d={dataPath} fill="rgba(0,200,150,0.18)" stroke="#00C896" strokeWidth="2" strokeLinejoin="round"/>
+      {dataPoints.map(([x,y],i) => <circle key={i} cx={x} cy={y} r="3.5" fill="#00C896"/>)}
+      {axes.map(a => { const [x,y]=pt(a.angle,maxR+18); return (
+        <g key={a.key}>
+          <text x={x} y={y-4} textAnchor="middle" fontSize="9" fill="rgba(168,184,204,0.7)" fontFamily="Satoshi,sans-serif" fontWeight="600">{a.label.toUpperCase()}</text>
+          <text x={x} y={y+8} textAnchor="middle" fontSize="11" fill="#00C896" fontFamily="Satoshi,sans-serif" fontWeight="700">{scores[a.key]?.toFixed(1)}</text>
+        </g>
+      )})}
+    </svg>
+  )
+}
 
 const C = {
   midnight: '#0F1D35',
