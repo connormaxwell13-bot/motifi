@@ -8,9 +8,9 @@ export default async function handler(req, res) {
 
   const prompt = `You are Motifi, a UK used car advisor. Write 2-3 sentences explaining why this car suits this user. Be specific and direct. Do NOT start with the car's name or make. Start with what makes it right for this person.
 
-User: budget £${answers.budgetMin}-£${answers.budgetMax}, drives ${answers.driving}, needs ${answers.space} space, mileage ${answers.mileage}, reliability preference ${answers.reliability}.
+User: budget £${answers.budgetMin}–£${answers.budgetMax}, drives ${answers.drivingContext}, ${answers.annualMileage} miles/year, priority is ${answers.priority}, needs ${answers.bootSpace} boot space.
 
-Car: ${car.make} ${car.model}, ${car.segment}, ${car.fuelType}, MPG ${car.mpgBand}, boot ${car.bootSize}, insurance ${car.insuranceBand}, reliability tier ${car.reliabilityTier}, price from £${car.price}.`
+Car: ${car.make} ${car.model} ${car.generationName}, ${car.bodyType}, ${car.fuelType}, MPG ${car.mpgBand}, boot ${car.bootBand}, insurance ${car.insuranceBand}, reliability ${car.reliabilityBand}, ownership stress ${car.ownershipStress}, NCAP ${car.ncapStars} stars, price from £${car.priceLow}.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -21,7 +21,7 @@ Car: ${car.make} ${car.model}, ${car.segment}, ${car.fuelType}, MPG ${car.mpgBan
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 200,
         messages: [{ role: 'user', content: prompt }],
       }),
