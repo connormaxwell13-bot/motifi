@@ -582,13 +582,13 @@ function CarPage({ car, answers, onBack }) {
           <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>KEY SPECS</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
             {[
-              { label: 'Price from', value: car.price ? `£${Number(car.price).toLocaleString()}` : 'N/A' },
-              { label: 'MPG', value: car.mpgBand },
-              { label: 'Boot size', value: car.bootSize },
-              { label: 'Insurance risk', value: car.insuranceBand },
-              { label: 'Reliability', value: `Tier ${car.reliabilityTier}` },
-              { label: 'Safety', value: `Tier ${car.safetyTier}` },
-              { label: 'ULEZ', value: car.ulezCompliance },
+              { label: 'Price from', value: car.priceLow ? `£${Number(car.priceLow).toLocaleString()}` : 'N/A' },
+{ label: 'MPG', value: car.mpgBand },
+{ label: 'Boot size', value: car.bootBand },
+{ label: 'Insurance risk', value: car.insuranceBand },
+{ label: 'Reliability', value: car.reliabilityBand },
+{ label: 'Safety', value: `${car.ncapStars}★ NCAP (${car.ncapAdultPct}%)` },
+{ label: 'ULEZ', value: car.ulezCompliant },,
               { label: 'Ownership stress', value: car.ownershipStress },
             ].map(({ label, value }) => (
               <div key={label} style={{ backgroundColor: C.offwhite, borderRadius: '8px', padding: '12px' }}>
