@@ -79,7 +79,7 @@ function handleChatResults({ results, answers }) {
   if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
   if (screen === 'car') return <CarPage car={selectedCar} answers={answers} onBack={() => setScreen('results')} />
 if (screen === 'compare') return <CompareFlow onBack={() => setScreen('home')} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
-if (screen === 'questions') return <ChatInterface onResults={handleChatResults} />
+  if (screen === 'questions') return <ChatInterface onResults={handleChatResults} />
 
   return (
     <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
