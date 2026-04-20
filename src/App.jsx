@@ -472,7 +472,7 @@ function Results({ results, answers, onBack, onSelectCar }) {
                     <div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px', marginBottom: '16px' }}>
                         {[
-                          { label: 'Car price', value: `£${Number(car.price).toLocaleString()}` },
+                          { label: 'Car price', value: `£${Number(car.priceLow).toLocaleString()}` },
                           { label: 'Road tax', value: costs.roadTax === 0 ? 'Free (EV)' : `£${costs.roadTax}/yr` },
                           { label: 'Insurance est.', value: `£${costs.insuranceMin}–£${costs.insuranceMax}/yr` },
                         ].map(({ label, value }) => (
