@@ -593,7 +593,7 @@ function CarPage({ car, answers, onBack }) {
   const ebayUrl = `https://www.ebay.co.uk/sch/Cars/9801/i.html?_nkw=${encodeURIComponent(car.make + ' ' + car.model)}`
   const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
   const financeUrl = `https://www.zuto.com/apply/`
-  const generationYear = car.generation?.split(/[-–]/)[0]?.trim() || '2020'
+  const generationYear = car.generationYears?.split(/[—-]/)[0]?.trim() || '2020'split(/[-–]/)[0]?.trim() || '2020'
   const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
 
   return (
@@ -686,7 +686,7 @@ function CarPage({ car, answers, onBack }) {
         </div>
         <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
           <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>FIND THIS CAR NEAR YOU</div>
-          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Search live listings within {answers.radius || '25 miles'} of {answers.postcode || 'your location'}.</p>
+          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Search live listings within {answers.searchRadius || 50} miles of {answers.postcode || 'your location'}.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {[
               { label: 'Search on AutoTrader', url: autotraderUrl, primary: true },
@@ -739,7 +739,7 @@ function CompareFlow({ onBack, onSelectCar }) {
   }).sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
 
   function toggleCar(car) {
-    const key = `${car.make} ${car.model} ${car.generation}`
+    const key = `${car.make} ${car.model} ${car.generationName}`
     const exists = selectedCars.find(c => `${c.make} ${c.model} ${c.generation}` === key)
     if (exists) {
       setSelectedCars(prev => prev.filter(c => `${c.make} ${c.model} ${c.generation}` !== key))
@@ -800,9 +800,9 @@ function CompareFlow({ onBack, onSelectCar }) {
             { label: 'MPG', key: 'mpgBand' },
             { label: 'Boot size', key: 'bootBand' },,
             { label: 'Insurance risk', key: 'insuranceBand' },
-            { label: 'Reliability', key: null, fn: car => `Tier ${car.reliabilityTier}` },
-            { label: 'Safety', key: null, fn: car => `Tier ${car.safetyTier}` },
-            { label: 'ULEZ', key: 'ulezCompliance' },
+            { label: 'Reliability', fn: car => car.reliabilityBand },,
+            { label: 'Safety', fn: car => `${car.ncapStars}★ NCAP` },,
+            { label: 'ULEZ', key: 'ulezCompliant' },
             { label: 'Ownership stress', key: 'ownershipStress' },
           ].map(({ label, key, fn }, rowI) => (
             <div key={label} style={{ display: 'grid', gridTemplateColumns: `180px repeat(${results.length}, 1fr)`, borderTop: '1px solid #E8ECF0', backgroundColor: rowI % 2 === 0 ? '#FAFBFC' : C.white }}>
@@ -829,7 +829,7 @@ function CompareFlow({ onBack, onSelectCar }) {
             { label: 'Monthly total', fn: (car) => { const c = getYearOneCost(car, answers); return `~£${c.totalMonthlyMin}–£${c.totalMonthlyMax}/mo` }, highlight: true },
             { label: '48-month total', fn: (car) => { const c = getYearOneCost(car, answers); return `~£${Number(c.deposit + (c.financeMonthly * 48) + (c.insuranceMonthly * 48) + (c.roadTax * 4)).toLocaleString()}` }, highlight: true },
           ] : [
-            { label: 'Car price', fn: (car) => `£${Number(car.price).toLocaleString()}` },
+            { label: 'Car price', fn: (car) => `£${Number(car.priceLow).toLocaleString()}`` },
             { label: 'Road tax/yr', fn: (car) => getYearOneCost(car, answers).roadTax === 0 ? 'Free (EV)' : `£${getYearOneCost(car, answers).roadTax}` },
             { label: 'Insurance/yr', fn: (car) => { const c = getYearOneCost(car, answers); return `£${c.insuranceMin}–£${c.insuranceMax}` } },
             { label: 'Year 1 total', fn: (car) => { const c = getYearOneCost(car, answers); return `£${c.yearOneMin.toLocaleString()}–£${c.yearOneMax.toLocaleString()}` }, highlight: true },
@@ -903,8 +903,8 @@ function CompareFlow({ onBack, onSelectCar }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', marginBottom: '24px' }}>
             {filteredCars.map(car => {
-              const key = `${car.make} ${car.model} ${car.generation}`
-              const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generation}` === key)
+              const key = `${car.make} ${car.model} ${car.generationName}``
+              const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}`` === key)
               const disabled = !selected && selectedCars.length >= 3
               return (
                 <button key={key} onClick={() => !disabled && toggleCar(car)} style={{ backgroundColor: selected ? C.teal : C.navy, color: selected ? C.midnight : disabled ? C.dim : C.offwhite, border: `1.5px solid ${selected ? C.teal : '#2A4060'}`, borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: selected ? '700' : '400', cursor: disabled ? 'not-allowed' : 'pointer', textAlign: 'left', opacity: disabled ? 0.5 : 1 }}>
