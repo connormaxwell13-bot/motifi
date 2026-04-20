@@ -511,12 +511,12 @@ function Results({ results, answers, onBack, onSelectCar }) {
                 <div style={{ padding: '0 28px 28px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: car.bodySpaceConflict ? '16px' : '0' }}>
                     {[
-                      { label: 'Budget fit', score: car.scores.budgetFit },
-                      { label: 'Driving fit', score: car.scores.drivingFit },
-                      { label: 'Space fit', score: car.scores.spaceFit },
-                      { label: 'Running cost', score: car.scores.runningFit },
-                      { label: 'Ownership ease', score: car.scores.ownershipFit },
-                      { label: 'Safety', score: car.scores.safetyFit },
+                      { label: 'Budget fit', score: car.scores.budgetScore },
+{ label: 'Driving fit', score: car.scores.drivingScore },
+{ label: 'Depreciation', score: car.scores.depreciationScore },
+{ label: 'Running cost', score: car.scores.runningScore },
+{ label: 'Ownership ease', score: car.scores.ownershipScore },
+{ label: 'Safety', score: car.scores.safetyScore },
                     ].map(({ label, score }) => (
                       <div key={label} style={{ backgroundColor: C.offwhite, borderRadius: '8px', padding: '10px' }}>
                         <div style={{ fontSize: '10px', color: '#8A9AB0', marginBottom: '4px' }}>{label}</div>
