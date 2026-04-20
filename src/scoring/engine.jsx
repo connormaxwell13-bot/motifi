@@ -1,134 +1,202 @@
+// engine.jsx
+// Scoring engine v2.0
+// Scores cars across six weighted dimensions. Does NOT filter — call
+// applyHardFilters() from filters.jsx first, then pass the result here.
+// App.jsx already does this in getTop3(). ChatInterface does it too.
+
 function clamp(val, min = 0, max = 10) {
   return Math.min(max, Math.max(min, val))
 }
 
-function scoreBudgetFit(car, answers) {
-  const budget = parseFloat(answers.budgetMax) || 0
-  const price = parseFloat(car.price) || 0
-  const ratio = price / budget
+// ─── 1. BUDGET FIT (base weight 25%) ─────────────────────────────────────────
+// Scores what proportion of the car's price range the user can access.
+// priceLow = AutoTrader 10th percentile. priceHigh = 90th percentile.
 
-  let priceScore = 0
-  if (ratio <= 0.70) priceScore = 10
-  else if (ratio <= 0.80) priceScore = 9
-  else if (ratio <= 0.90) priceScore = 8
-  else if (ratio <= 1.00) priceScore = 7
-  else if (ratio <= 1.10) priceScore = 4
-  else priceScore = 0
+function scoreBudget(car, answers) {
+  const priceLow  = parseFloat(car.priceLow)  || 0
+  const priceHigh = parseFloat(car.priceHigh) || priceLow
+  const budgetMax = parseFloat(answers.budgetMax) || 0
+  const range     = Math.max(priceHigh - priceLow, 1)
+  const coverage  = (budgetMax - priceLow) / range
 
-  const depScores = { Low: 10, Medium: 6, High: 2 }
-  const depScore = depScores[car.depreciationBand] || 5
-  return clamp((0.70 * priceScore) + (0.30 * depScore))
+  if (coverage >= 1.00) return 10  // Can afford the full range
+  if (coverage >= 0.75) return 9
+  if (coverage >= 0.50) return 7
+  if (coverage >= 0.25) return 5
+  return 3                          // Barely above entry point
 }
 
-function scoreDrivingFit(car, answers) {
-  const seg = car.segment || ''
-  const mpgAdjust = { Excellent: 1, 'Very Good': 1, Good: 0, Average: -1, Poor: -2 }
-  const mpgAdj = mpgAdjust[car.mpgBand] || 0
-  let base = 5
+// ─── 2. DRIVING CONTEXT FIT (base weight 15%) ────────────────────────────────
+// Uses parkingSize, mpgBand, bodyType and safety depending on driving context.
 
-  if (answers.driving === 'Mostly city') {
-    const urbanBase = { High: 10, Medium: 6, Low: 2 }
-    base = urbanBase[car.urbanSuitability] || 5
-    const segAdj = { Supermini: 1, 'Family Hatchback': 1, 'Compact SUV': 0, 'Large SUV': -2, Executive: -2, Van: -3 }
-    base += (segAdj[seg] || 0)
-  } else if (answers.driving === 'Mostly motorway') {
-    const segBase = { Estate: 9, 'Family Saloon': 9, Executive: 9, 'Large SUV': 8, 'Family Hatchback': 7, 'Compact SUV': 7, Supermini: 4, MPV: 6, Van: 5 }
-    base = segBase[seg] || 6
-  } else if (answers.driving === 'Mostly rural') {
-    const segBase = { 'Large SUV': 9, 'Compact SUV': 8, Estate: 8, 'Family Hatchback': 7, 'Family Saloon': 7, Supermini: 6, Executive: 6, Van: 7, MPV: 7 }
-    base = segBase[seg] || 6
-  } else {
-    const segBase = { 'Family Hatchback': 9, 'Compact SUV': 8, Estate: 8, 'Family Saloon': 8, Supermini: 7, 'Large SUV': 6, Executive: 6, MPV: 6, Van: 4 }
-    base = segBase[seg] || 6
-    const urbanAdj = { High: 1, Medium: 0, Low: -1 }
-    base += (urbanAdj[car.urbanSuitability] || 0)
+function scoreDrivingContext(car, answers) {
+  const ctx = answers.drivingContext
+
+  if (ctx === 'Mostly city') {
+    const parkScores = { Compact: 10, Standard: 6, Large: 2 }
+    return clamp(parkScores[car.parkingSize] || 5)
   }
-  return clamp(base + mpgAdj)
+
+  if (ctx === 'Mostly motorway') {
+    const mpgScores = { Excellent: 10, 'Very Good': 8, Good: 6, Average: 4, Poor: 2 }
+    const mpgScore  = mpgScores[car.mpgBand] || 5
+    const safety    = scoreNcap(car)
+    return clamp((0.70 * mpgScore) + (0.30 * safety))
+  }
+
+  if (ctx === 'Mostly rural') {
+    const bodyScores = {
+      SUV: 10, Crossover: 9, Estate: 8,
+      Saloon: 6, Hatchback: 6, MPV: 5,
+      Van: 4, Coupe: 3,
+    }
+    return clamp(bodyScores[car.bodyType] || 5)
+  }
+
+  // Mixed — balanced parkingSize + mpgBand
+  const parkScores = { Compact: 10, Standard: 8, Large: 5 }
+  const mpgScores  = { Excellent: 10, 'Very Good': 8, Good: 6, Average: 4, Poor: 2 }
+  return clamp((0.50 * (parkScores[car.parkingSize] || 6)) + (0.50 * (mpgScores[car.mpgBand] || 5)))
 }
 
-function scoreSpaceFit(car, answers) {
-  const spaceScores = {
-    'Just me / couple': { Small: 10, Medium: 9, Large: 7, 'Very Large': 5 },
-    'Small family': { Small: 3, Medium: 7, Large: 9, 'Very Large': 10 },
-    'Family + luggage': { Small: 1, Medium: 4, Large: 8, 'Very Large': 10 },
-    'As much as possible': { Small: 0, Medium: 3, Large: 8, 'Very Large': 10 },
-  }
-  let score = (spaceScores[answers.space] || spaceScores['Just me / couple'])[car.bootSize] || 5
-  const seg = car.segment || ''
-  if (['Family + luggage', 'As much as possible'].includes(answers.space)) {
-    if (['Estate', 'MPV', 'Large SUV'].includes(seg)) score += 1
-    if (['Sports / Performance'].includes(seg)) score -= 2
-  }
-  return clamp(score)
-}
+// ─── 3. RUNNING COST FIT (base weight 20%) ───────────────────────────────────
+// MPG and insurance band weighted by annual mileage.
+// High mileage = MPG matters more. Low mileage = insurance dominates.
 
 function scoreRunningCost(car, answers) {
   const mpgScores = { Excellent: 10, 'Very Good': 8, Good: 6, Average: 4, Poor: 2 }
-  const mpgScore = mpgScores[car.mpgBand] || 5
-  const insScores = { Low: 10, Medium: 6, High: 3, 'Very High': 1 }
-  const insScore = insScores[car.insuranceBand] || 5
+  const insScores = { Low: 10, Medium: 7, High: 4, 'Very High': 1 }
+  const mpgScore  = mpgScores[car.mpgBand]      || 5
+  const insScore  = insScores[car.insuranceBand] || 5
 
-  let mpgW = 0.5, insW = 0.5
-  if (['Under 3,000', '3,000-5,000'].includes(answers.mileage)) { mpgW = 0.40; insW = 0.60 }
-  else if (answers.mileage === '5,000-8,000') { mpgW = 0.50; insW = 0.50 }
-  else if (answers.mileage === '8,000-15,000') { mpgW = 0.60; insW = 0.40 }
-  else if (answers.mileage === '15,000+') { mpgW = 0.70; insW = 0.30 }
-  return clamp((mpgW * mpgScore) + (insW * insScore))
+  const weights = {
+    'Under 3,000': { mpg: 0.20, ins: 0.80 },
+    '3,000-5,000': { mpg: 0.35, ins: 0.65 },
+    '5,000-8,000': { mpg: 0.55, ins: 0.45 },
+    '8,000+':      { mpg: 0.75, ins: 0.25 },
+  }
+  const w = weights[answers.annualMileage] || { mpg: 0.50, ins: 0.50 }
+  return clamp((w.mpg * mpgScore) + (w.ins * insScore))
 }
+
+// ─── 4. OWNERSHIP EASE (base weight 15%) ─────────────────────────────────────
+// Reliability band + ownership stress. Reliability weight increases at high mileage.
 
 function scoreOwnershipEase(car, answers) {
-  const relScores = { '8-10': 10, '6-8': 7, '4-6': 4, '1-4': 1 }
-  const relScore = relScores[car.reliabilityScore] || 5
-  const stressScores = { Low: 10, Medium: 6, High: 2 }
-  const stressScore = stressScores[car.ownershipStress] || 5
+  const relScores    = { Excellent: 10, Good: 7, Fair: 4, Poor: 1 }
+  const stressScores = { Low: 10, Medium: 7, High: 4, 'Very High': 1 }
+  const relScore     = relScores[car.reliabilityBand]    || 5
+  const stressScore  = stressScores[car.ownershipStress] || 5
 
-  if (answers.ulez === 'Yes') {
-    const ulezScores = { High: 10, Medium: 5, Low: 0 }
-    const ulezScore = ulezScores[car.ulezCompliance] || 5
-    return clamp((0.50 * relScore) + (0.30 * stressScore) + (0.20 * ulezScore))
+  let relW = 0.60, stressW = 0.40
+  if (answers.annualMileage === '8,000+')           { relW = 0.75; stressW = 0.25 }
+  else if (answers.annualMileage === '5,000-8,000') { relW = 0.65; stressW = 0.35 }
+
+  return clamp((relW * relScore) + (stressW * stressScore))
+}
+
+// ─── 5. SAFETY (base weight 15%, 20% for motorway drivers) ───────────────────
+// Euro NCAP stars (60%) + adult occupant percentage (40%).
+
+function scoreNcap(car) {
+  const starScores = { 5: 10, 4: 8, 3: 5, 2: 3, 1: 1 }
+  const starScore  = starScores[parseInt(car.ncapStars)] ?? 5
+
+  const adultPct = parseFloat(car.ncapAdultPct) || 0
+  let adultScore = 5
+  if (adultPct >= 90)      adultScore = 10
+  else if (adultPct >= 80) adultScore = 8
+  else if (adultPct >= 70) adultScore = 6
+  else if (adultPct >= 60) adultScore = 4
+  else                     adultScore = 2
+
+  return clamp((0.60 * starScore) + (0.40 * adultScore))
+}
+
+// ─── 6. DEPRECIATION (base weight 10%) ───────────────────────────────────────
+// How well the car holds value. Low base weight — most buyers overlook this.
+// The priority question boosts it for users who care.
+
+function scoreDepreciation(car) {
+  const depScores = { Low: 10, Medium: 6, High: 2 }
+  return clamp(depScores[car.depreciationBand] || 5)
+}
+
+// ─── DYNAMIC WEIGHTS ─────────────────────────────────────────────────────────
+// Base weights sum to 1.00. All adjustments are zero-sum.
+
+function getWeights(answers) {
+  const w = {
+    budget:       0.25,
+    driving:      0.15,
+    running:      0.20,  // raised from v1: fuel + insurance are most visible costs
+    ownership:    0.15,
+    safety:       0.15,
+    depreciation: 0.10,  // lowered from v1: least front-of-mind at purchase
   }
-  if (answers.reliability === 'Maximum reliability') return clamp((0.70 * relScore) + (0.30 * stressScore))
-  if (answers.reliability === 'Balanced') return clamp((0.60 * relScore) + (0.40 * stressScore))
-  return clamp((0.50 * relScore) + (0.50 * stressScore))
+
+  // Priority: +10% to chosen dimension, -5% each from two others
+  if (answers.priority === 'MPG') {
+    w.running      += 0.10
+    w.depreciation -= 0.05
+    w.ownership    -= 0.05
+  } else if (answers.priority === 'Reliability') {
+    w.ownership    += 0.10
+    w.running      -= 0.05
+    w.depreciation -= 0.05
+  } else if (answers.priority === 'Depreciation') {
+    w.depreciation += 0.10
+    w.running      -= 0.05
+    w.ownership    -= 0.05
+  }
+
+  // Motorway driving: safety matters more at speed
+  if (answers.drivingContext === 'Mostly motorway') {
+    w.safety  += 0.05
+    w.driving -= 0.05
+  }
+
+  return w
 }
 
-function scoreSafety(car) {
-  const safetyScores = { '8-10': 10, '6-8': 7, '4-6': 4, '1-4': 1 }
-  return clamp(safetyScores[car.safetyScore] || 5)
-}
+// ─── MAIN EXPORT ─────────────────────────────────────────────────────────────
+// Accepts a pre-filtered array of cars (run applyHardFilters first).
+// Returns scored array sorted highest first.
 
 export function scoreAllCars(cars, answers) {
-  let rcW = 0.15, drivW = 0.20
-  if (answers.runningCosts === 'Not a concern') { rcW = 0.10; drivW = 0.25 }
-  else if (answers.runningCosts === 'Somewhat important') { rcW = 0.20; drivW = 0.15 }
-  else if (answers.runningCosts === 'Extremely important') { rcW = 0.25; drivW = 0.10 }
+  const weights = getWeights(answers)
 
-  return cars.map(car => {
-    const budgetFit = scoreBudgetFit(car, answers)
-    const drivingFit = scoreDrivingFit(car, answers)
-    const spaceFit = scoreSpaceFit(car, answers)
-    const runningFit = scoreRunningCost(car, answers)
-    const ownershipFit = scoreOwnershipEase(car, answers)
-    const safetyFit = scoreSafety(car)
+  return cars
+    .map(car => {
+      const budgetScore       = scoreBudget(car, answers)
+      const drivingScore      = scoreDrivingContext(car, answers)
+      const runningScore      = scoreRunningCost(car, answers)
+      const ownershipScore    = scoreOwnershipEase(car, answers)
+      const safetyScore       = scoreNcap(car)
+      const depreciationScore = scoreDepreciation(car)
 
-    const finalScore = clamp(
-      (0.25 * budgetFit) +
-      (drivW * drivingFit) +
-      (0.20 * spaceFit) +
-      (rcW * runningFit) +
-      (0.10 * ownershipFit) +
-      (0.10 * safetyFit)
-    )
+      const finalScore = clamp(
+        (weights.budget       * budgetScore)       +
+        (weights.driving      * drivingScore)      +
+        (weights.running      * runningScore)      +
+        (weights.ownership    * ownershipScore)    +
+        (weights.safety       * safetyScore)       +
+        (weights.depreciation * depreciationScore)
+      )
 
-    const bodySpaceConflict =
-      answers.bodyType !== 'No preference' &&
-      ['Hatchback', 'Saloon', 'Coupe'].includes(answers.bodyType) &&
-      ['Family + luggage', 'As much as possible'].includes(answers.space)
-
-    return {
-      ...car,
-      scores: { budgetFit, drivingFit, spaceFit, runningFit, ownershipFit, safetyFit, finalScore },
-      bodySpaceConflict,
-    }
-  })
+      return {
+        ...car,
+        scores: {
+          budgetScore,
+          drivingScore,
+          runningScore,
+          ownershipScore,
+          safetyScore,
+          depreciationScore,
+          finalScore,
+          weights,
+        },
+      }
+    })
+    .sort((a, b) => b.scores.finalScore - a.scores.finalScore)
 }
