@@ -1,8 +1,7 @@
-// ChatInterface.jsx
-// Replaces the step-by-step question form entirely.
-// Collect answers conversationally via Claude, then runs filtering and scoring.
-// Place in src/ alongside App.jsx.
-// Wire into App.jsx: when screen === 'questions', render <ChatInterface onResults={...} />
+// ChatInterface.jsx — v2
+// - Quick-reply chips for fixed-answer questions
+// - Loading transition animation before results
+// - Mobile-optimised layout and touch targets
 
 import { useState, useRef, useEffect } from 'react'
 import { applyHardFilters } from './scoring/filters'
@@ -74,6 +73,66 @@ WHEN YOU HAVE ALL ANSWERS, end your message with exactly this block:
 }
 </MOTIFI_ANSWERS>`
 
+// ─── Quick-reply chip detection ───────────────────────────────────────────────
+
+const CHIP_SETS = [
+  {
+    keywords: ['gender', 'personalise', 'personalisation'],
+    options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
+  },
+  {
+    keywords: ['pay', 'cash', 'hire purchase', 'part exchange', 'bank loan', 'planning to pay', 'finance'],
+    options: ['Cash', 'Part Exchange', 'Hire Purchase', 'Bank Loan'],
+  },
+  {
+    keywords: ['transmission', 'manual', 'automatic', 'gearbox'],
+    options: ['Manual', 'Automatic', 'No preference'],
+  },
+  {
+    keywords: ['fuel', 'petrol', 'diesel', 'hybrid', 'electric'],
+    options: ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'No preference'],
+  },
+  {
+    keywords: ['body type', 'body style', 'hatchback', 'estate', 'suv', 'saloon', 'crossover', 'mpv', 'coupe', 'van'],
+    options: ['Hatchback', 'SUV', 'Estate', 'Saloon', 'Crossover', 'No preference'],
+  },
+  {
+    keywords: ['mostly drive', 'driving', 'motorway', 'mostly city', 'mostly rural', 'mix of'],
+    options: ['Mostly city', 'Mostly motorway', 'Mostly rural', 'Mixed'],
+  },
+  {
+    keywords: ['miles', 'mileage', 'drive per year', 'drive a year', 'annually', 'how far'],
+    options: ['Under 3,000', '3,000-5,000', '5,000-8,000', '8,000+'],
+  },
+  {
+    keywords: ['boot', 'space', 'storage', 'luggage', 'how much room'],
+    options: ['Small', 'Medium', 'Large', 'No preference'],
+  },
+  {
+    keywords: ['priority', 'mpg', 'reliability', 'depreciation', 'hold its value', 'most important', 'fuel economy'],
+    options: ['MPG', 'Reliability', 'Depreciation'],
+  },
+  {
+    keywords: ['ulez', 'ultra low emission', 'emission zone', 'london'],
+    options: ['Yes', 'No'],
+  },
+  {
+    keywords: ['radius', 'search area', 'how far are you', 'distance', 'search radius', 'miles from'],
+    options: ['10 miles', '25 miles', '50 miles', '100 miles', 'Nationwide'],
+  },
+]
+
+function detectChips(text) {
+  if (!text) return null
+  const lower = text.toLowerCase()
+  for (const set of CHIP_SETS) {
+    if (set.keywords.some(k => lower.includes(k))) {
+      return set.options
+    }
+  }
+  return null
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function extractAnswers(text) {
@@ -86,7 +145,79 @@ function cleanText(text) {
   return text.replace(/<MOTIFI_ANSWERS>[\s\S]*?<\/MOTIFI_ANSWERS>/, '').trim()
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Loading screen ───────────────────────────────────────────────────────────
+
+function LoadingScreen() {
+  const [count, setCount] = useState(0)
+  const messages = [
+    'Filtering 353 cars to your budget…',
+    'Scoring fuel efficiency & running costs…',
+    'Weighing up reliability & safety…',
+    'Ranking your best matches…',
+  ]
+
+  useEffect(() => {
+    const t = setInterval(() => setCount(c => Math.min(c + 1, messages.length - 1)), 700)
+    return () => clearInterval(t)
+  }, [])
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, backgroundColor: C.midnight,
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', fontFamily: 'Satoshi, sans-serif', zIndex: 100,
+    }}>
+      {/* Animated rings */}
+      <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '40px' }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{
+            position: 'absolute', inset: `${i * 12}px`,
+            border: `2px solid ${i === 0 ? C.teal : i === 1 ? 'rgba(0,200,150,0.4)' : 'rgba(0,200,150,0.15)'}`,
+            borderRadius: '50%',
+            animation: `spin ${1.2 + i * 0.4}s linear infinite`,
+            animationDirection: i % 2 === 0 ? 'normal' : 'reverse',
+          }} />
+        ))}
+        <div style={{
+          position: 'absolute', inset: '28px', backgroundColor: C.teal,
+          borderRadius: '50%', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', fontSize: '14px', fontWeight: '900', color: C.midnight,
+        }}>M</div>
+      </div>
+
+      {/* Progress messages */}
+      <div style={{ textAlign: 'center', maxWidth: '280px' }}>
+        {messages.slice(0, count + 1).map((msg, i) => (
+          <div key={i} style={{
+            fontSize: i === count ? '16px' : '13px',
+            fontWeight: i === count ? '600' : '400',
+            color: i === count ? C.offwhite : C.dim,
+            marginBottom: '8px',
+            transition: 'all 0.3s ease',
+          }}>{msg}</div>
+        ))}
+      </div>
+
+      {/* Progress bar */}
+      <div style={{
+        marginTop: '40px', width: '200px', height: '3px',
+        backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden',
+      }}>
+        <div style={{
+          height: '100%', backgroundColor: C.teal, borderRadius: '2px',
+          width: `${((count + 1) / messages.length) * 100}%`,
+          transition: 'width 0.7s ease',
+        }} />
+      </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+      `}</style>
+    </div>
+  )
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function ChatInterface({ onResults }) {
   const [messages, setMessages] = useState([
@@ -95,21 +226,26 @@ export default function ChatInterface({ onResults }) {
       content: "Hi! I'm your Motifi car advisor. I'll find your perfect used car in a few quick questions. To kick off — what's your budget?"
     }
   ])
-  const [input, setInput]   = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError]   = useState(null)
-  const bottomRef = useRef(null)
+  const [input, setInput]       = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [showLoader, setShowLoader] = useState(false)
+  const [error, setError]       = useState(null)
+  const bottomRef               = useRef(null)
+  const inputRef                = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  async function send(e) {
-    e.preventDefault()
-    if (!input.trim() || loading) return
+  const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
+  const chips = loading ? null : detectChips(lastAssistantMsg?.content || '')
 
-    const userMsg   = { role: 'user', content: input.trim() }
-    const history   = [...messages, userMsg]
+  async function send(text) {
+    const content = (text || input).trim()
+    if (!content || loading) return
+
+    const userMsg = { role: 'user', content }
+    const history = [...messages, userMsg]
     setMessages(history)
     setInput('')
     setLoading(true)
@@ -133,60 +269,73 @@ export default function ChatInterface({ onResults }) {
       const display = cleanText(raw)
 
       setMessages(prev => [...prev, { role: 'assistant', content: display }])
+      setLoading(false)
 
       if (answers) {
+        // Show loading animation for 3 seconds before results
+        setShowLoader(true)
         setTimeout(() => {
           const filtered = applyHardFilters(carsData, answers)
           const scored   = scoreAllCars(filtered, answers)
           onResults({ results: scored.slice(0, 3), answers })
-        }, 1000)
+        }, 3000)
       }
     } catch (err) {
       setError('Something went wrong — please try again.')
-      console.error(err)
-    } finally {
       setLoading(false)
+      console.error(err)
     }
   }
 
+  function handleSubmit(e) {
+    e.preventDefault()
+    send()
+  }
+
+  if (showLoader) return <LoadingScreen />
+
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', height: '100vh',
-      backgroundColor: C.midnight, fontFamily: 'Satoshi, sans-serif',
+      display: 'flex', flexDirection: 'column',
+      height: '100dvh', // dvh for mobile browser chrome handling
+      backgroundColor: C.midnight,
+      fontFamily: 'Satoshi, sans-serif',
     }}>
 
       {/* Nav */}
       <nav style={{
-        backgroundColor: C.navy, padding: '0 24px', height: '64px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
+        backgroundColor: C.navy, padding: '0 20px', height: '56px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexShrink: 0,
       }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>
+        <div style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>
           Mo<span style={{ color: C.teal }}>ti</span>fi
         </div>
-        <div style={{ fontSize: '13px', color: C.muted }}>Finding your perfect car</div>
+        <div style={{ fontSize: '12px', color: C.muted }}>Finding your perfect car</div>
       </nav>
 
       {/* Messages */}
       <div style={{
-        flex: 1, overflowY: 'auto', padding: '24px',
-        display: 'flex', flexDirection: 'column', gap: '16px',
+        flex: 1, overflowY: 'auto', padding: '16px 16px 8px',
+        display: 'flex', flexDirection: 'column', gap: '12px',
+        WebkitOverflowScrolling: 'touch',
       }}>
         {messages.map((msg, i) => (
           <div key={i} style={{
             display: 'flex',
             flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-            alignItems: 'flex-end', gap: '10px',
+            alignItems: 'flex-end', gap: '8px',
           }}>
             {msg.role === 'assistant' && (
               <div style={{
-                width: '32px', height: '32px', borderRadius: '50%',
+                width: '28px', height: '28px', borderRadius: '50%',
                 backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '13px', fontWeight: '700',
+                justifyContent: 'center', fontSize: '12px', fontWeight: '700',
                 color: C.midnight, flexShrink: 0,
               }}>M</div>
             )}
             <div style={{
-              maxWidth: '75%',
+              maxWidth: 'min(78%, 480px)',
               backgroundColor: msg.role === 'user' ? C.teal : C.navy,
               color: msg.role === 'user' ? C.midnight : C.offwhite,
               borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
@@ -199,12 +348,13 @@ export default function ChatInterface({ onResults }) {
           </div>
         ))}
 
+        {/* Typing indicator */}
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
             <div style={{
-              width: '32px', height: '32px', borderRadius: '50%',
+              width: '28px', height: '28px', borderRadius: '50%',
               backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '13px', fontWeight: '700',
+              justifyContent: 'center', fontSize: '12px', fontWeight: '700',
               color: C.midnight, flexShrink: 0,
             }}>M</div>
             <div style={{
@@ -213,9 +363,9 @@ export default function ChatInterface({ onResults }) {
             }}>
               {[0, 1, 2].map(i => (
                 <div key={i} style={{
-                  width: '7px', height: '7px', borderRadius: '50%',
+                  width: '6px', height: '6px', borderRadius: '50%',
                   backgroundColor: C.muted,
-                  animation: 'pulse 1.2s ease-in-out infinite',
+                  animation: 'dot-pulse 1.2s ease-in-out infinite',
                   animationDelay: `${i * 0.2}s`,
                 }} />
               ))}
@@ -223,32 +373,78 @@ export default function ChatInterface({ onResults }) {
           </div>
         )}
 
-        {error && (
+        {/* Quick-reply chips */}
+        {chips && (
           <div style={{
-            textAlign: 'center', color: '#FF6B6B', fontSize: '14px', padding: '8px',
-          }}>{error}</div>
+            display: 'flex', flexWrap: 'wrap', gap: '8px',
+            paddingLeft: '36px', paddingTop: '4px',
+          }}>
+            {chips.map(opt => (
+              <button
+                key={opt}
+                onClick={() => send(opt)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: `1.5px solid ${C.teal}`,
+                  borderRadius: '20px',
+                  padding: '8px 16px',
+                  color: C.teal,
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontFamily: 'Satoshi, sans-serif',
+                  minHeight: '44px',
+                  transition: 'all 0.15s ease',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.backgroundColor = C.teal
+                  e.currentTarget.style.color = C.midnight
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.backgroundColor = 'transparent'
+                  e.currentTarget.style.color = C.teal
+                }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div style={{ textAlign: 'center', color: '#FF6B6B', fontSize: '14px', padding: '8px' }}>
+            {error}
+          </div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <form onSubmit={send} style={{
-        padding: '16px 24px 24px', backgroundColor: C.navy,
-        display: 'flex', gap: '12px', flexShrink: 0,
+      {/* Input area */}
+      <form onSubmit={handleSubmit} style={{
+        padding: '12px 16px 20px',
+        paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
+        backgroundColor: C.navy,
+        display: 'flex', gap: '10px', flexShrink: 0,
       }}>
         <input
+          ref={inputRef}
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
-          placeholder="Type your answer..."
+          placeholder="Type your answer…"
           disabled={loading}
           autoFocus
           style={{
             flex: 1, backgroundColor: C.midnight, color: C.offwhite,
-            border: '1.5px solid #2A4060', borderRadius: '10px',
-            padding: '14px 18px', fontSize: '15px', outline: 'none',
+            border: '1.5px solid #2A4060', borderRadius: '12px',
+            padding: '14px 16px',
+            fontSize: '16px', // 16px prevents iOS zoom on focus
+            outline: 'none',
             fontFamily: 'Satoshi, sans-serif',
+            minHeight: '48px',
+            WebkitAppearance: 'none',
           }}
         />
         <button
@@ -257,10 +453,15 @@ export default function ChatInterface({ onResults }) {
           style={{
             backgroundColor: input.trim() && !loading ? C.teal : '#2A4060',
             color: input.trim() && !loading ? C.midnight : C.dim,
-            border: 'none', borderRadius: '10px',
-            padding: '14px 22px', fontSize: '15px', fontWeight: '700',
+            border: 'none', borderRadius: '12px',
+            padding: '0 20px',
+            fontSize: '15px', fontWeight: '700',
             cursor: input.trim() && !loading ? 'pointer' : 'default',
-            transition: 'all 0.15s ease', fontFamily: 'Satoshi, sans-serif',
+            transition: 'all 0.15s ease',
+            fontFamily: 'Satoshi, sans-serif',
+            minHeight: '48px',
+            minWidth: '72px',
+            WebkitTapHighlightColor: 'transparent',
           }}
         >
           Send
@@ -268,7 +469,7 @@ export default function ChatInterface({ onResults }) {
       </form>
 
       <style>{`
-        @keyframes pulse {
+        @keyframes dot-pulse {
           0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
           40% { opacity: 1; transform: scale(1); }
         }
