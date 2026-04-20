@@ -545,6 +545,7 @@ function Results({ results, answers, onBack, onSelectCar }) {
                 <div style={{ padding: '0 28px 28px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: car.bodySpaceConflict ? '16px' : '0' }}>
                     {[
+                <RadarChart scores={car.scores} />
                       { label: 'Budget fit', score: car.scores.budgetScore },
 { label: 'Driving fit', score: car.scores.drivingScore },
 { label: 'Depreciation', score: car.scores.depreciationScore },
@@ -585,9 +586,9 @@ function Results({ results, answers, onBack, onSelectCar }) {
 }
 function CarPage({ car, answers, onBack }) {
   const costs = getYearOneCost(car, answers)
-  const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.purchaseMethod)
+  const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.paymentMethod)
   const postcode = (answers.postcode || '').replace(/\s/g, '')
-  const radius = (answers.radius || 'Up to 25 miles').replace(/\D/g, '') || '25'
+  const radius = String(answers.searchRadius || 25)'
   const autotraderUrl = `https://www.autotrader.co.uk/car-search?make=${encodeURIComponent(car.make)}&model=${encodeURIComponent(car.model)}&postcode=${postcode}&radius=${radius}&year-from=${car.generation?.split(/[-–]/)[0]?.trim() || ''}`
   const ebayUrl = `https://www.ebay.co.uk/sch/Cars/9801/i.html?_nkw=${encodeURIComponent(car.make + ' ' + car.model)}`
   const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
@@ -603,9 +604,9 @@ function CarPage({ car, answers, onBack }) {
       </nav>
       <div style={{ backgroundColor: '#1A2E50', padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' }}>
         <div style={{ flex: 1, paddingTop: '32px', paddingBottom: '32px' }}>
-          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.segment?.toUpperCase()}</div>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.bodyType?.toUpperCase()()}</div>
           <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
-          <div style={{ fontSize: '14px', color: C.muted }}>{car.generation} · {car.fuelType} · {car.transmission}</div>
+          <div style={{ fontSize: '14px', color: C.muted }}>{car.generationName} · {car.fuelType} · {car.transmission}</div>
         </div>
         <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '360px', height: '200px', overflow: 'hidden' }}>
           <img src={imaginUrl} alt={`${car.make} ${car.model}`} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom right' }} onError={(e) => { e.target.style.display = 'none' }} />
@@ -770,7 +771,7 @@ function CompareFlow({ onBack, onSelectCar }) {
       {/* Car image headers */}
       <div style={{ backgroundColor: '#1A2E50', padding: '0 5%', display: 'grid', gridTemplateColumns: `repeat(${results.length}, 1fr)`, gap: '1px' }}>
         {results.map((car, i) => {
-          const generationYear = car.generation?.split(/[-–]/)[0]?.trim() || '2020'
+          const generationYear = car.generationYears?.split(/[—-]/)[0]?.trim() || '2020'
           const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
           return (
             <div key={i} style={{ padding: '24px 16px', textAlign: 'center', borderRight: i < results.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
@@ -779,7 +780,7 @@ function CompareFlow({ onBack, onSelectCar }) {
               </div>
               <div style={{ fontSize: '16px', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.02em' }}>{car.make} {car.model}</div>
               <div style={{ fontSize: '12px', color: C.muted, marginTop: '4px' }}>{car.generation}</div>
-              <div style={{ fontSize: '14px', fontWeight: '700', color: C.teal, marginTop: '6px' }}>Avg. £{Number(car.price).toLocaleString()}</div>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: C.teal, marginTop: '6px' }}>£{Number(car.priceLow).toLocaleString()}–£{Number(car.priceHigh).toLocaleString()}}</div>
             </div>
           )
         })}
@@ -793,11 +794,11 @@ function CompareFlow({ onBack, onSelectCar }) {
             <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em' }}>KEY SPECS</div>
           </div>
           {[
-            { label: 'Segment', key: 'segment' },
+            { label: 'Body type', key: 'bodyType' },
             { label: 'Fuel type', key: 'fuelType' },
             { label: 'Transmission', key: 'transmission' },
             { label: 'MPG', key: 'mpgBand' },
-            { label: 'Boot size', key: 'bootSize' },
+            { label: 'Boot size', key: 'bootBand' },,
             { label: 'Insurance risk', key: 'insuranceBand' },
             { label: 'Reliability', key: null, fn: car => `Tier ${car.reliabilityTier}` },
             { label: 'Safety', key: null, fn: car => `Tier ${car.safetyTier}` },
