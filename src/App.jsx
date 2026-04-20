@@ -65,6 +65,11 @@ export default function App() {
     setAnswers({})
     setScreen('home')
   }
+  function handleChatResults({ results, answers }) {
+  setResults(results)
+  setAnswers(answers)
+  setScreen('results')
+}
 
   if (screen === 'home') return <Home onStart={() => setScreen('questions')} onCompare={() => setScreen('compare')} />
   if (screen === 'results') return <Results results={results} answers={answers} onBack={startOver} onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }} />
