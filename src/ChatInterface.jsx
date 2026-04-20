@@ -116,14 +116,12 @@ export default function ChatInterface({ onResults }) {
     setError(null)
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model:      'claude-haiku-4-5-20251001',
-          max_tokens: 1000,
-          system:     SYSTEM_PROMPT,
-          messages:   history.map(m => ({ role: m.role, content: m.content })),
+          system:   SYSTEM_PROMPT,
+          messages: history.map(m => ({ role: m.role, content: m.content })),
         }),
       })
 
