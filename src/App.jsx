@@ -544,8 +544,8 @@ function Results({ results, answers, onBack, onSelectCar }) {
                 </div>
                 <div style={{ padding: '0 28px 28px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: car.bodySpaceConflict ? '16px' : '0' }}>
+                    <RadarChart scores={car.scores} />
                     {[
-                <RadarChart scores={car.scores} />
                       { label: 'Budget fit', score: car.scores.budgetScore },
 { label: 'Driving fit', score: car.scores.drivingScore },
 { label: 'Depreciation', score: car.scores.depreciationScore },
