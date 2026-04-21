@@ -588,7 +588,7 @@ function CarPage({ car, answers, onBack }) {
   const costs = getYearOneCost(car, answers)
   const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].includes(answers.paymentMethod)
   const postcode = (answers.postcode || '').replace(/\s/g, '')
-  const radius = String(answers.searchRadius || 25)'
+  const radius = String(answers.searchRadius || 25)
   const autotraderUrl = `https://www.autotrader.co.uk/car-search?make=${encodeURIComponent(car.make)}&model=${encodeURIComponent(car.model)}&postcode=${postcode}&radius=${radius}&year-from=${car.generation?.split(/[-–]/)[0]?.trim() || ''}`
   const ebayUrl = `https://www.ebay.co.uk/sch/Cars/9801/i.html?_nkw=${encodeURIComponent(car.make + ' ' + car.model)}`
   const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
