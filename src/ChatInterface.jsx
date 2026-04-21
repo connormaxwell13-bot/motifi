@@ -1,7 +1,9 @@
-// ChatInterface.jsx — v2
-// - Quick-reply chips for fixed-answer questions
-// - Loading transition animation before results
-// - Mobile-optimised layout and touch targets
+// ChatInterface.jsx — v3
+// Key changes from v2:
+// - AI signals chips via <CHIPS>opt1|opt2</CHIPS> tag — no more keyword guessing
+// - System prompt enforces strict question order and explicitly forbids repeats
+// - Chip clicks send the value AND are clearly marked so AI knows it's answered
+// - Mobile optimised layout preserved
 
 import { useState, useRef, useEffect } from 'react'
 import { applyHardFilters } from './scoring/filters'
@@ -18,38 +20,53 @@ const C = {
 }
 
 // ─── System prompt ────────────────────────────────────────────────────────────
+// Strict order, no repeats, AI signals its own chips
 
-const SYSTEM_PROMPT = `You are Motifi's car advisor. Have a warm, natural conversation to understand what the user needs, then help them find their perfect used car.
+const SYSTEM_PROMPT = `You are Motifi's car advisor. Your job is to collect exactly 17 answers from the user through friendly conversation, then return them as structured JSON.
 
-Collect the following through conversation — don't list them all at once. Ask naturally, group related questions, and use what they tell you to infer answers where possible.
+STRICT RULES:
+- Ask questions in the ORDER listed below. Do not skip ahead or go back.
+- NEVER ask a question that has already been answered.
+- Ask max 2 questions per message. Group related ones naturally.
+- Keep replies to 2-3 sentences max. Be warm but efficient.
+- When a user sends a short word like "Cash", "Manual", "Yes" — treat it as the answer to your most recent question.
 
-INFORMATION TO COLLECT:
-1. gender — Male / Female / Non-binary / Prefer not to say (mention it's for personalisation only)
-2. age — number
-3. budgetMin — minimum budget in GBP as a number (ask as a range: "what's your budget?")
-4. budgetMax — maximum budget in GBP as a number
-5. paymentMethod — Cash / Part Exchange / Hire Purchase / Bank Loan
-6. partExValue — if Part Exchange: approximate value of their current car in GBP, else null
-7. depositAmount — if Hire Purchase: deposit amount in GBP, else null
-8. transmission — Manual / Automatic / No preference
-9. fuelType — Petrol / Diesel / Hybrid / Electric / No preference
-10. bodyType — Hatchback / SUV / Estate / Saloon / MPV / Coupe / Van / Crossover / No preference
-11. drivingContext — Mostly city / Mostly motorway / Mostly rural / Mixed
-12. annualMileage — Under 3,000 / 3,000-5,000 / 5,000-8,000 / 8,000+
-13. bootSpace — Small / Medium / Large / Very Large / No preference
-14. priority — MPG / Reliability / Depreciation (ask: "Is MPG, reliability, or holding its value most important?")
-15. ulezRequired — Yes / No
-16. postcode — UK postcode
-17. searchRadius — number in miles (suggest: 10 / 25 / 50 / 100 / nationwide=1500)
+QUESTION ORDER (collect these in sequence):
+1. budgetMin + budgetMax — ask together as a range ("what's your budget?")
+2. paymentMethod — Cash / Part Exchange / Hire Purchase / Bank Loan
+3. partExValue — only if paymentMethod is "Part Exchange" (ask value of their car)
+4. depositAmount — only if paymentMethod is "Hire Purchase" (ask deposit amount)
+5. transmission — Manual / Automatic / No preference
+6. fuelType — Petrol / Diesel / Hybrid / Electric / No preference
+7. bodyType — Hatchback / SUV / Estate / Saloon / MPV / Coupe / Van / Crossover / No preference
+8. drivingContext — Mostly city / Mostly motorway / Mostly rural / Mixed
+9. annualMileage — Under 3,000 / 3,000-5,000 / 5,000-8,000 / 8,000+
+10. bootSpace — Small / Medium / Large / Very Large / No preference
+11. priority — MPG / Reliability / Depreciation
+12. ulezRequired — Yes / No
+13. postcode — UK postcode
+14. searchRadius — 10 / 25 / 50 / 100 / 1500 (nationwide)
+15. gender — Male / Female / Non-binary / Prefer not to say (mention it's for personalisation)
+16. age — number
 
-STYLE:
-- Warm, concise, conversational. 2-3 sentences per reply max.
-- Group related questions naturally (e.g. budget and payment together).
-- If they say something that implies an answer, use it.
-- If they're unsure, offer a sensible default.
-- Never repeat a question already answered.
+CHIPS — whenever you ask a fixed-choice question, end your message with a chips tag listing the options pipe-separated:
+<CHIPS>Option1|Option2|Option3</CHIPS>
 
-WHEN YOU HAVE ALL ANSWERS, end your message with exactly this block:
+Examples:
+- After asking about payment: <CHIPS>Cash|Part Exchange|Hire Purchase|Bank Loan</CHIPS>
+- After asking about transmission: <CHIPS>Manual|Automatic|No preference</CHIPS>
+- After asking about fuel: <CHIPS>Petrol|Diesel|Hybrid|Electric|No preference</CHIPS>
+- After asking about body type: <CHIPS>Hatchback|SUV|Estate|Saloon|No preference</CHIPS>
+- After asking about driving context: <CHIPS>Mostly city|Mostly motorway|Mostly rural|Mixed</CHIPS>
+- After asking about mileage: <CHIPS>Under 3,000|3,000-5,000|5,000-8,000|8,000+</CHIPS>
+- After asking about boot space: <CHIPS>Small|Medium|Large|No preference</CHIPS>
+- After asking about priority: <CHIPS>MPG|Reliability|Depreciation</CHIPS>
+- After asking about ULEZ: <CHIPS>Yes|No</CHIPS>
+- After asking about search radius: <CHIPS>10 miles|25 miles|50 miles|100 miles|Nationwide</CHIPS>
+- After asking about gender: <CHIPS>Male|Female|Non-binary|Prefer not to say</CHIPS>
+- Do NOT add chips for budget, postcode, deposit amount, part-ex value, or age — these need typed input.
+
+WHEN YOU HAVE ALL 16 ANSWERS, respond with a brief closing message then end with exactly this block (no other text after it):
 
 <MOTIFI_ANSWERS>
 {
@@ -73,66 +90,6 @@ WHEN YOU HAVE ALL ANSWERS, end your message with exactly this block:
 }
 </MOTIFI_ANSWERS>`
 
-// ─── Quick-reply chip detection ───────────────────────────────────────────────
-
-const CHIP_SETS = [
-  {
-    keywords: ['gender', 'personalise', 'personalisation'],
-    options: ['Male', 'Female', 'Non-binary', 'Prefer not to say'],
-  },
-  {
-    keywords: ['pay', 'cash', 'hire purchase', 'part exchange', 'bank loan', 'planning to pay', 'finance'],
-    options: ['Cash', 'Part Exchange', 'Hire Purchase', 'Bank Loan'],
-  },
-  {
-    keywords: ['transmission', 'manual', 'automatic', 'gearbox'],
-    options: ['Manual', 'Automatic', 'No preference'],
-  },
-  {
-    keywords: ['fuel', 'petrol', 'diesel', 'hybrid', 'electric'],
-    options: ['Petrol', 'Diesel', 'Hybrid', 'Electric', 'No preference'],
-  },
-  {
-    keywords: ['body type', 'body style', 'hatchback', 'estate', 'suv', 'saloon', 'crossover', 'mpv', 'coupe', 'van'],
-    options: ['Hatchback', 'SUV', 'Estate', 'Saloon', 'Crossover', 'No preference'],
-  },
-  {
-    keywords: ['mostly drive', 'driving', 'motorway', 'mostly city', 'mostly rural', 'mix of'],
-    options: ['Mostly city', 'Mostly motorway', 'Mostly rural', 'Mixed'],
-  },
-  {
-    keywords: ['miles', 'mileage', 'drive per year', 'drive a year', 'annually', 'how far'],
-    options: ['Under 3,000', '3,000-5,000', '5,000-8,000', '8,000+'],
-  },
-  {
-    keywords: ['boot', 'space', 'storage', 'luggage', 'how much room'],
-    options: ['Small', 'Medium', 'Large', 'No preference'],
-  },
-  {
-    keywords: ['priority', 'mpg', 'reliability', 'depreciation', 'hold its value', 'most important', 'fuel economy'],
-    options: ['MPG', 'Reliability', 'Depreciation'],
-  },
-  {
-    keywords: ['ulez', 'ultra low emission', 'emission zone', 'london'],
-    options: ['Yes', 'No'],
-  },
-  {
-    keywords: ['radius', 'search area', 'how far are you', 'distance', 'search radius', 'miles from'],
-    options: ['10 miles', '25 miles', '50 miles', '100 miles', 'Nationwide'],
-  },
-]
-
-function detectChips(text) {
-  if (!text) return null
-  const lower = text.toLowerCase()
-  for (const set of CHIP_SETS) {
-    if (set.keywords.some(k => lower.includes(k))) {
-      return set.options
-    }
-  }
-  return null
-}
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function extractAnswers(text) {
@@ -141,8 +98,17 @@ function extractAnswers(text) {
   try { return JSON.parse(match[1].trim()) } catch { return null }
 }
 
+function extractChips(text) {
+  const match = text.match(/<CHIPS>(.*?)<\/CHIPS>/)
+  if (!match) return null
+  return match[1].split('|').map(s => s.trim()).filter(Boolean)
+}
+
 function cleanText(text) {
-  return text.replace(/<MOTIFI_ANSWERS>[\s\S]*?<\/MOTIFI_ANSWERS>/, '').trim()
+  return text
+    .replace(/<MOTIFI_ANSWERS>[\s\S]*?<\/MOTIFI_ANSWERS>/, '')
+    .replace(/<CHIPS>.*?<\/CHIPS>/, '')
+    .trim()
 }
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
@@ -167,7 +133,6 @@ function LoadingScreen() {
       display: 'flex', flexDirection: 'column', alignItems: 'center',
       justifyContent: 'center', fontFamily: 'Satoshi, sans-serif', zIndex: 100,
     }}>
-      {/* Animated rings */}
       <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '40px' }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
@@ -185,7 +150,6 @@ function LoadingScreen() {
         }}>M</div>
       </div>
 
-      {/* Progress messages */}
       <div style={{ textAlign: 'center', maxWidth: '280px' }}>
         {messages.slice(0, count + 1).map((msg, i) => (
           <div key={i} style={{
@@ -198,7 +162,6 @@ function LoadingScreen() {
         ))}
       </div>
 
-      {/* Progress bar */}
       <div style={{
         marginTop: '40px', width: '200px', height: '3px',
         backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden',
@@ -210,9 +173,7 @@ function LoadingScreen() {
         }} />
       </div>
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
@@ -223,29 +184,30 @@ export default function ChatInterface({ onResults }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm your Motifi car advisor. I'll find your perfect used car in a few quick questions. To kick off — what's your budget?"
+      content: "Hi! I'm your Motifi car advisor — I'll find your perfect used car in just a few questions. First up, what's your budget?",
+      chips: null,
     }
   ])
-  const [input, setInput]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [input, setInput]         = useState('')
+  const [loading, setLoading]     = useState(false)
   const [showLoader, setShowLoader] = useState(false)
-  const [error, setError]       = useState(null)
-  const bottomRef               = useRef(null)
-  const inputRef                = useRef(null)
+  const [error, setError]         = useState(null)
+  const bottomRef                 = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant')
-  const chips = loading ? null : detectChips(lastAssistantMsg?.content || '')
+  // Chips come from the last assistant message only
+  const lastMsg = [...messages].reverse().find(m => m.role === 'assistant')
+  const currentChips = loading ? null : lastMsg?.chips || null
 
   async function send(text) {
     const content = (text || input).trim()
     if (!content || loading) return
 
-    const userMsg = { role: 'user', content }
-    const history = [...messages, userMsg]
+    const userMsg   = { role: 'user', content }
+    const history   = [...messages, userMsg]
     setMessages(history)
     setInput('')
     setLoading(true)
@@ -266,13 +228,17 @@ export default function ChatInterface({ onResults }) {
       const data    = await res.json()
       const raw     = data.content?.[0]?.text || ''
       const answers = extractAnswers(raw)
+      const chips   = extractChips(raw)
       const display = cleanText(raw)
 
-      setMessages(prev => [...prev, { role: 'assistant', content: display }])
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: display,
+        chips: answers ? null : chips, // don't show chips if we're done
+      }])
       setLoading(false)
 
       if (answers) {
-        // Show loading animation for 3 seconds before results
         setShowLoader(true)
         setTimeout(() => {
           const filtered = applyHardFilters(carsData, answers)
@@ -297,16 +263,14 @@ export default function ChatInterface({ onResults }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
-      height: '100dvh', // dvh for mobile browser chrome handling
+      height: '100dvh',
       backgroundColor: C.midnight,
       fontFamily: 'Satoshi, sans-serif',
     }}>
-
       {/* Nav */}
       <nav style={{
         backgroundColor: C.navy, padding: '0 20px', height: '56px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
       }}>
         <div style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>
           Mo<span style={{ color: C.teal }}>ti</span>fi
@@ -321,30 +285,71 @@ export default function ChatInterface({ onResults }) {
         WebkitOverflowScrolling: 'touch',
       }}>
         {messages.map((msg, i) => (
-          <div key={i} style={{
-            display: 'flex',
-            flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-            alignItems: 'flex-end', gap: '8px',
-          }}>
-            {msg.role === 'assistant' && (
-              <div style={{
-                width: '28px', height: '28px', borderRadius: '50%',
-                backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', fontSize: '12px', fontWeight: '700',
-                color: C.midnight, flexShrink: 0,
-              }}>M</div>
-            )}
+          <div key={i}>
             <div style={{
-              maxWidth: 'min(78%, 480px)',
-              backgroundColor: msg.role === 'user' ? C.teal : C.navy,
-              color: msg.role === 'user' ? C.midnight : C.offwhite,
-              borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-              padding: '12px 16px',
-              fontSize: '15px', lineHeight: '1.6',
-              fontWeight: msg.role === 'user' ? '500' : '400',
+              display: 'flex',
+              flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
+              alignItems: 'flex-end', gap: '8px',
             }}>
-              {msg.content}
+              {msg.role === 'assistant' && (
+                <div style={{
+                  width: '28px', height: '28px', borderRadius: '50%',
+                  backgroundColor: C.teal, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', fontSize: '12px', fontWeight: '700',
+                  color: C.midnight, flexShrink: 0,
+                }}>M</div>
+              )}
+              <div style={{
+                maxWidth: 'min(78%, 480px)',
+                backgroundColor: msg.role === 'user' ? C.teal : C.navy,
+                color: msg.role === 'user' ? C.midnight : C.offwhite,
+                borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+                padding: '12px 16px',
+                fontSize: '15px', lineHeight: '1.6',
+                fontWeight: msg.role === 'user' ? '500' : '400',
+              }}>
+                {msg.content}
+              </div>
             </div>
+
+            {/* Chips — only on the LAST assistant message with chips */}
+            {msg.role === 'assistant' && msg.chips && i === messages.length - 1 && !loading && (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: '8px',
+                paddingLeft: '36px', paddingTop: '10px',
+              }}>
+                {msg.chips.map(opt => (
+                  <button
+                    key={opt}
+                    onClick={() => send(opt)}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: `1.5px solid ${C.teal}`,
+                      borderRadius: '20px',
+                      padding: '8px 16px',
+                      color: C.teal,
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      fontFamily: 'Satoshi, sans-serif',
+                      minHeight: '44px',
+                      transition: 'all 0.15s ease',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.backgroundColor = C.teal
+                      e.currentTarget.style.color = C.midnight
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.backgroundColor = 'transparent'
+                      e.currentTarget.style.color = C.teal
+                    }}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
 
@@ -373,45 +378,6 @@ export default function ChatInterface({ onResults }) {
           </div>
         )}
 
-        {/* Quick-reply chips */}
-        {chips && (
-          <div style={{
-            display: 'flex', flexWrap: 'wrap', gap: '8px',
-            paddingLeft: '36px', paddingTop: '4px',
-          }}>
-            {chips.map(opt => (
-              <button
-                key={opt}
-                onClick={() => send(opt)}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: `1.5px solid ${C.teal}`,
-                  borderRadius: '20px',
-                  padding: '8px 16px',
-                  color: C.teal,
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontFamily: 'Satoshi, sans-serif',
-                  minHeight: '44px',
-                  transition: 'all 0.15s ease',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.backgroundColor = C.teal
-                  e.currentTarget.style.color = C.midnight
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                  e.currentTarget.style.color = C.teal
-                }}
-              >
-                {opt}
-              </button>
-            ))}
-          </div>
-        )}
-
         {error && (
           <div style={{ textAlign: 'center', color: '#FF6B6B', fontSize: '14px', padding: '8px' }}>
             {error}
@@ -421,7 +387,7 @@ export default function ChatInterface({ onResults }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input area */}
+      {/* Input */}
       <form onSubmit={handleSubmit} style={{
         padding: '12px 16px 20px',
         paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
@@ -429,7 +395,6 @@ export default function ChatInterface({ onResults }) {
         display: 'flex', gap: '10px', flexShrink: 0,
       }}>
         <input
-          ref={inputRef}
           type="text"
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -440,7 +405,7 @@ export default function ChatInterface({ onResults }) {
             flex: 1, backgroundColor: C.midnight, color: C.offwhite,
             border: '1.5px solid #2A4060', borderRadius: '12px',
             padding: '14px 16px',
-            fontSize: '16px', // 16px prevents iOS zoom on focus
+            fontSize: '16px',
             outline: 'none',
             fontFamily: 'Satoshi, sans-serif',
             minHeight: '48px',
@@ -459,8 +424,7 @@ export default function ChatInterface({ onResults }) {
             cursor: input.trim() && !loading ? 'pointer' : 'default',
             transition: 'all 0.15s ease',
             fontFamily: 'Satoshi, sans-serif',
-            minHeight: '48px',
-            minWidth: '72px',
+            minHeight: '48px', minWidth: '72px',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
@@ -477,3 +441,4 @@ export default function ChatInterface({ onResults }) {
     </div>
   )
 }
+
