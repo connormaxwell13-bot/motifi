@@ -593,7 +593,7 @@ function CarPage({ car, answers, onBack }) {
   const ebayUrl = `https://www.ebay.co.uk/sch/Cars/9801/i.html?_nkw=${encodeURIComponent(car.make + ' ' + car.model)}`
   const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
   const financeUrl = `https://www.zuto.com/apply/`
-  const generationYear = car.generationYears?.split(/[—-]/)[0]?.trim() || '2020'split(/[-–]/)[0]?.trim() || '2020'
+  const generationYear = car.generationYears?.split(/[—-]/)[0]?.trim() || '2020'
   const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
 
   return (
