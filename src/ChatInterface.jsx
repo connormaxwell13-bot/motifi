@@ -19,81 +19,17 @@ const C = {
 }
 
 // ─── Body type SVG silhouettes ────────────────────────────────────────────────
-// Simple, clean side-profile silhouettes for each body type
+// Detailed line-art silhouettes loaded from /public — one per body type
 
 const BODY_ICONS = {
-  Hatchback: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 28 Q6 22 12 22 L22 22 L32 12 L56 12 L64 22 L70 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  SUV: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 27 Q6 20 12 20 L18 20 L24 11 L56 11 L62 20 L68 20 Q74 20 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  Estate: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 28 Q6 22 12 22 L20 22 L28 14 L62 14 L62 22 L68 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  Saloon: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 28 Q6 22 12 22 L20 22 L28 14 L52 14 L60 22 L68 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  MPV: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 27 Q6 20 12 20 L18 20 L20 11 L62 11 L64 20 L68 20 Q74 20 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  Coupe: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 28 Q6 22 12 22 L22 22 L36 13 L58 13 L66 22 L68 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  Van: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 27 Q6 20 12 20 L14 20 L14 10 L58 10 L64 20 L68 20 Q74 20 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
-  Crossover: (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M6 27 Q6 21 12 21 L20 21 L28 13 L54 13 L62 21 L68 21 Q74 21 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
-      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="18" cy="30" r="2"/>
-      <circle cx="62" cy="30" r="2"/>
-    </svg>
-  ),
+  Hatchback: <img src="/hatchback.svg" alt="Hatchback" className="w-full h-full object-contain" />,
+  SUV:       <img src="/suv.svg"       alt="SUV"       className="w-full h-full object-contain" />,
+  Estate:    <img src="/estate.svg"    alt="Estate"    className="w-full h-full object-contain" />,
+  Saloon:    <img src="/saloon.svg"    alt="Saloon"    className="w-full h-full object-contain" />,
+  MPV:       <img src="/mpv.svg"       alt="MPV"       className="w-full h-full object-contain" />,
+  Coupe:     <img src="/coupe.svg"     alt="Coupe"     className="w-full h-full object-contain" />,
+  Van:       <img src="/van.svg"       alt="Van"       className="w-full h-full object-contain" />,
+  Crossover: <img src="/crossover.svg" alt="Crossover" className="w-full h-full object-contain" />,
   'No preference': (
     <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
       <text x="40" y="26" textAnchor="middle" fontSize="20" fill="currentColor" fontFamily="Satoshi,sans-serif">✓</text>
