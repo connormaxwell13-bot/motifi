@@ -1,9 +1,8 @@
-// ChatInterface.jsx — v3
-// Key changes from v2:
-// - AI signals chips via <CHIPS>opt1|opt2</CHIPS> tag — no more keyword guessing
-// - System prompt enforces strict question order and explicitly forbids repeats
-// - Chip clicks send the value AND are clearly marked so AI knows it's answered
-// - Mobile optimised layout preserved
+// ChatInterface.jsx — v4
+// Changes from v3:
+// - Advisor renamed to Cooper
+// - Body type chips show SVG silhouettes + label (visual cards)
+// - All other chip sets remain as text pills
 
 import { useState, useRef, useEffect } from 'react'
 import { applyHardFilters } from './scoring/filters'
@@ -19,16 +18,102 @@ const C = {
   dim:      '#4A6080',
 }
 
-// ─── System prompt ────────────────────────────────────────────────────────────
-// Strict order, no repeats, AI signals its own chips
+// ─── Body type SVG silhouettes ────────────────────────────────────────────────
+// Simple, clean side-profile silhouettes for each body type
 
-const SYSTEM_PROMPT = `You are Motifi's car advisor. Your job is to collect exactly 17 answers from the user through friendly conversation, then return them as structured JSON.
+const BODY_ICONS = {
+  Hatchback: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 28 Q6 22 12 22 L22 22 L32 12 L56 12 L64 22 L70 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  SUV: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 27 Q6 20 12 20 L18 20 L24 11 L56 11 L62 20 L68 20 Q74 20 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  Estate: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 28 Q6 22 12 22 L20 22 L28 14 L62 14 L62 22 L68 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  Saloon: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 28 Q6 22 12 22 L20 22 L28 14 L52 14 L60 22 L68 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  MPV: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 27 Q6 20 12 20 L18 20 L20 11 L62 11 L64 20 L68 20 Q74 20 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  Coupe: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 28 Q6 22 12 22 L22 22 L36 13 L58 13 L66 22 L68 22 Q74 22 74 28 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  Van: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 27 Q6 20 12 20 L14 20 L14 10 L58 10 L64 20 L68 20 Q74 20 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  Crossover: (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 27 Q6 21 12 21 L20 21 L28 13 L54 13 L62 21 L68 21 Q74 21 74 27 L74 30 L68 30 Q68 24 62 24 Q56 24 56 30 L24 30 Q24 24 18 24 Q12 24 12 30 L6 30 Z"/>
+      <circle cx="18" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="62" cy="30" r="5" fill="none" stroke="currentColor" strokeWidth="2"/>
+      <circle cx="18" cy="30" r="2"/>
+      <circle cx="62" cy="30" r="2"/>
+    </svg>
+  ),
+  'No preference': (
+    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <text x="40" y="26" textAnchor="middle" fontSize="20" fill="currentColor" fontFamily="Satoshi,sans-serif">✓</text>
+    </svg>
+  ),
+}
+
+const BODY_TYPE_OPTIONS = ['Hatchback', 'SUV', 'Estate', 'Saloon', 'MPV', 'Coupe', 'Van', 'Crossover', 'No preference']
+
+// ─── System prompt ────────────────────────────────────────────────────────────
+
+const SYSTEM_PROMPT = `You are Cooper, Motifi's friendly car advisor. Your job is to collect exactly 16 answers from the user through friendly conversation, then return them as structured JSON.
+
+Your name is Cooper. Sign off warmly but don't overdo it. Be concise and human.
 
 STRICT RULES:
 - Ask questions in the ORDER listed below. Do not skip ahead or go back.
 - NEVER ask a question that has already been answered.
 - Ask max 2 questions per message. Group related ones naturally.
-- Keep replies to 2-3 sentences max. Be warm but efficient.
+- Keep replies to 2-3 sentences max.
 - When a user sends a short word like "Cash", "Manual", "Yes" — treat it as the answer to your most recent question.
 
 QUESTION ORDER (collect these in sequence):
@@ -46,27 +131,27 @@ QUESTION ORDER (collect these in sequence):
 12. ulezRequired — Yes / No
 13. postcode — UK postcode
 14. searchRadius — 10 / 25 / 50 / 100 / 1500 (nationwide)
-15. gender — Male / Female / Non-binary / Prefer not to say (mention it's for personalisation)
+15. gender — Male / Female / Non-binary / Prefer not to say (mention it's just for personalisation)
 16. age — number
 
-CHIPS — whenever you ask a fixed-choice question, end your message with a chips tag listing the options pipe-separated:
+CHIPS — whenever you ask a fixed-choice question, end your message with a chips tag:
 <CHIPS>Option1|Option2|Option3</CHIPS>
 
 Examples:
-- After asking about payment: <CHIPS>Cash|Part Exchange|Hire Purchase|Bank Loan</CHIPS>
-- After asking about transmission: <CHIPS>Manual|Automatic|No preference</CHIPS>
-- After asking about fuel: <CHIPS>Petrol|Diesel|Hybrid|Electric|No preference</CHIPS>
-- After asking about body type: <CHIPS>Hatchback|SUV|Estate|Saloon|No preference</CHIPS>
-- After asking about driving context: <CHIPS>Mostly city|Mostly motorway|Mostly rural|Mixed</CHIPS>
-- After asking about mileage: <CHIPS>Under 3,000|3,000-5,000|5,000-8,000|8,000+</CHIPS>
-- After asking about boot space: <CHIPS>Small|Medium|Large|No preference</CHIPS>
-- After asking about priority: <CHIPS>MPG|Reliability|Depreciation</CHIPS>
-- After asking about ULEZ: <CHIPS>Yes|No</CHIPS>
-- After asking about search radius: <CHIPS>10 miles|25 miles|50 miles|100 miles|Nationwide</CHIPS>
-- After asking about gender: <CHIPS>Male|Female|Non-binary|Prefer not to say</CHIPS>
-- Do NOT add chips for budget, postcode, deposit amount, part-ex value, or age — these need typed input.
+- Payment: <CHIPS>Cash|Part Exchange|Hire Purchase|Bank Loan</CHIPS>
+- Transmission: <CHIPS>Manual|Automatic|No preference</CHIPS>
+- Fuel: <CHIPS>Petrol|Diesel|Hybrid|Electric|No preference</CHIPS>
+- Body type: <CHIPS>Hatchback|SUV|Estate|Saloon|MPV|Coupe|Van|Crossover|No preference</CHIPS>
+- Driving context: <CHIPS>Mostly city|Mostly motorway|Mostly rural|Mixed</CHIPS>
+- Mileage: <CHIPS>Under 3,000|3,000-5,000|5,000-8,000|8,000+</CHIPS>
+- Boot space: <CHIPS>Small|Medium|Large|No preference</CHIPS>
+- Priority: <CHIPS>MPG|Reliability|Depreciation</CHIPS>
+- ULEZ: <CHIPS>Yes|No</CHIPS>
+- Search radius: <CHIPS>10 miles|25 miles|50 miles|100 miles|Nationwide</CHIPS>
+- Gender: <CHIPS>Male|Female|Non-binary|Prefer not to say</CHIPS>
+- Do NOT add chips for budget, postcode, deposit, part-ex value, or age.
 
-WHEN YOU HAVE ALL 16 ANSWERS, respond with a brief closing message then end with exactly this block (no other text after it):
+WHEN YOU HAVE ALL 16 ANSWERS, respond with a brief closing message then end with exactly this block:
 
 <MOTIFI_ANSWERS>
 {
@@ -111,6 +196,11 @@ function cleanText(text) {
     .trim()
 }
 
+function isBodyTypeChips(chips) {
+  if (!chips) return false
+  return chips.some(c => BODY_TYPE_OPTIONS.includes(c))
+}
+
 // ─── Loading screen ───────────────────────────────────────────────────────────
 
 function LoadingScreen() {
@@ -149,19 +239,16 @@ function LoadingScreen() {
           justifyContent: 'center', fontSize: '14px', fontWeight: '900', color: C.midnight,
         }}>M</div>
       </div>
-
       <div style={{ textAlign: 'center', maxWidth: '280px' }}>
         {messages.slice(0, count + 1).map((msg, i) => (
           <div key={i} style={{
             fontSize: i === count ? '16px' : '13px',
             fontWeight: i === count ? '600' : '400',
             color: i === count ? C.offwhite : C.dim,
-            marginBottom: '8px',
-            transition: 'all 0.3s ease',
+            marginBottom: '8px', transition: 'all 0.3s ease',
           }}>{msg}</div>
         ))}
       </div>
-
       <div style={{
         marginTop: '40px', width: '200px', height: '3px',
         backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden',
@@ -172,8 +259,96 @@ function LoadingScreen() {
           transition: 'width 0.7s ease',
         }} />
       </div>
-
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
+
+// ─── Chip renderers ───────────────────────────────────────────────────────────
+
+function TextChips({ chips, onSelect }) {
+  return (
+    <div style={{
+      display: 'flex', flexWrap: 'wrap', gap: '8px',
+      paddingLeft: '36px', paddingTop: '10px',
+    }}>
+      {chips.map(opt => (
+        <button
+          key={opt}
+          onClick={() => onSelect(opt)}
+          style={{
+            backgroundColor: 'transparent',
+            border: `1.5px solid ${C.teal}`,
+            borderRadius: '20px',
+            padding: '8px 16px',
+            color: C.teal,
+            fontSize: '14px', fontWeight: '600',
+            cursor: 'pointer',
+            fontFamily: 'Satoshi, sans-serif',
+            minHeight: '44px',
+            transition: 'all 0.15s ease',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = C.teal
+            e.currentTarget.style.color = C.midnight
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = C.teal
+          }}
+        >
+          {opt}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function BodyTypeChips({ chips, onSelect }) {
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
+      gap: '8px',
+      paddingLeft: '36px',
+      paddingTop: '10px',
+      paddingRight: '8px',
+    }}>
+      {chips.map(opt => (
+        <button
+          key={opt}
+          onClick={() => onSelect(opt)}
+          style={{
+            backgroundColor: 'transparent',
+            border: `1.5px solid rgba(0,200,150,0.5)`,
+            borderRadius: '12px',
+            padding: '10px 6px 8px',
+            color: C.teal,
+            cursor: 'pointer',
+            fontFamily: 'Satoshi, sans-serif',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', gap: '6px',
+            transition: 'all 0.15s ease',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = 'rgba(0,200,150,0.1)'
+            e.currentTarget.style.borderColor = C.teal
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.borderColor = 'rgba(0,200,150,0.5)'
+          }}
+        >
+          <div style={{ width: '56px', height: '28px', color: C.teal }}>
+            {BODY_ICONS[opt] || BODY_ICONS['No preference']}
+          </div>
+          <span style={{ fontSize: '11px', fontWeight: '600', textAlign: 'center', lineHeight: '1.2' }}>
+            {opt}
+          </span>
+        </button>
+      ))}
     </div>
   )
 }
@@ -184,30 +359,26 @@ export default function ChatInterface({ onResults }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm your Motifi car advisor — I'll find your perfect used car in just a few questions. First up, what's your budget?",
+      content: "Hi! I'm Cooper, your Motifi car advisor — I'll find your perfect used car in just a few questions. First up, what's your budget?",
       chips: null,
     }
   ])
-  const [input, setInput]         = useState('')
-  const [loading, setLoading]     = useState(false)
+  const [input, setInput]           = useState('')
+  const [loading, setLoading]       = useState(false)
   const [showLoader, setShowLoader] = useState(false)
-  const [error, setError]         = useState(null)
-  const bottomRef                 = useRef(null)
+  const [error, setError]           = useState(null)
+  const bottomRef                   = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  // Chips come from the last assistant message only
-  const lastMsg = [...messages].reverse().find(m => m.role === 'assistant')
-  const currentChips = loading ? null : lastMsg?.chips || null
-
   async function send(text) {
     const content = (text || input).trim()
     if (!content || loading) return
 
-    const userMsg   = { role: 'user', content }
-    const history   = [...messages, userMsg]
+    const userMsg = { role: 'user', content }
+    const history = [...messages, userMsg]
     setMessages(history)
     setInput('')
     setLoading(true)
@@ -234,7 +405,7 @@ export default function ChatInterface({ onResults }) {
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: display,
-        chips: answers ? null : chips, // don't show chips if we're done
+        chips: answers ? null : chips,
       }])
       setLoading(false)
 
@@ -267,6 +438,7 @@ export default function ChatInterface({ onResults }) {
       backgroundColor: C.midnight,
       fontFamily: 'Satoshi, sans-serif',
     }}>
+
       {/* Nav */}
       <nav style={{
         backgroundColor: C.navy, padding: '0 20px', height: '56px',
@@ -275,7 +447,7 @@ export default function ChatInterface({ onResults }) {
         <div style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>
           Mo<span style={{ color: C.teal }}>ti</span>fi
         </div>
-        <div style={{ fontSize: '12px', color: C.muted }}>Finding your perfect car</div>
+        <div style={{ fontSize: '12px', color: C.muted }}>Cooper · Your car advisor</div>
       </nav>
 
       {/* Messages */}
@@ -295,9 +467,9 @@ export default function ChatInterface({ onResults }) {
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '50%',
                   backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', fontSize: '12px', fontWeight: '700',
-                  color: C.midnight, flexShrink: 0,
-                }}>M</div>
+                  justifyContent: 'center', fontSize: '11px', fontWeight: '700',
+                  color: C.midnight, flexShrink: 0, letterSpacing: '-0.02em',
+                }}>Co</div>
               )}
               <div style={{
                 maxWidth: 'min(78%, 480px)',
@@ -312,43 +484,11 @@ export default function ChatInterface({ onResults }) {
               </div>
             </div>
 
-            {/* Chips — only on the LAST assistant message with chips */}
+            {/* Chips — only on last assistant message */}
             {msg.role === 'assistant' && msg.chips && i === messages.length - 1 && !loading && (
-              <div style={{
-                display: 'flex', flexWrap: 'wrap', gap: '8px',
-                paddingLeft: '36px', paddingTop: '10px',
-              }}>
-                {msg.chips.map(opt => (
-                  <button
-                    key={opt}
-                    onClick={() => send(opt)}
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: `1.5px solid ${C.teal}`,
-                      borderRadius: '20px',
-                      padding: '8px 16px',
-                      color: C.teal,
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      fontFamily: 'Satoshi, sans-serif',
-                      minHeight: '44px',
-                      transition: 'all 0.15s ease',
-                      WebkitTapHighlightColor: 'transparent',
-                    }}
-                    onMouseEnter={e => {
-                      e.currentTarget.style.backgroundColor = C.teal
-                      e.currentTarget.style.color = C.midnight
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                      e.currentTarget.style.color = C.teal
-                    }}
-                  >
-                    {opt}
-                  </button>
-                ))}
-              </div>
+              isBodyTypeChips(msg.chips)
+                ? <BodyTypeChips chips={msg.chips} onSelect={send} />
+                : <TextChips chips={msg.chips} onSelect={send} />
             )}
           </div>
         ))}
@@ -359,9 +499,9 @@ export default function ChatInterface({ onResults }) {
             <div style={{
               width: '28px', height: '28px', borderRadius: '50%',
               backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '12px', fontWeight: '700',
+              justifyContent: 'center', fontSize: '11px', fontWeight: '700',
               color: C.midnight, flexShrink: 0,
-            }}>M</div>
+            }}>Co</div>
             <div style={{
               backgroundColor: C.navy, borderRadius: '18px 18px 18px 4px',
               padding: '14px 18px', display: 'flex', gap: '5px', alignItems: 'center',
@@ -404,12 +544,9 @@ export default function ChatInterface({ onResults }) {
           style={{
             flex: 1, backgroundColor: C.midnight, color: C.offwhite,
             border: '1.5px solid #2A4060', borderRadius: '12px',
-            padding: '14px 16px',
-            fontSize: '16px',
-            outline: 'none',
-            fontFamily: 'Satoshi, sans-serif',
-            minHeight: '48px',
-            WebkitAppearance: 'none',
+            padding: '14px 16px', fontSize: '16px',
+            outline: 'none', fontFamily: 'Satoshi, sans-serif',
+            minHeight: '48px', WebkitAppearance: 'none',
           }}
         />
         <button
@@ -419,8 +556,7 @@ export default function ChatInterface({ onResults }) {
             backgroundColor: input.trim() && !loading ? C.teal : '#2A4060',
             color: input.trim() && !loading ? C.midnight : C.dim,
             border: 'none', borderRadius: '12px',
-            padding: '0 20px',
-            fontSize: '15px', fontWeight: '700',
+            padding: '0 20px', fontSize: '15px', fontWeight: '700',
             cursor: input.trim() && !loading ? 'pointer' : 'default',
             transition: 'all 0.15s ease',
             fontFamily: 'Satoshi, sans-serif',
