@@ -903,8 +903,8 @@ function CompareFlow({ onBack, onSelectCar }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', marginBottom: '24px' }}>
             {filteredCars.map(car => {
-              const key = `${car.make} ${car.model} ${car.generationName}``
-              const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}`` === key)
+              const key = `${car.make} ${car.model} ${car.generationName}`
+              const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}` === key)
               const disabled = !selected && selectedCars.length >= 3
               return (
                 <button key={key} onClick={() => !disabled && toggleCar(car)} style={{ backgroundColor: selected ? C.teal : C.navy, color: selected ? C.midnight : disabled ? C.dim : C.offwhite, border: `1.5px solid ${selected ? C.teal : '#2A4060'}`, borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: selected ? '700' : '400', cursor: disabled ? 'not-allowed' : 'pointer', textAlign: 'left', opacity: disabled ? 0.5 : 1 }}>
