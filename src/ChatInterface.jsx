@@ -198,7 +198,7 @@ function cleanText(text) {
 
 function isBodyTypeChips(chips) {
   if (!chips) return false
-  return chips.some(c => BODY_TYPE_OPTIONS.includes(c))
+  return chips.some(c => ["Hatchback","SUV","Estate","Saloon","MPV","Coupe","Van","Crossover"].includes(c))
 }
 
 // ─── Loading screen ───────────────────────────────────────────────────────────
