@@ -6,7 +6,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { applyHardFilters } from './scoring/filters'
-import { scoreAllCars } from './scoring/engine'
+import { getTopMatches } from './scoring/engine'
 import carsData from './data/cars.json'
 
 const C = {
@@ -349,8 +349,8 @@ export default function ChatInterface({ onResults }) {
         setShowLoader(true)
         setTimeout(() => {
           const filtered = applyHardFilters(carsData, answers)
-          const scored   = scoreAllCars(filtered, answers)
-          onResults({ results: scored.slice(0, 3), answers })
+          const top      = getTopMatches(filtered, answers, { maxResults: 10, minScore: 6.0 })
+          onResults({ results: top, answers })
         }, 3000)
       }
     } catch (err) {
