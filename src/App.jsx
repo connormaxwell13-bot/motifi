@@ -3,7 +3,7 @@ import carsData from './data/cars.json'
 import { questions } from './questions.jsx'
 import { applyHardFilters } from './scoring/filters.jsx'
 import { scoreAllCars, getTopMatches } from './scoring/engine.jsx'
-import { generateOneLiner } from './scoring/oneliners.jsx'
+import { generateOneLiners } from './scoring/oneliners.jsx'
 import { getYearOneCost } from './scoring/costs.jsx'
 import ChatInterface from './ChatInterface'
 
@@ -514,8 +514,7 @@ function ScoreBar({ score }) {
   )
 }
 
-function CompactRow({ rank, car, answers, onSelectCar }) {
-  const oneLiner = generateOneLiner(car, answers)
+function CompactRow({ rank, car, answers, oneLiner, onSelectCar }) {
   const costs = getYearOneCost(car, answers)
   const isFinance = answers.paymentMethod === 'Hire Purchase'
   const scorePct = Math.round(car.scores.finalScore * 10)
@@ -678,16 +677,20 @@ function Results({ results, answers, onBack, onSelectCar }) {
               {rest.length} strong {rest.length === 1 ? 'alternative' : 'alternatives'}.
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {rest.map((car, i) => (
-                <CompactRow
-                  key={`${car.make}-${car.model}-${i}`}
-                  rank={i + 2}
-                  car={car}
-                  answers={answers}
-                  onSelectCar={onSelectCar}
-                />
-              ))}
-            </div>
+  {(() => {
+    const oneLiners = generateOneLiners(rest, answers)
+    return rest.map((car, i) => (
+      <CompactRow
+        key={`${car.make}-${car.model}-${i}`}
+        rank={i + 2}
+        car={car}
+        answers={answers}
+        oneLiner={oneLiners[i]}
+        onSelectCar={onSelectCar}
+      />
+    ))
+  })()}
+</div>
           </div>
         </div>
       )}
