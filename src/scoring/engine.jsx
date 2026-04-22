@@ -200,3 +200,16 @@ export function scoreAllCars(cars, answers) {
     })
     .sort((a, b) => b.scores.finalScore - a.scores.finalScore)
 }
+// Append to end of engine.jsx
+
+// ─── TOP MATCHES ─────────────────────────────────────────────────────────────
+// Returns up to maxResults cars scoring at least minScore/10.
+// minScore is on the 0–10 internal scale. UI shows /100, so 6.0 = 60/100.
+// If fewer cars pass the threshold, returns what we have (including 0).
+
+export function getTopMatches(cars, answers, { maxResults = 10, minScore = 6.0 } = {}) {
+  const scored = scoreAllCars(cars, answers)
+  return scored
+    .filter(car => car.scores.finalScore >= minScore)
+    .slice(0, maxResults)
+}
