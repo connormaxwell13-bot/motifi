@@ -1,0 +1,1435 @@
+/* ============================================================
+   Motifi — Home (editorial landing)
+   All rules scoped under .motifi-home so nothing leaks into
+   the already-built Results / CarPage / CompareFlow screens.
+   ============================================================ */
+
+.motifi-home,
+.motifi-home *,
+.motifi-home *::before,
+.motifi-home *::after { box-sizing: border-box; }
+
+.motifi-home {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.motifi-home button {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* ============================================================
+   TOP NAV
+   ============================================================ */
+
+.motifi-home .topbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  padding: 18px 40px;
+  gap: 40px;
+  border-bottom: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 20;
+}
+
+.motifi-home .wordmark {
+  font-family: var(--sans);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.motifi-home .wordmark b {
+  color: var(--mint);
+  font-weight: 800;
+  font-style: italic;
+}
+
+.motifi-home .nav {
+  display: flex;
+  gap: 28px;
+  font-size: 13px;
+  color: var(--ink-2);
+  justify-self: start;
+}
+.motifi-home .nav button {
+  padding: 6px 0;
+  position: relative;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-weight: 500;
+  transition: color 150ms ease;
+}
+.motifi-home .nav button:hover { color: var(--ink); }
+.motifi-home .nav button.active { color: var(--ink); }
+.motifi-home .nav button.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -20px;
+  height: 2px;
+  background: var(--mint);
+}
+
+.motifi-home .actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.motifi-home .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--mint);
+  background: var(--mint);
+  color: var(--mint-deep);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 150ms ease, background 150ms ease, border-color 150ms ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.motifi-home .btn:hover {
+  transform: translateY(-1px);
+  background: var(--mint-hi);
+  border-color: var(--mint-hi);
+}
+.motifi-home .btn.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+.motifi-home .btn.ghost:hover {
+  transform: none;
+  border-color: var(--ink-3);
+  background: rgba(245, 247, 250, 0.04);
+}
+.motifi-home .band-light .btn.ghost {
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+.motifi-home .band-light .btn.ghost:hover {
+  background: rgba(15, 29, 53, 0.04);
+}
+.motifi-home .btn.sm  { padding: 7px 14px; font-size: 12px; }
+.motifi-home .btn.lg  { padding: 14px 22px; font-size: 14px; }
+
+.motifi-home .btn .arrow {
+  width: 14px;
+  height: 10px;
+  position: relative;
+  display: inline-block;
+}
+.motifi-home .btn .arrow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'><path d='M0 5h14M10 1l4 4-4 4' stroke='black' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>") center/contain no-repeat;
+          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'><path d='M0 5h14M10 1l4 4-4 4' stroke='black' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>") center/contain no-repeat;
+}
+
+/* ============================================================
+   HERO — editorial variant
+   ============================================================ */
+
+.motifi-home .hero {
+  padding: 56px 40px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.motifi-home .hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 28px;
+}
+.motifi-home .hero-kicker .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--mint);
+  border-radius: 50%;
+  animation: motifi-pulse 2.2s ease-in-out infinite;
+}
+.motifi-home .hero-kicker .sep { opacity: 0.4; }
+
+@keyframes motifi-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+.motifi-home .hero-ed-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.motifi-home .hero-ed-left { padding-top: 8px; }
+
+.motifi-home .hero-issue {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mint);
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+  width: fit-content;
+  padding-right: 80px;
+}
+
+.motifi-home .hero h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(52px, 6.8vw, 96px);
+  line-height: 1.0;
+  letter-spacing: -0.035em;
+  margin: 0 0 8px;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.motifi-home .hero h1 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 300;
+}
+
+.motifi-home .hero-lede {
+  margin-top: 28px;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 44ch;
+}
+.motifi-home .hero-lede b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.motifi-home .hero-cta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+}
+.motifi-home .hero-cta .btn { padding: 14px 22px; font-size: 14px; }
+.motifi-home .hero-cta .btn.primary { font-weight: 700; }
+
+.motifi-home .hero-footnote {
+  margin-top: 20px;
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.5;
+  max-width: 46ch;
+}
+.motifi-home .hero-footnote .mono {
+  font-family: var(--mono);
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+
+/* Hero photo frame (right) */
+.motifi-home .hero-ed-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.motifi-home .hero-photo-frame {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.motifi-home .hero-photo-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--mint);
+  padding: 14px 18px 6px;
+}
+.motifi-home .hero-photo-inner {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(160deg, #EDF0F5, #DDE2EA);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.motifi-home .hero-photo-inner img {
+  width: 115%;
+  height: 115%;
+  object-fit: contain;
+  display: block;
+}
+.motifi-home .hero-photo-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 14px 18px 16px;
+}
+.motifi-home .hpf-brand {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.motifi-home .hpf-name {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1;
+  color: var(--ink);
+}
+.motifi-home .hpf-cost { text-align: right; }
+.motifi-home .hpf-k {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.motifi-home .hpf-v {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--mint);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+.motifi-home .hero-photo-caption {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  line-height: 1.55;
+  padding: 0 4px;
+}
+.motifi-home .hero-photo-caption .mono {
+  font-family: var(--mono);
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  margin-right: 6px;
+}
+
+/* Hero rule-stats strip (4-up) */
+.motifi-home .hero-rule-stats {
+  margin-top: 44px;
+  border-top: 1px solid var(--rule);
+  padding-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px;
+}
+.motifi-home .hero-rule-stats > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.motifi-home .rs-k {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-home .rs-v {
+  font-family: var(--serif);
+  font-size: 40px;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--ink);
+}
+.motifi-home .hero-rule-stats > div:nth-child(4) .rs-v { color: var(--mint); }
+
+/* ============================================================
+   SECTION — base
+   ============================================================ */
+
+.motifi-home .section {
+  padding: 80px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  border-top: 1px solid var(--rule);
+}
+.motifi-home .band-light { padding: 0; }
+.motifi-home .band-light .section {
+  border-top: 1px solid rgba(15, 29, 53, 0.08);
+}
+
+.motifi-home .section-head {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px 48px;
+  align-items: end;
+  margin-bottom: 40px;
+}
+.motifi-home .section-head .tag,
+.motifi-home .tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mint);
+  margin-bottom: 12px;
+  display: block;
+}
+.motifi-home .band-light .section-head .tag,
+.motifi-home .band-light .tag { color: var(--mint-low); }
+
+.motifi-home .section-head h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 5.5vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: 0;
+  max-width: 22ch;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.motifi-home .section-head h2 em {
+  font-style: italic;
+  color: var(--ink-3);
+  font-weight: 300;
+}
+
+/* ============================================================
+   §01 — TRUE COST (LEDGER + ASIDE), band-light
+   ============================================================ */
+
+.motifi-home .tc-section { padding-bottom: 96px; }
+.motifi-home .tc-lede {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 48ch;
+}
+.motifi-home .tc-lede b { color: var(--ink); font-weight: 500; }
+
+.motifi-home .tc-layout {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.motifi-home .tc-ledger {
+  background: #FFFFFF;
+  border: 1px solid rgba(15, 29, 53, 0.10);
+  border-radius: 4px;
+  padding: 24px 28px 26px;
+}
+.motifi-home .tc-ledger-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(15, 29, 53, 0.08);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-home .tc-ledger-car {
+  color: var(--ink);
+  letter-spacing: 0.08em;
+}
+.motifi-home .tc-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  align-items: center;
+  gap: 18px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(15, 29, 53, 0.06);
+}
+.motifi-home .tc-row:last-child { border-bottom: 0; }
+.motifi-home .tc-lab {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.motifi-home .tc-lab b { font-weight: 500; }
+.motifi-home .tc-idx {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  width: 22px;
+  text-align: right;
+}
+.motifi-home .tc-row.total .tc-idx {
+  color: var(--mint-low);
+  font-weight: 600;
+}
+.motifi-home .tc-bar {
+  position: relative;
+  height: 6px;
+  background: rgba(15, 29, 53, 0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.motifi-home .tc-bar i {
+  display: block;
+  height: 100%;
+  background: #8B5E3C;
+}
+.motifi-home .tc-row.sub .tc-bar i { background: var(--mint-low); }
+.motifi-home .tc-row.total .tc-bar { background: transparent; }
+.motifi-home .tc-val {
+  font-family: var(--serif);
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-align: right;
+  min-width: 100px;
+}
+.motifi-home .tc-val.neg { color: var(--mint-low); }
+.motifi-home .tc-val.big { font-size: 36px; color: var(--ink); }
+.motifi-home .tc-row.total {
+  background: #F5F0E6;
+  margin: 8px -28px -26px;
+  padding: 18px 28px 22px;
+  border-radius: 0 0 4px 4px;
+  border-top: 1px solid rgba(139, 94, 60, 0.3);
+}
+
+.motifi-home .tc-aside {
+  background: #FFFFFF;
+  border: 1px solid rgba(15, 29, 53, 0.10);
+  border-radius: 4px;
+  padding: 22px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.motifi-home .tc-aside-head {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: #8B5E3C;
+  text-transform: uppercase;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(15, 29, 53, 0.08);
+}
+.motifi-home .tc-aside-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.motifi-home .tc-aside-n {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: #8B5E3C;
+}
+.motifi-home .tc-aside-t {
+  font-size: 13.5px;
+  color: var(--ink-2);
+  line-height: 1.55;
+}
+.motifi-home .tc-aside-t b { color: var(--ink); font-weight: 500; }
+.motifi-home .tc-aside .btn { margin-top: auto; width: fit-content; }
+
+/* ============================================================
+   §02 — TOOLS V2 (Cooper chat + Compare diff)
+   ============================================================ */
+
+.motifi-home .tools-v2 { padding-bottom: 96px; }
+.motifi-home .tv2-head {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: end;
+  gap: 48px;
+  margin-bottom: 48px;
+}
+.motifi-home .tv2-lede {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 52ch;
+}
+.motifi-home .tv2-lede b { color: var(--ink); font-weight: 500; }
+
+.motifi-home .tv2-row-ab {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 20px;
+}
+
+.motifi-home .tv2-plate {
+  position: relative;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+.motifi-home .tv2-plate:hover {
+  border-color: var(--rule-strong);
+  transform: translateY(-2px);
+}
+.motifi-home .tv2-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--bg-2);
+}
+.motifi-home .tv2-top-l {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+.motifi-home .tv2-top .idx {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 300;
+  color: var(--mint);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.motifi-home .tv2-top .tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0;
+}
+.motifi-home .tv2-top .live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+}
+.motifi-home .tv2-top .live .blink {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+  animation: motifi-pulse 1.4s ease-in-out infinite;
+}
+
+/* Plate 01 — Cooper chat mock */
+.motifi-home .tv2-cooper-intro { padding: 24px 28px 18px; }
+.motifi-home .tv2-cooper-intro h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.motifi-home .tv2-cooper-intro h3 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 400;
+}
+.motifi-home .tv2-cooper-intro p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.motifi-home .tv2-cooper-win {
+  margin: 0 20px 20px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--bg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.motifi-home .tv2-cwin-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-home .tv2-cwin-bar .dot { width: 8px; height: 8px; border-radius: 50%; background: #2F2F2F; }
+.motifi-home .tv2-cwin-bar .dot.g { background: #27C93F; }
+.motifi-home .tv2-cwin-bar .dot.y { background: #FFBD2E; }
+.motifi-home .tv2-cwin-bar .dot.r { background: #FF5F56; }
+.motifi-home .tv2-cwin-bar .title { margin-left: 10px; color: var(--ink-2); text-transform: none; letter-spacing: 0.02em; }
+
+.motifi-home .tv2-cwin-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+}
+.motifi-home .tv2-msg {
+  font-size: 13px;
+  line-height: 1.5;
+  max-width: 86%;
+}
+.motifi-home .tv2-msg-you {
+  align-self: flex-end;
+  background: var(--card-hi);
+  border: 1px solid var(--rule);
+  border-radius: 10px 10px 2px 10px;
+  padding: 9px 13px;
+  font-style: italic;
+  color: var(--ink-2);
+}
+.motifi-home .tv2-msg-cooper {
+  align-self: flex-start;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+.motifi-home .tv2-msg-cooper .av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--mint-deep);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: var(--sans);
+  font-size: 12px;
+}
+.motifi-home .tv2-msg-cooper .body {
+  background: rgba(0, 200, 150, 0.08);
+  border: 1px solid rgba(0, 200, 150, 0.22);
+  border-radius: 2px 10px 10px 10px;
+  padding: 9px 13px;
+  color: var(--ink);
+}
+.motifi-home .tv2-msg-cooper .name {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.motifi-home .tv2-typing {
+  display: inline-flex;
+  gap: 4px;
+  padding: 10px 14px;
+  background: rgba(0, 200, 150, 0.08);
+  border: 1px solid rgba(0, 200, 150, 0.22);
+  border-radius: 2px 10px 10px 10px;
+  align-self: flex-start;
+  margin-left: 38px;
+  width: fit-content;
+}
+.motifi-home .tv2-typing i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--mint);
+  animation: motifi-typing 1s ease-in-out infinite;
+}
+.motifi-home .tv2-typing i:nth-child(2) { animation-delay: 0.15s; }
+.motifi-home .tv2-typing i:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes motifi-typing {
+  0%, 100% { opacity: 0.3; transform: translateY(0); }
+  50%      { opacity: 1;   transform: translateY(-2px); }
+}
+
+.motifi-home .tv2-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 38px;
+}
+.motifi-home .tv2-chip {
+  font-size: 11.5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+  background: transparent;
+}
+.motifi-home .tv2-chip.selected {
+  background: var(--mint);
+  color: var(--mint-deep);
+  border-color: var(--mint);
+  font-weight: 500;
+}
+
+.motifi-home .tv2-result {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--rule);
+}
+.motifi-home .tv2-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.motifi-home .tv2-result-head .lab {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--mint);
+  text-transform: uppercase;
+}
+.motifi-home .tv2-result-head .count {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.06em;
+}
+.motifi-home .tv2-result-cars {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.motifi-home .tv2-result-car {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  background: var(--bg-2);
+}
+.motifi-home .tv2-result-car .im {
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 2px;
+}
+.motifi-home .tv2-result-car .im img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.motifi-home .tv2-result-car .nm {
+  font-size: 10.5px;
+  text-align: center;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+}
+
+.motifi-home .tv2-cooper-foot {
+  margin-top: auto;
+  padding: 16px 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+.motifi-home .tv2-cooper-foot .go {
+  color: var(--mint);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Plate 02 — Compare diff mock */
+.motifi-home .tv2-compare-intro { padding: 24px 28px 18px; }
+.motifi-home .tv2-compare-intro h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  color: var(--ink);
+}
+.motifi-home .tv2-compare-intro h3 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 400;
+}
+.motifi-home .tv2-compare-intro p {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.motifi-home .tv2-cmp {
+  margin: 0 20px 20px;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.motifi-home .tv2-cmp-heads {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--rule);
+}
+.motifi-home .tv2-cmp-heads > div {
+  padding: 12px;
+  border-right: 1px solid var(--rule);
+  font-size: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.motifi-home .tv2-cmp-heads > div:last-child { border-right: 0; }
+.motifi-home .tv2-cmp-heads .car .im {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.motifi-home .tv2-cmp-heads .car .im img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+.motifi-home .tv2-cmp-heads .car .nm {
+  font-size: 10.5px;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.motifi-home .tv2-cmp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11.5px;
+}
+.motifi-home .tv2-cmp-row:last-of-type { border-bottom: 0; }
+.motifi-home .tv2-cmp-row .lbl,
+.motifi-home .tv2-cmp-row .cell {
+  padding: 10px 12px;
+  border-right: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.motifi-home .tv2-cmp-row .cell:last-child,
+.motifi-home .tv2-cmp-row .lbl:last-child { border-right: 0; }
+.motifi-home .tv2-cmp-row .lbl {
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+.motifi-home .tv2-cmp-row .cell .v {
+  color: var(--ink-2);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.motifi-home .tv2-cmp-row .cell.best {
+  background: rgba(0, 200, 150, 0.08);
+  border-left: 2px solid var(--mint);
+}
+.motifi-home .tv2-cmp-row .cell.best .v { color: var(--mint); font-weight: 600; }
+.motifi-home .tv2-cmp-row .cell.worst { opacity: 0.55; }
+.motifi-home .tv2-cmp-row .cell.worst .v { color: var(--ink-4); text-decoration: line-through; }
+.motifi-home .tv2-cmp-row .cell .pill {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: rgba(0, 200, 150, 0.2);
+  color: var(--mint);
+}
+.motifi-home .tv2-cmp-row .cell.worst .pill {
+  background: rgba(245, 106, 106, 0.2);
+  color: #F56A6A;
+}
+
+.motifi-home .tv2-verdict {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(0, 200, 150, 0.06);
+  border-top: 1px solid rgba(0, 200, 150, 0.2);
+}
+.motifi-home .tv2-verdict .lab {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-top: 1px;
+}
+.motifi-home .tv2-verdict .txt {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.motifi-home .tv2-verdict .txt b { color: var(--ink); font-weight: 600; }
+
+.motifi-home .tv2-compare-foot {
+  margin-top: auto;
+  padding: 16px 24px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+}
+.motifi-home .tv2-compare-foot .go {
+  color: var(--mint);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ============================================================
+   §03 — DATASET (band-light)
+   ============================================================ */
+
+.motifi-home .ds-lede {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 48ch;
+}
+.motifi-home .ds-big {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 48px;
+  align-items: center;
+  padding: 40px 0;
+  border-top: 1px solid rgba(15, 29, 53, 0.10);
+  border-bottom: 1px solid rgba(15, 29, 53, 0.10);
+  margin-bottom: 32px;
+}
+.motifi-home .ds-num .ds-n {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 156px;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.motifi-home .ds-num .ds-lab {
+  font-size: 14px;
+  color: var(--ink-2);
+  margin-top: 8px;
+}
+.motifi-home .ds-num .ds-sub {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--mint-low);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.motifi-home .ds-split { display: flex; flex-direction: column; gap: 10px; }
+.motifi-home .ds-split-row {
+  display: grid;
+  grid-template-columns: 64px 200px 1fr 50px;
+  align-items: center;
+  gap: 18px;
+  font-size: 13px;
+  color: var(--ink-2);
+  padding: 6px 0;
+}
+.motifi-home .ds-silh {
+  width: 64px;
+  height: 28px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  color: var(--ink);
+  opacity: 0.88;
+}
+.motifi-home .ds-silh svg { width: 100%; height: 100%; display: block; }
+.motifi-home .ds-split-row .k {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.motifi-home .ds-split-row .bar {
+  height: 6px;
+  background: rgba(15, 29, 53, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.motifi-home .ds-split-row .bar i {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+}
+.motifi-home .ds-split-row .bar.ev i { background: var(--mint-low); }
+.motifi-home .ds-split-row .v {
+  font-family: var(--serif);
+  font-size: 22px;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  text-align: right;
+}
+
+.motifi-home .ds-criteria {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  border-top: 1px solid rgba(15, 29, 53, 0.10);
+}
+.motifi-home .ds-crit {
+  padding: 28px 24px 30px 0;
+  border-right: 1px solid rgba(15, 29, 53, 0.10);
+}
+.motifi-home .ds-crit:last-child { border-right: 0; padding-right: 0; }
+.motifi-home .ds-crit .mono {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: #8B5E3C;
+  text-transform: uppercase;
+}
+.motifi-home .ds-crit h5 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 10px 0 8px;
+  color: var(--ink);
+}
+.motifi-home .ds-crit p {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+/* ============================================================
+   §04 — FREE FOREVER MANIFESTO (band-light)
+   ============================================================ */
+
+.motifi-home .free-section { padding: 100px 40px; }
+.motifi-home .free-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.motifi-home .free-section .tag {
+  color: var(--mint-low);
+  margin-bottom: 16px;
+}
+.motifi-home .free-h {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(56px, 7.4vw, 108px);
+  line-height: 0.94;
+  letter-spacing: -0.035em;
+  margin: 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.motifi-home .free-h em {
+  font-style: italic;
+  color: var(--mint-low);
+  font-weight: 300;
+}
+.motifi-home .free-copy {
+  padding-left: 40px;
+  border-left: 1px solid rgba(15, 29, 53, 0.16);
+}
+.motifi-home .free-copy p {
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  margin: 0 0 18px;
+  max-width: 48ch;
+}
+.motifi-home .free-sig {
+  font-family: var(--mono) !important;
+  font-size: 11.5px !important;
+  letter-spacing: 0.1em;
+  color: var(--ink-3) !important;
+  text-transform: uppercase;
+  margin-top: 20px !important;
+}
+
+/* ============================================================
+   CTA SECTION + FOOTER
+   ============================================================ */
+
+.motifi-home .cta-section { padding: 80px 40px 120px; }
+.motifi-home .cta-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+.motifi-home .cta-head .tag { margin-bottom: 18px; }
+.motifi-home .cta-head h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(36px, 4.4vw, 60px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.motifi-home .cta-head h2 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 300;
+}
+.motifi-home .cta-two { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.motifi-home .cta-card {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 24px 28px;
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 20px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.motifi-home .cta-card:hover {
+  background: var(--card-hi);
+  border-color: var(--mint);
+  transform: translateY(-2px);
+}
+.motifi-home .cc-num {
+  font-family: var(--serif);
+  font-size: 60px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--mint);
+  letter-spacing: -0.03em;
+  opacity: 0.9;
+}
+.motifi-home .cc-body { display: flex; flex-direction: column; gap: 6px; }
+.motifi-home .cc-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-home .cc-body h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--ink);
+}
+.motifi-home .cc-body p {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  margin: 4px 0 0;
+}
+.motifi-home .cc-go {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Footer (dark) */
+.motifi-home footer {
+  padding: 56px 40px 40px;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 40px;
+  font-size: 13px;
+  color: var(--ink-3);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.motifi-home footer h5 {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: 0 0 14px;
+  font-weight: 500;
+}
+.motifi-home footer .big {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 1.05;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-top: 20px;
+  max-width: 460px;
+}
+.motifi-home footer .big em { font-style: italic; color: var(--mint); font-weight: 300; }
+.motifi-home footer ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.motifi-home footer a {
+  color: var(--ink-2);
+  text-decoration: none;
+  cursor: pointer;
+}
+.motifi-home footer a:hover { color: var(--mint); }
+.motifi-home footer .bottom {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 30px;
+  margin-top: 20px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-4);
+  letter-spacing: 0.06em;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1000px) {
+  .motifi-home .section-head,
+  .motifi-home .tv2-head {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .motifi-home .ds-big { grid-template-columns: 1fr; gap: 24px; }
+  .motifi-home .ds-criteria { grid-template-columns: repeat(2, 1fr); }
+  .motifi-home .ds-crit:nth-child(2) { border-right: 0; }
+  .motifi-home .tc-layout { grid-template-columns: 1fr; }
+  .motifi-home .free-grid { grid-template-columns: 1fr; gap: 32px; }
+  .motifi-home .free-copy { padding-left: 0; border-left: 0; border-top: 1px solid var(--rule-strong); padding-top: 24px; }
+  .motifi-home .cta-inner { grid-template-columns: 1fr; gap: 32px; }
+}
+
+@media (max-width: 820px) {
+  .motifi-home .hero { padding: 40px 24px 28px; }
+  .motifi-home .section { padding: 64px 24px; }
+  .motifi-home .hero-ed-grid { grid-template-columns: 1fr; gap: 32px; }
+  .motifi-home .tv2-row-ab { grid-template-columns: 1fr; }
+  .motifi-home .hero-rule-stats { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .motifi-home .ds-split-row { grid-template-columns: 48px 1fr auto 50px; gap: 12px; }
+  .motifi-home footer {
+    grid-template-columns: 1fr 1fr;
+    padding: 48px 24px 32px;
+    gap: 32px;
+  }
+  .motifi-home footer .bottom { flex-direction: column; gap: 8px; }
+}
+
+@media (max-width: 700px) {
+  .motifi-home .topbar { padding: 14px 20px; gap: 20px; }
+  .motifi-home .nav { display: none; }
+  .motifi-home .free-section { padding: 72px 24px; }
+  .motifi-home .ds-criteria { grid-template-columns: 1fr; }
+  .motifi-home .ds-crit { border-right: 0; padding: 20px 0; border-bottom: 1px solid rgba(15, 29, 53, 0.1); }
+  .motifi-home .ds-crit:last-child { border-bottom: 0; }
+  .motifi-home .tv2-cmp-heads,
+  .motifi-home .tv2-cmp-row { font-size: 10.5px; }
+  .motifi-home .tv2-result-cars { grid-template-columns: repeat(2, 1fr); }
+}
