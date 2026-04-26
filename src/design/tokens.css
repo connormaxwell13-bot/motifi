@@ -1,0 +1,72 @@
+/* ============================================================
+   Motifi — Design Tokens
+   Session 1: palette, typography, light-band override.
+   Scope: variables are global on :root; class-based overrides
+   live under .motifi-home so nothing leaks into the already-
+   rebuilt Results, CarPage, or CompareFlow screens.
+   ============================================================ */
+
+:root {
+  /* ----- Brand palette (locked) -------------------------------- */
+  --bg:          #0F1D35;  /* midnight — page background                */
+  --bg-2:        #1A2E50;  /* navy — elevated surface                   */
+  --bg-3:        #142340;  /* deeper well                               */
+  --card:        #1A2E50;  /* card background                           */
+  --card-hi:     #223863;  /* card hover                                */
+
+  /* Text on dark */
+  --ink:         #F5F7FA;  /* offwhite — primary                        */
+  --ink-2:       #C8D4E4;  /* derived — body copy, 1 step below ink     */
+  --ink-3:       #A8B8CC;  /* muted — secondary                         */
+  --ink-4:       #4A6080;  /* dim — tertiary / labels                   */
+
+  /* Accent */
+  --mint:        #00C896;  /* teal                                      */
+  --mint-hi:     #33D6AE;  /* lighter teal — hover                      */
+  --mint-deep:   #03392A;  /* darkest teal — ink on mint surfaces       */
+  --mint-low:    #007A57;  /* deeper teal — contrast on light paper     */
+
+  /* Rules */
+  --rule:         rgba(245, 247, 250, 0.08);
+  --rule-strong:  rgba(245, 247, 250, 0.18);
+
+  /* Typography */
+  --serif: 'Fraunces', 'Times New Roman', serif;
+  --sans:  'Satoshi', 'Inter', system-ui, -apple-system, sans-serif;
+  --mono:  'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+}
+
+/* ----- Light-paper band override ------------------------------
+   Applied as a wrapper around any section that should render on
+   cream/offwhite paper instead of midnight. Flips all the ink +
+   surface tokens so nested components re-resolve automatically.
+   -------------------------------------------------------------- */
+.motifi-home .band-light {
+  --bg:          #F5F7FA;
+  --bg-2:        #FFFFFF;
+  --bg-3:        #EDF0F5;
+  --card:        #FFFFFF;
+  --card-hi:     #FFFFFF;
+  --ink:         #0F1D35;
+  --ink-2:       #2C3648;
+  --ink-3:       #4A6080;
+  --ink-4:       #7890A8;
+  --rule:         rgba(15, 29, 53, 0.08);
+  --rule-strong:  rgba(15, 29, 53, 0.16);
+
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* The bright teal loses AA contrast on offwhite. Use the deeper
+   teal variant for serif italic emphasis in light bands. */
+.motifi-home .band-light h1 em,
+.motifi-home .band-light h2 em,
+.motifi-home .band-light h3 em,
+.motifi-home .band-light .free-h em {
+  color: var(--mint-low);
+}
+
+/* ----- Helper classes ----- */
+.motifi-home .mono  { font-family: var(--mono); }
+.motifi-home .serif { font-family: var(--serif); font-weight: 300; }
