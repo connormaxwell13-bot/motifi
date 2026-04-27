@@ -1484,3 +1484,127 @@
   .motifi-screen.cooper .chips-row,
   .motifi-screen.cooper .body-chips { padding-left: 0; }
 }
+/* ============================================================
+   LIGHT MODIFIER — .motifi-screen.light
+   Flips background and ink tokens to light values, scoped to
+   the screen. Only Cooper uses this today.
+   Applied alongside the variant class, e.g.:
+     <div className="motifi-screen cooper light">
+   ============================================================ */
+
+.motifi-screen.light {
+  --bg:          #F5F7FA;   /* offwhite — page background */
+  --bg-2:        #EDF1F5;   /* slightly cooler — strip / composer rest */
+  --bg-3:        #E3E8EE;   /* deeper grey — disabled / pressed */
+  --card:        #FFFFFF;   /* white — bubbles, inset surfaces */
+  --ink:         #0F1D35;   /* midnight — primary text */
+  --ink-2:       #2A3F5C;   /* deep slate — secondary text */
+  --ink-3:       #5A7090;   /* mid slate — meta / labels */
+  --ink-4:       #8A9AB0;   /* dim — disabled */
+  --rule:        #E1E6EC;   /* hairline rules */
+  --rule-strong: #C9D2DC;   /* heavier dividers, input borders */
+  /* Mint stays the same — accents read on both palettes.
+     Mint-deep stays as ink-on-mint. */
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* TopNav blends with the light page; backdrop-filter pill stays. */
+.motifi-screen.light .topbar {
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border-bottom-color: var(--rule);
+}
+.motifi-screen.light .wordmark        { color: var(--ink); }
+.motifi-screen.light .nav button      { color: var(--ink-2); }
+.motifi-screen.light .nav button:hover,
+.motifi-screen.light .nav button.active { color: var(--ink); }
+
+/* Buttons — mint primary unchanged. Ghost button needs darker ink in light mode. */
+.motifi-screen.light .btn.ghost {
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+.motifi-screen.light .btn.ghost:hover {
+  border-color: var(--ink-3);
+  background: rgba(15, 29, 53, 0.04);
+}
+
+/* Strip rules get the light hairline */
+.motifi-screen.light.cooper .cooper-strip {
+  border-bottom-color: var(--rule);
+}
+
+/* Profile slot — soft grey card on white page */
+.motifi-screen.light.cooper .cooper-slot {
+  background: var(--bg-2);
+  border-color: var(--rule);
+}
+
+/* Cooper avatar — light palette inverts: white circle, mint ring + ink */
+.motifi-screen.light.cooper .av {
+  background: #FFFFFF;
+  color: var(--mint);
+  border-color: var(--mint);
+}
+.motifi-screen.light.cooper .av-dot {
+  border-color: var(--bg);  /* status dot ring matches page bg, not dark navy */
+}
+
+/* Bubbles — assistant becomes white card, user stays mint */
+.motifi-screen.light.cooper .bubble.assistant {
+  background: var(--card);
+  color: var(--ink);
+  border-color: var(--rule);
+}
+.motifi-screen.light.cooper .typing {
+  background: var(--card);
+  border-color: var(--rule);
+}
+
+/* Quick-reply chips — readable on light bg */
+.motifi-screen.light.cooper .chip {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+.motifi-screen.light.cooper .chip-plus {
+  color: var(--ink-3);
+}
+.motifi-screen.light.cooper .chip:hover {
+  background: rgba(0, 200, 150, 0.08);
+  border-color: var(--mint);
+  color: var(--mint-deep);
+}
+.motifi-screen.light.cooper .chip:hover .chip-plus {
+  color: var(--mint-deep);
+}
+
+/* Body-type chip silhouettes — dark ink in light mode */
+.motifi-screen.light.cooper .body-chip {
+  border-color: rgba(0, 200, 150, 0.4);
+}
+.motifi-screen.light.cooper .body-chip-icon { color: var(--ink); }
+.motifi-screen.light.cooper .body-chip-label { color: var(--ink-2); }
+
+/* Composer pill on light bg */
+.motifi-screen.light.cooper .composer-pill {
+  background: var(--card);
+  border-color: var(--rule-strong);
+}
+.motifi-screen.light.cooper .composer-pill input {
+  color: var(--ink);
+}
+.motifi-screen.light.cooper .composer-pill input::placeholder {
+  color: var(--ink-3);
+}
+
+/* Loader handoff — when Cooper finishes and the screen briefly
+   stays light before transitioning to dark Results, keep parity. */
+.motifi-screen.light .loader-overlay {
+  background: var(--bg);
+}
+.motifi-screen.light .loader-overlay .loader-h {
+  color: var(--ink);
+}
+.motifi-screen.light .loader-overlay .loader-steps {
+  color: var(--ink-3);
+}
