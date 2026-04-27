@@ -1716,3 +1716,998 @@
   justify-content: center;
   padding-top: 2px;
 }
+/* ============================================================
+   COMPARE — Editorial rebuild (Session 3)
+   Two scopes:
+     .motifi-screen.compare-pre — Details + Select pre-steps
+     .motifi-screen.compare     — The comparison view itself
+   Both stay on the dark editorial palette to match Results.
+   The verdict panel inside .compare flips to a light cream
+   band — that's the only light surface inside the dark page.
+   ============================================================ */
+
+/* ─── Pre-steps (Details + Select) ─────────────────────────── */
+
+.motifi-screen.compare-pre {
+  min-height: 100dvh;
+  background: var(--bg);
+}
+.motifi-screen.compare-pre .cmp-pre {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+}
+.motifi-screen.compare-pre .kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.motifi-screen.compare-pre h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0 0 16px;
+  text-wrap: balance;
+}
+.motifi-screen.compare-pre h1 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 300;
+}
+.motifi-screen.compare-pre .lede {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 56ch;
+  margin: 0 0 36px;
+}
+
+/* Details form */
+.motifi-screen.compare-pre .cmp-pre-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.motifi-screen.compare-pre .cmp-pre-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.motifi-screen.compare-pre .cmp-pre-form .lbl {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.motifi-screen.compare-pre .cmp-pre-form input {
+  background: var(--bg-2);
+  color: var(--ink);
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: var(--sans);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+.motifi-screen.compare-pre .cmp-pre-form input:focus {
+  border-color: var(--mint);
+}
+.motifi-screen.compare-pre .cmp-pre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.motifi-screen.compare-pre .cmp-pre-chip {
+  background: transparent;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.motifi-screen.compare-pre .cmp-pre-chip:hover {
+  border-color: var(--mint);
+}
+.motifi-screen.compare-pre .cmp-pre-chip.selected {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--mint-deep);
+  font-weight: 600;
+}
+
+/* Select step */
+.motifi-screen.compare-pre .cmp-select-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.motifi-screen.compare-pre .cmp-select-filters select {
+  flex: 1;
+  min-width: 160px;
+  background: var(--bg-2);
+  color: var(--ink);
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+}
+.motifi-screen.compare-pre .cmp-select-pills {
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.motifi-screen.compare-pre .cmp-select-pills-lab {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.motifi-screen.compare-pre .cmp-select-pills-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.motifi-screen.compare-pre .cmp-select-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 200, 150, 0.12);
+  border: 1px solid rgba(0, 200, 150, 0.3);
+  color: var(--mint);
+  border-radius: 999px;
+  padding: 6px 12px 6px 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.motifi-screen.compare-pre .cmp-select-pill .opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--mint-deep);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.motifi-screen.compare-pre .cmp-select-pill button {
+  background: none;
+  border: 0;
+  color: var(--mint);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+  margin-left: 2px;
+}
+.motifi-screen.compare-pre .cmp-select-pill button:hover { color: var(--ink); }
+
+.motifi-screen.compare-pre .cmp-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 480px;
+  overflow-y: auto;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 6px;
+  margin-bottom: 28px;
+}
+.motifi-screen.compare-pre .cmp-select-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  color: var(--ink);
+  transition: all 150ms ease;
+}
+.motifi-screen.compare-pre .cmp-select-row:hover {
+  background: var(--bg-2);
+  border-color: var(--rule);
+}
+.motifi-screen.compare-pre .cmp-select-row.selected {
+  background: rgba(0, 200, 150, 0.08);
+  border-color: rgba(0, 200, 150, 0.3);
+}
+.motifi-screen.compare-pre .cmp-select-row.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.motifi-screen.compare-pre .cmp-select-row-name {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 14px;
+}
+.motifi-screen.compare-pre .cmp-select-row-name strong {
+  font-weight: 600;
+}
+.motifi-screen.compare-pre .cmp-select-row-name .trim {
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.motifi-screen.compare-pre .cmp-select-row-price {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.motifi-screen.compare-pre .cmp-select-cta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.motifi-screen.compare-pre .arrow.back {
+  transform: rotate(180deg);
+}
+
+/* ─── Comparison view ──────────────────────────────────────── */
+
+.motifi-screen.compare {
+  min-height: 100dvh;
+  background: var(--bg);
+  padding-bottom: 0;  /* verdict panel handles its own bottom */
+}
+
+/* Page header */
+.motifi-screen.compare .cmp-head {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 48px 40px 24px;
+  display: grid;
+  grid-template-columns: 1.4fr auto;
+  gap: 40px;
+  align-items: end;
+}
+.motifi-screen.compare .cmp-head-l { min-width: 0; }
+.motifi-screen.compare .cmp-head-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.motifi-screen.compare .cmp-head-h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(48px, 6vw, 96px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin: 0;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.motifi-screen.compare .cmp-head-h1 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 300;
+}
+.motifi-screen.compare .cmp-head-r {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* View toggle */
+.motifi-screen.compare .cmp-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-screen.compare .cmp-view-lab { letter-spacing: 0.12em; }
+.motifi-screen.compare .cmp-view-btn {
+  background: transparent;
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-2);
+  padding: 8px 14px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+  transition: all 150ms ease;
+}
+.motifi-screen.compare .cmp-view-btn:hover { border-color: var(--ink-3); }
+.motifi-screen.compare .cmp-view-btn.on {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--mint-deep);
+  font-weight: 600;
+}
+
+/* Selected pills row */
+.motifi-screen.compare .cmp-selected {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.motifi-screen.compare .cmp-selected-lab {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-screen.compare .cmp-selected-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+.motifi-screen.compare .cmp-selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 200, 150, 0.12);
+  border: 1px solid rgba(0, 200, 150, 0.3);
+  color: var(--mint);
+  border-radius: 999px;
+  padding: 6px 14px 6px 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.motifi-screen.compare .cmp-selected-pill .opt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--mint-deep);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+.motifi-screen.compare .cmp-selected-pill button {
+  background: none;
+  border: 0;
+  color: var(--mint);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.motifi-screen.compare .cmp-selected-pill button:hover { color: var(--ink); }
+.motifi-screen.compare .cmp-selected-add {
+  background: transparent;
+  border: 1.5px dashed var(--rule-strong);
+  color: var(--ink-3);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.motifi-screen.compare .cmp-selected-add:hover {
+  border-color: var(--mint);
+  color: var(--mint);
+  border-style: solid;
+}
+
+/* ─── The grid — used by hero + every row ──────────────────── */
+/* 4 columns: label + 3 car slots. Width fixed for column rhythm. */
+.motifi-screen.compare .cmp-grid {
+  display: grid;
+  grid-template-columns: 220px repeat(3, 1fr);
+  gap: 0;
+}
+
+/* Hero strip */
+.motifi-screen.compare .cmp-hero {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px 8px;
+}
+.motifi-screen.compare .cmp-hero .cmp-grid > * {
+  border-top: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  padding: 28px 24px;
+  min-height: 480px;
+}
+.motifi-screen.compare .cmp-hero .cmp-grid > *:last-child {
+  border-right: 1px solid var(--rule);
+}
+
+.motifi-screen.compare .cmp-hero-meta-kicker {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.motifi-screen.compare .cmp-hero-meta-h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0 0 16px;
+}
+.motifi-screen.compare .cmp-hero-meta-lede {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-3);
+  margin: 0;
+}
+
+/* Car column (hero) */
+.motifi-screen.compare .cmp-col {
+  display: flex;
+  flex-direction: column;
+}
+.motifi-screen.compare .cmp-col-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.motifi-screen.compare .cmp-col-brand {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.motifi-screen.compare .cmp-col-brand strong { color: var(--ink-2); font-weight: 500; }
+.motifi-screen.compare .cmp-col-brand .opt {
+  color: var(--mint);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+.motifi-screen.compare .cmp-col-x {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-3);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 150ms ease;
+}
+.motifi-screen.compare .cmp-col-x:hover { color: var(--ink); border-color: var(--ink-3); }
+
+.motifi-screen.compare .cmp-col-name {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 2.4vw, 38px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+.motifi-screen.compare .cmp-col-trim {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  margin-bottom: 16px;
+}
+
+.motifi-screen.compare .cmp-col-photo {
+  background: var(--bg-2);
+  border-radius: 6px;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.motifi-screen.compare .cmp-col-photo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.motifi-screen.compare .cmp-col-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.motifi-screen.compare .cmp-col-price .v {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.motifi-screen.compare .cmp-col-price .mo {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--mint);
+  letter-spacing: 0.04em;
+}
+
+/* Empty slot */
+.motifi-screen.compare .cmp-col-empty {
+  background: transparent;
+  border: 1.5px dashed var(--rule-strong) !important;
+  border-radius: 6px;
+  margin: 0 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: var(--sans);
+  color: var(--ink-3);
+}
+.motifi-screen.compare .cmp-col-empty:hover {
+  border-color: var(--mint) !important;
+  color: var(--mint);
+}
+.motifi-screen.compare .cmp-col-empty-plus {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 48px;
+  color: var(--mint);
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.motifi-screen.compare .cmp-col-empty-lab {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.motifi-screen.compare .cmp-col-empty-sub {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+}
+
+/* ─── Section blocks ───────────────────────────────────────── */
+
+.motifi-screen.compare .cmp-section {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.motifi-screen.compare .cmp-section-head {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  gap: 24px;
+  align-items: baseline;
+  padding: 32px 0 18px;
+  border-top: 1px solid var(--rule-strong);
+  margin-top: -1px;  /* collapse with hero bottom border */
+}
+.motifi-screen.compare .cmp-section-num {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  padding-left: 24px;
+}
+.motifi-screen.compare .cmp-section-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: 0;
+  color: var(--ink);
+}
+.motifi-screen.compare .cmp-section-count {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+
+/* ─── Rows + Cells ─────────────────────────────────────────── */
+
+.motifi-screen.compare .cmp-row .cmp-grid > * {
+  padding: 22px 24px;
+  border-top: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  min-height: 88px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.motifi-screen.compare .cmp-row.headline .cmp-grid > * {
+  background: rgba(0, 200, 150, 0.04);
+  min-height: 110px;
+}
+
+.motifi-screen.compare .cmp-row-lab .cmp-row-lab-k {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.motifi-screen.compare .cmp-row-lab .cmp-row-lab-sub {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-top: 4px;
+}
+.motifi-screen.compare .cmp-row.headline .cmp-row-lab-k {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Cell base */
+.motifi-screen.compare .cmp-cell {
+  position: relative;
+}
+.motifi-screen.compare .cmp-cell.empty {
+  background: transparent;
+  border-top: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  /* dim diagonal hatch — visually quiet */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(168, 184, 204, 0.04) 8px,
+    rgba(168, 184, 204, 0.04) 9px
+  );
+}
+.motifi-screen.compare .cmp-cell-v {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.motifi-screen.compare .cmp-row.headline .cmp-cell-v {
+  font-size: 36px;
+}
+.motifi-screen.compare .cmp-cell-sub {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  margin-top: 2px;
+  margin-bottom: 6px;
+  letter-spacing: 0.06em;
+}
+
+/* Verdict-coloured values */
+.motifi-screen.compare .cmp-cell.best   .cmp-cell-v { color: var(--mint); }
+.motifi-screen.compare .cmp-cell.worst  .cmp-cell-v { color: #E59A4A; }
+.motifi-screen.compare .cmp-cell.middle .cmp-cell-v { color: var(--ink-2); }
+.motifi-screen.compare .cmp-cell.plain  .cmp-cell-v { color: var(--ink); }
+
+/* Winner outline — only on the headline row's best cell */
+.motifi-screen.compare .cmp-row.headline .cmp-cell.best {
+  outline: 1.5px solid var(--mint);
+  outline-offset: -1px;
+  background: rgba(0, 200, 150, 0.08);
+}
+
+/* Verdict tags */
+.motifi-screen.compare .cmp-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.motifi-screen.compare .cmp-tag.best   { color: var(--mint); }
+.motifi-screen.compare .cmp-tag.worst  { color: #E59A4A; }
+.motifi-screen.compare .cmp-tag.middle { color: var(--ink-3); }
+
+/* Position progress bar */
+.motifi-screen.compare .cmp-cell-bar {
+  margin-top: 8px;
+  height: 2px;
+  background: rgba(168, 184, 204, 0.12);
+  border-radius: 1px;
+  overflow: hidden;
+}
+.motifi-screen.compare .cmp-cell-bar i {
+  display: block;
+  height: 100%;
+  background: var(--ink-3);
+  transition: width 240ms ease;
+}
+.motifi-screen.compare .cmp-cell.best  .cmp-cell-bar i { background: var(--mint); }
+.motifi-screen.compare .cmp-cell.worst .cmp-cell-bar i { background: #E59A4A; }
+
+/* Empty / no differences */
+.motifi-screen.compare .cmp-no-diff {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 64px 40px;
+  text-align: center;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+.motifi-screen.compare .cmp-empty {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 96px 24px;
+  text-align: center;
+}
+.motifi-screen.compare .cmp-empty h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 40px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.motifi-screen.compare .cmp-empty p {
+  color: var(--ink-2);
+  margin: 0 0 28px;
+}
+
+/* ─── Verdict panel — light cream pull-quote band ─────────── */
+
+.motifi-screen.compare .cmp-verdict {
+  margin-top: 60px;
+  background: #F5F0E6;        /* cream — only light surface in the page */
+  color: #1A2E50;
+  padding: 80px 40px;
+}
+.motifi-screen.compare .cmp-verdict-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 64px;
+  align-items: start;
+}
+.motifi-screen.compare .cmp-verdict-l { min-width: 0; }
+.motifi-screen.compare .cmp-verdict-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #007A57;             /* mint-low — readable on cream */
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.motifi-screen.compare .cmp-verdict-h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 5vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin: 0 0 28px;
+  color: #1A2E50;
+  text-wrap: balance;
+}
+.motifi-screen.compare .cmp-verdict-h2 em {
+  font-style: italic;
+  color: #03392A;             /* mint-deep */
+  font-weight: 300;
+}
+.motifi-screen.compare .cmp-verdict-copy {
+  font-size: 17px;
+  line-height: 1.6;
+  color: #2A3F5C;
+  margin: 0;
+  max-width: 56ch;
+}
+.motifi-screen.compare .cmp-verdict-copy strong { font-weight: 700; color: #1A2E50; }
+.motifi-screen.compare .cmp-verdict-copy em { font-style: italic; }
+
+/* Right rail card */
+.motifi-screen.compare .cmp-verdict-card {
+  background: #FFFFFF;
+  border: 1px solid #E1E6EC;
+  border-radius: 6px;
+  padding: 22px;
+}
+.motifi-screen.compare .cmp-verdict-card-photo {
+  background: #F5F0E6;
+  border-radius: 4px;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+.motifi-screen.compare .cmp-verdict-card-photo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.motifi-screen.compare .cmp-verdict-card-tags {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #007A57;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.motifi-screen.compare .cmp-verdict-card-tags .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #007A57;
+}
+.motifi-screen.compare .cmp-verdict-card-name {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: #1A2E50;
+  margin: 0 0 8px;
+}
+.motifi-screen.compare .cmp-verdict-card-meta {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: #5A7090;
+  letter-spacing: 0.06em;
+  margin-bottom: 18px;
+}
+
+.motifi-screen.compare .cmp-verdict-card-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 0;
+  border-top: 1px solid #E1E6EC;
+  border-bottom: 1px solid #E1E6EC;
+  margin-bottom: 18px;
+}
+.motifi-screen.compare .cmp-reason {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+}
+.motifi-screen.compare .cmp-reason-arrow {
+  color: #007A57;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.motifi-screen.compare .cmp-reason-lab {
+  font-size: 13.5px;
+  color: #2A3F5C;
+  margin-bottom: 2px;
+}
+.motifi-screen.compare .cmp-reason-val {
+  font-family: var(--serif);
+  font-size: 18px;
+  font-weight: 400;
+  color: #1A2E50;
+  line-height: 1.2;
+}
+
+.motifi-screen.compare .cmp-verdict-card-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.motifi-screen.compare .cmp-verdict-card-cta .btn {
+  background: #1A2E50;
+  border-color: #1A2E50;
+  color: #F5F0E6;
+}
+.motifi-screen.compare .cmp-verdict-card-cta .btn:hover {
+  background: #0F1D35;
+  border-color: #0F1D35;
+}
+.motifi-screen.compare .cmp-verdict-card-cta .btn.ghost {
+  background: transparent;
+  color: #1A2E50;
+  border-color: #C9D2DC;
+}
+.motifi-screen.compare .cmp-verdict-card-cta .btn.ghost:hover {
+  border-color: #1A2E50;
+  background: rgba(26, 46, 80, 0.04);
+}
+
+/* ─── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .motifi-screen.compare .cmp-grid {
+    grid-template-columns: 180px repeat(3, 1fr);
+  }
+  .motifi-screen.compare .cmp-section-head {
+    grid-template-columns: 180px 1fr auto;
+  }
+  .motifi-screen.compare .cmp-verdict-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 900px) {
+  .motifi-screen.compare .cmp-head {
+    grid-template-columns: 1fr;
+    padding: 32px 24px 18px;
+  }
+  .motifi-screen.compare .cmp-head-r {
+    justify-content: flex-start;
+  }
+  .motifi-screen.compare .cmp-selected,
+  .motifi-screen.compare .cmp-hero,
+  .motifi-screen.compare .cmp-section {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .motifi-screen.compare .cmp-grid {
+    /* Switch to per-car horizontal scroll on narrow viewports.
+       Label column sticks left so the user can read row meaning. */
+    grid-template-columns: 140px repeat(3, minmax(220px, 1fr));
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .motifi-screen.compare .cmp-section-head {
+    grid-template-columns: 140px 1fr auto;
+    padding: 24px 0 14px;
+  }
+  .motifi-screen.compare .cmp-section-num {
+    padding-left: 0;
+  }
+  .motifi-screen.compare .cmp-cell-v { font-size: 22px; }
+  .motifi-screen.compare .cmp-row.headline .cmp-cell-v { font-size: 26px; }
+  .motifi-screen.compare .cmp-verdict {
+    padding: 48px 24px;
+  }
+}
