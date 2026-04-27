@@ -2711,3 +2711,559 @@
     padding: 48px 24px;
   }
 }
+/* ============================================================
+   COMPARE — Session 3.5 additions
+   New surfaces: landing (empty state), postcode modal, picker modal.
+   Plus enlarged hero empty slot + header button row tweaks.
+   Append-only — does not modify earlier rules.
+   ============================================================ */
+
+/* ─── Landing (empty state) ──────────────────────────────── */
+
+.motifi-screen.compare .cmp-landing {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 48px 40px 80px;
+}
+.motifi-screen.compare .cmp-landing-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: end;
+  margin-bottom: 48px;
+}
+.motifi-screen.compare .cmp-landing-l { min-width: 0; }
+.motifi-screen.compare .cmp-landing-r {
+  display: flex;
+  align-items: center;
+}
+
+.motifi-screen.compare .cmp-landing-card {
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  padding: 96px 40px 88px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.motifi-screen.compare .cmp-landing-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.motifi-screen.compare .cmp-landing-h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(36px, 4.5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+.motifi-screen.compare .cmp-landing-lede {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 60ch;
+  margin: 0 0 36px;
+}
+
+@media (max-width: 900px) {
+  .motifi-screen.compare .cmp-landing {
+    padding: 32px 24px 64px;
+  }
+  .motifi-screen.compare .cmp-landing-head {
+    grid-template-columns: 1fr;
+  }
+  .motifi-screen.compare .cmp-landing-card {
+    padding: 56px 24px 48px;
+  }
+}
+
+/* ─── Header right rail — accommodate new buttons ────────── */
+/* Override Session 3 spacing so View toggle + Clear all + Share + Export
+   fit on one row at desktop widths without wrapping awkwardly. */
+
+.motifi-screen.compare .cmp-head-r {
+  gap: 10px;
+}
+@media (max-width: 1200px) {
+  .motifi-screen.compare .cmp-head-r {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+/* ─── Hero empty slot — enlarged hollow circle ───────────── */
+/* Replace Session 3's smaller dashed treatment with the prototype's
+   hollow mint circle. Hover state lights it up. */
+
+.motifi-screen.compare .cmp-col-empty {
+  background: transparent !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--sans);
+  color: var(--ink-3);
+  padding: 28px 24px;
+  /* Faint diagonal hatch keeps it visually quiet */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 10px,
+    rgba(168, 184, 204, 0.04) 10px,
+    rgba(168, 184, 204, 0.04) 11px
+  ) !important;
+}
+.motifi-screen.compare .cmp-col-empty.quiet {
+  cursor: default;
+}
+.motifi-screen.compare .cmp-col-empty.interactive {
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+.motifi-screen.compare .cmp-col-empty.interactive:hover {
+  background-image: none !important;
+  background-color: rgba(0, 200, 150, 0.05) !important;
+}
+
+.motifi-screen.compare .cmp-col-empty-circle {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.motifi-screen.compare .cmp-col-empty.interactive:hover .cmp-col-empty-circle {
+  border-color: var(--mint);
+  background: rgba(0, 200, 150, 0.08);
+  transform: translateY(-2px);
+}
+.motifi-screen.compare .cmp-col-empty-plus {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: 56px;
+  line-height: 1;
+  color: var(--ink-3);
+  transition: color 180ms ease;
+}
+.motifi-screen.compare .cmp-col-empty.interactive:hover .cmp-col-empty-plus {
+  color: var(--mint);
+}
+.motifi-screen.compare .cmp-col-empty-lab {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.motifi-screen.compare .cmp-col-empty-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+
+/* Quiet variant for 2nd / 3rd empty slots — show the hatch only. */
+.motifi-screen.compare .cmp-col-empty.quiet .cmp-col-empty-circle,
+.motifi-screen.compare .cmp-col-empty.quiet .cmp-col-empty-lab,
+.motifi-screen.compare .cmp-col-empty.quiet .cmp-col-empty-sub {
+  display: none;
+}
+
+/* ─── Modal scaffolding (shared between postcode + picker) ─ */
+
+.cmp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 29, 53, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: cmp-modal-fade 200ms ease-out;
+}
+@keyframes cmp-modal-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cmp-modal-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.cmp-modal-kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.cmp-modal-h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(32px, 3.6vw, 48px);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin: 0 0 14px;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.cmp-modal-h2 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 300;
+}
+.cmp-modal-lede {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 0 24px;
+  max-width: 56ch;
+}
+
+/* ─── Postcode modal ─────────────────────────────────────── */
+
+.cmp-postcode-modal {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 14px;
+  padding: 36px 40px 32px;
+  width: min(100%, 480px);
+  color: var(--ink);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  animation: cmp-modal-pop 220ms ease-out;
+}
+.cmp-postcode-modal .cmp-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.cmp-postcode-modal input[type="text"] {
+  background: var(--bg-2);
+  color: var(--ink);
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: var(--sans);
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  outline: none;
+  transition: border-color 150ms ease;
+  text-transform: uppercase;
+}
+.cmp-postcode-modal input[type="text"]:focus {
+  border-color: var(--mint);
+}
+.cmp-postcode-modal input[type="text"][aria-invalid="true"] {
+  border-color: #E59A4A;
+}
+.cmp-postcode-modal .cmp-modal-hint {
+  font-size: 12.5px;
+  color: #E59A4A;
+  line-height: 1.5;
+}
+.cmp-postcode-modal .cmp-modal-hint code {
+  font-family: var(--mono);
+  background: rgba(229, 154, 74, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11.5px;
+}
+.cmp-postcode-modal .cmp-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ─── Picker modal ───────────────────────────────────────── */
+
+.cmp-picker-modal {
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  width: min(100%, 1180px);
+  max-height: min(92vh, 880px);
+  display: flex;
+  flex-direction: column;
+  color: var(--ink);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  animation: cmp-modal-pop 240ms ease-out;
+  overflow: hidden;
+}
+.cmp-picker-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 32px 40px 24px;
+  border-bottom: 1px solid var(--rule);
+}
+.cmp-picker-close {
+  background: transparent;
+  border: 1px solid var(--rule);
+  color: var(--ink-2);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 150ms ease;
+}
+.cmp-picker-close:hover { color: var(--ink); border-color: var(--ink-3); }
+
+/* Controls — search + chips */
+.cmp-picker-controls {
+  padding: 20px 40px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.cmp-picker-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.cmp-picker-search-glyph {
+  position: absolute;
+  left: 18px;
+  font-size: 17px;
+  color: var(--ink-3);
+  pointer-events: none;
+}
+.cmp-picker-search input {
+  width: 100%;
+  background: var(--bg-2);
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 14px 20px 14px 46px;
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+.cmp-picker-search input:focus {
+  border-color: var(--mint);
+}
+.cmp-picker-search input::placeholder {
+  color: var(--ink-3);
+}
+
+.cmp-picker-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cmp-picker-chip {
+  background: transparent;
+  border: 1.5px solid var(--rule-strong);
+  color: var(--ink-2);
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 150ms ease;
+}
+.cmp-picker-chip:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+.cmp-picker-chip.on {
+  background: var(--mint);
+  border-color: var(--mint);
+  color: var(--mint-deep);
+}
+
+/* Card grid */
+.cmp-picker-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 40px 22px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.cmp-picker-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px 14px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--sans);
+  color: var(--ink);
+  transition: all 150ms ease;
+}
+.cmp-picker-card:hover {
+  border-color: var(--mint);
+  background: rgba(0, 200, 150, 0.04);
+  transform: translateY(-1px);
+}
+.cmp-picker-card.selected {
+  border-color: var(--mint);
+  background: rgba(0, 200, 150, 0.08);
+  cursor: default;
+}
+.cmp-picker-card.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.cmp-picker-card-photo {
+  width: 96px;
+  height: 64px;
+  background: var(--bg-3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.cmp-picker-card-photo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.cmp-picker-card-body {
+  min-width: 0;
+}
+.cmp-picker-card-brand {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.cmp-picker-card-name {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin-bottom: 6px;
+  /* truncate long model names rather than wrap awkwardly */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmp-picker-card-meta {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cmp-picker-card-add {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid var(--mint);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mint);
+  font-family: var(--sans);
+  font-size: 20px;
+  font-weight: 300;
+  flex-shrink: 0;
+  transition: all 150ms ease;
+}
+.cmp-picker-card:hover .cmp-picker-card-add {
+  background: var(--mint);
+  color: var(--mint-deep);
+}
+.cmp-picker-card.selected .cmp-picker-card-add {
+  background: var(--mint);
+  color: var(--mint-deep);
+  font-size: 16px;
+}
+
+.cmp-picker-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 24px;
+  color: var(--ink-3);
+  font-size: 14px;
+}
+
+/* Footer */
+.cmp-picker-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 40px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.cmp-picker-foot strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* ─── Modal responsive ───────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .cmp-modal-backdrop { padding: 12px; align-items: flex-end; }
+  .cmp-postcode-modal {
+    padding: 28px 24px 24px;
+    width: 100%;
+    border-radius: 14px;
+  }
+  .cmp-postcode-modal input[type="text"] {
+    font-size: 16px;
+  }
+  .cmp-picker-modal {
+    border-radius: 14px;
+    max-height: 92vh;
+  }
+  .cmp-picker-head { padding: 24px 24px 18px; }
+  .cmp-picker-controls { padding: 16px 24px 14px; }
+  .cmp-picker-grid {
+    grid-template-columns: 1fr;
+    padding: 14px 24px 18px;
+  }
+  .cmp-picker-foot {
+    padding: 14px 24px;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+}
