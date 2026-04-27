@@ -1,15 +1,18 @@
-// CompareFlow.jsx — Session 3
-// Full editorial rebuild.
+// CompareFlow.jsx — Session 3.5
+// Reworked entry & picker flow.
 //
-// Three steps preserved from v1:
-//   - 'details' — postcode + payment method + deposit (cold-from-Home entry)
-//   - 'select'  — pick up to 3 cars
-//   - 'results' — the comparison view itself (the big rebuild)
+// Steps:
+//   1. landing  — empty "Pick your contenders." page (only when no cars + no postcode)
+//   2. picker   — modal: search + body-type multi-select + 2-col grid (replaces old Select step)
+//   3. results  — comparison view (always shown if at least 1 car is selected)
 //
-// New `preloaded={{ cars, answers }}` prop (from Session 2) still works:
-//   when present, mount directly in 'results' with those cars/answers.
+// Postcode is collected once (centred modal) before the picker first opens.
+// Persisted on the answers object for the rest of the session.
+//
+// Warm-from-Results path (`preloaded`) skips landing AND postcode entirely:
+// Cooper already collected postcode on review screen, so we trust it.
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import TopNav from './TopNav'
 import carsData from './data/cars.json'
 import { getYearOneCost, getRepresentativePrice, getRetainedAfter48Months } from './scoring/costs.jsx'
@@ -17,8 +20,8 @@ import { buildComparison, getOverallVerdict } from './scoring/verdict.jsx'
 import './design/tokens.css'
 import './design/screens.css'
 
-// ─── Markdown helper (bold + italic) ──────────────────────────────────────────
-// Used to render the verdict panel's prose with **bold** and *italic* spans.
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 function renderMarkdown(text) {
   if (!text) return null
   const out = []
@@ -43,7 +46,6 @@ function renderMarkdown(text) {
   return out
 }
 
-// ─── Imagin URL builder (stays inline, matches existing pattern) ──────────────
 function imaginUrl(car) {
   const make    = (car.make || '').toLowerCase()
   const family  = (car.model || '').split(' ')[0].toLowerCase()
@@ -52,154 +54,163 @@ function imaginUrl(car) {
 }
 
 const fmtGBP = (n) => '£' + Math.round(Number(n) || 0).toLocaleString('en-GB')
-
-// Letters used to label car columns in the prototype: A / B / C.
 const COL_LETTERS = ['A', 'B', 'C']
+const MAX_CARS = 3
+
+// UK postcode regex — accepts standard formats with or without internal space.
+// Source-of-truth for validation; the polite hint fires when this fails.
+const POSTCODE_REGEX = /^[A-Z]{1,2}\d{1,2}[A-Z]?\s*\d[A-Z]{2}$/i
+
+// Body types that show as picker chips. Single source for chip generation.
+const BODY_TYPES = ['Hatchback', 'SUV', 'Estate', 'Saloon', 'Crossover', 'MPV', 'Coupe', 'Van']
+
+// Tiny debounce hook for the picker search box.
+function useDebounced(value, delay = 150) {
+  const [v, setV] = useState(value)
+  useEffect(() => {
+    const t = setTimeout(() => setV(value), delay)
+    return () => clearTimeout(t)
+  }, [value, delay])
+  return v
+}
 
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export default function CompareFlow({ onBack, onSelectCar, onHome, onCompare, preloaded }) {
-  const [step, setStep]                   = useState(preloaded ? 'results' : 'details')
-  const [answers, setAnswers]             = useState(preloaded?.answers || {})
-  const [selectedCars, setSelectedCars]   = useState(preloaded?.cars?.slice(0, 3) || [])
-  const [brandFilter, setBrandFilter]     = useState('')
-  const [bodyFilter, setBodyFilter]       = useState('')
-  const [results, setResults]             = useState(preloaded?.cars?.slice(0, 3) || [])
-  const [viewMode, setViewMode]           = useState('full') // 'full' | 'differences'
+  // Initialise from preloaded if Cooper-warm; otherwise empty cold start.
+  const [answers, setAnswers]           = useState(preloaded?.answers || {})
+  const [selectedCars, setSelectedCars] = useState(preloaded?.cars?.slice(0, MAX_CARS) || [])
+  const [viewMode, setViewMode]         = useState('full') // 'full' | 'differences'
 
-  const isFinance = ['Hire Purchase', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)']
-    .includes(answers?.purchaseMethod || answers?.paymentMethod)
+  // UI state — modals
+  const [postcodeModalOpen, setPostcodeModalOpen] = useState(false)
+  const [pickerOpen, setPickerOpen]               = useState(false)
 
-  // ─── Step routing ──────────────────────────────────────────────────────────
+  const hasPostcode = !!(answers?.postcode && POSTCODE_REGEX.test(answers.postcode))
 
-  if (step === 'results') {
-    return (
-      <CompareResults
-        cars={results}
-        answers={answers}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
-        onClearAll={() => {
-          setResults([])
-          setSelectedCars([])
-          if (preloaded) onBack()
-          else setStep('select')
-        }}
-        onRemoveCar={(idx) => {
-          const next = results.filter((_, i) => i !== idx)
-          setResults(next)
-          setSelectedCars(next)
-          if (next.length === 0) {
-            if (preloaded) onBack()
-            else setStep('select')
-          }
-        }}
-        onAddCar={() => setStep('select')}
-        onSelectCar={onSelectCar}
-        onHome={onHome}
-        onCompare={onCompare}
-      />
-    )
+  // Trigger the picker. If postcode isn't on file, ask for it first; the
+  // modal sets postcode then re-fires this function.
+  function openPicker() {
+    if (!hasPostcode) {
+      setPostcodeModalOpen(true)
+      return
+    }
+    setPickerOpen(true)
   }
 
-  if (step === 'select') {
-    return (
-      <CompareSelect
-        cars={carsData}
-        selectedCars={selectedCars}
-        setSelectedCars={setSelectedCars}
-        brandFilter={brandFilter}
-        setBrandFilter={setBrandFilter}
-        bodyFilter={bodyFilter}
-        setBodyFilter={setBodyFilter}
-        onBack={() => setStep('details')}
-        onCompare={() => {
-          setResults(selectedCars)
-          setStep('results')
-        }}
-        onHome={onHome}
-        onCompareNav={onCompare}
-      />
-    )
+  function onPostcodeConfirmed(postcode) {
+    setAnswers(prev => ({ ...prev, postcode }))
+    setPostcodeModalOpen(false)
+    // After confirming postcode, immediately open the picker — that's what
+    // the user was trying to do.
+    setPickerOpen(true)
   }
 
-  // step === 'details'
+  function addCar(car) {
+    if (selectedCars.length >= MAX_CARS) return
+    const key = `${car.make}|${car.model}|${car.generationName}`
+    const exists = selectedCars.some(c => `${c.make}|${c.model}|${c.generationName}` === key)
+    if (exists) return
+    setSelectedCars(prev => [...prev, car])
+  }
+
+  function removeCar(idx) {
+    setSelectedCars(prev => prev.filter((_, i) => i !== idx))
+  }
+
+  function clearAll() {
+    setSelectedCars([])
+  }
+
+  // ─── Routing ──────────────────────────────────────────────────────────────
+  // Show landing page when there are no cars yet AND we're not warm-loaded
+  // from Cooper. Otherwise show the comparison view.
+  const showLanding = selectedCars.length === 0
+
   return (
-    <CompareDetails
-      answers={answers}
-      setAnswers={setAnswers}
-      isFinance={isFinance}
-      onBack={onBack}
-      onContinue={() => setStep('select')}
-      onHome={onHome}
-      onCompare={onCompare}
-    />
+    <>
+      {showLanding ? (
+        <CompareLanding
+          onBrowse={openPicker}
+          onAddCar={openPicker}
+          onHome={onHome}
+          onCompare={onCompare}
+        />
+      ) : (
+        <CompareResults
+          cars={selectedCars}
+          answers={answers}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onClearAll={clearAll}
+          onRemoveCar={removeCar}
+          onAddCar={openPicker}
+          onSelectCar={onSelectCar}
+          onHome={onHome}
+          onCompare={onCompare}
+        />
+      )}
+
+      {postcodeModalOpen && (
+        <PostcodeModal
+          initial={answers?.postcode || ''}
+          onCancel={() => setPostcodeModalOpen(false)}
+          onConfirm={onPostcodeConfirmed}
+        />
+      )}
+
+      {pickerOpen && (
+        <PickerModal
+          allCars={carsData}
+          selectedCars={selectedCars}
+          onClose={() => setPickerOpen(false)}
+          onAdd={(car) => {
+            addCar(car)
+            // Close after add when this would fill the last slot — otherwise
+            // keep open so the user can add a second/third in one session.
+            if (selectedCars.length + 1 >= MAX_CARS) {
+              setPickerOpen(false)
+            }
+          }}
+        />
+      )}
+    </>
   )
 }
 
-// ─── Details step ────────────────────────────────────────────────────────────
+// ─── Landing — empty state ───────────────────────────────────────────────────
 
-function CompareDetails({ answers, setAnswers, isFinance, onBack, onContinue, onHome, onCompare }) {
+function CompareLanding({ onBrowse, onAddCar, onHome, onCompare }) {
   return (
-    <div className="motifi-screen compare-pre">
+    <div className="motifi-screen compare">
       <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompare} />
 
-      <div className="cmp-pre">
-        <div className="kicker">◆ Compare cars · Step 1 of 2</div>
-        <h1>Already know what you're <em>looking for?</em></h1>
-        <p className="lede">
-          Tell us a bit about how you're paying and we'll show you the true four-year
-          cost for every car you put head-to-head.
-        </p>
+      <div className="cmp-landing">
+        <div className="cmp-landing-head">
+          <div className="cmp-landing-l">
+            <div className="cmp-head-kicker">◆ Comparison · Empty</div>
+            <h1 className="cmp-head-h1">
+              Pick your<br /><em>contenders.</em>
+            </h1>
+          </div>
+          <div className="cmp-landing-r">
+            <button className="btn lg" onClick={onAddCar}>
+              Add a car<span className="arrow" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
 
-        <div className="cmp-pre-form">
-          <label>
-            <span className="lbl">Your postcode</span>
-            <input
-              type="text"
-              placeholder="e.g. SW1A 1AA"
-              value={answers.postcode || ''}
-              onChange={e => setAnswers(p => ({ ...p, postcode: e.target.value }))}
-            />
-          </label>
-
-          <label>
-            <span className="lbl">How are you planning to pay?</span>
-            <div className="cmp-pre-chips">
-              {['Cash', 'Part Exchange', 'Hire Purchase', 'Bank Loan'].map(opt => {
-                const selected = (answers.paymentMethod || answers.purchaseMethod) === opt
-                return (
-                  <button
-                    key={opt}
-                    type="button"
-                    className={'cmp-pre-chip' + (selected ? ' selected' : '')}
-                    onClick={() => setAnswers(p => ({ ...p, paymentMethod: opt, purchaseMethod: opt }))}
-                  >
-                    {opt}
-                  </button>
-                )
-              })}
-            </div>
-          </label>
-
-          {isFinance && (
-            <label>
-              <span className="lbl">Deposit amount (£)</span>
-              <input
-                type="number"
-                placeholder="e.g. 2000"
-                value={answers.depositAmount || ''}
-                onChange={e => setAnswers(p => ({ ...p, depositAmount: e.target.value }))}
-              />
-            </label>
-          )}
-
-          <button
-            className="btn lg"
-            onClick={onContinue}
-            disabled={!(answers.paymentMethod || answers.purchaseMethod)}
-          >
-            Choose my cars<span className="arrow" aria-hidden="true"></span>
+        <div className="cmp-landing-card">
+          <div className="cmp-landing-kicker">◆ Nothing to compare</div>
+          <h2 className="cmp-landing-h2">
+            Add up to 3 cars to begin.
+          </h2>
+          <p className="cmp-landing-lede">
+            We'll line them up on 18 metrics across cost, ownership, practicality
+            and reliability — and pick a winner on true four-year cost.
+          </p>
+          <button className="btn lg" onClick={onBrowse}>
+            Browse the index<span className="arrow" aria-hidden="true"></span>
           </button>
         </div>
       </div>
@@ -207,131 +218,236 @@ function CompareDetails({ answers, setAnswers, isFinance, onBack, onContinue, on
   )
 }
 
-// ─── Select step ─────────────────────────────────────────────────────────────
+// ─── Postcode modal ──────────────────────────────────────────────────────────
 
-function CompareSelect({
-  cars, selectedCars, setSelectedCars,
-  brandFilter, setBrandFilter, bodyFilter, setBodyFilter,
-  onBack, onCompare, onHome, onCompareNav,
-}) {
-  const brands = useMemo(() => [...new Set(cars.map(c => c.make))].sort(), [cars])
-  const bodyTypes = ['Hatchback', 'Saloon', 'Estate', 'SUV', 'Crossover', 'MPV', 'Coupe', 'Van']
+function PostcodeModal({ initial, onCancel, onConfirm }) {
+  const [v, setV]         = useState(initial || '')
+  const [touched, setTouched] = useState(false)
 
-  const filtered = useMemo(() => cars
-    .filter(car => {
-      const matchBrand = !brandFilter || car.make === brandFilter
-      const matchBody  = !bodyFilter  || (car.bodyType || '').toLowerCase().includes(bodyFilter.toLowerCase())
-      return matchBrand && matchBody
-    })
-    .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`)),
-    [cars, brandFilter, bodyFilter]
-  )
+  const isValid = POSTCODE_REGEX.test(v.trim())
+  const showHint = touched && !isValid && v.length > 0
 
-  function toggle(car) {
-    const key = `${car.make} ${car.model} ${car.generationName}`
-    const exists = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}` === key)
-    if (exists) {
-      setSelectedCars(prev => prev.filter(c => `${c.make} ${c.model} ${c.generationName}` !== key))
-    } else if (selectedCars.length < 3) {
-      setSelectedCars(prev => [...prev, car])
-    }
+  function submit(e) {
+    e?.preventDefault?.()
+    setTouched(true)
+    if (!isValid) return
+    onConfirm(v.trim().toUpperCase())
   }
 
-  return (
-    <div className="motifi-screen compare-pre">
-      <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompareNav} />
+  // ESC closes
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onCancel() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onCancel])
 
-      <div className="cmp-pre">
-        <div className="kicker">◆ Compare cars · Step 2 of 2</div>
-        <h1>Choose up to <em>three.</em></h1>
-        <p className="lede">
-          Filter by brand or body type to narrow the list. The order you pick them in
-          becomes the column order on the comparison page.
+  return (
+    <div className="cmp-modal-backdrop" onClick={onCancel}>
+      <div className="cmp-postcode-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="cmp-modal-kicker">◆ One thing first</div>
+        <h2 className="cmp-modal-h2">
+          What's your <em>postcode?</em>
+        </h2>
+        <p className="cmp-modal-lede">
+          We use it to surface live local listings on the cars you compare.
+          Stored only for this session.
         </p>
 
-        <div className="cmp-select-filters">
-          <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)}>
-            <option value="">All brands</option>
-            {brands.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
-          <select value={bodyFilter} onChange={e => setBodyFilter(e.target.value)}>
-            <option value="">All body types</option>
-            {bodyTypes.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
+        <form className="cmp-modal-form" onSubmit={submit}>
+          <input
+            type="text"
+            value={v}
+            placeholder="e.g. SW1A 1AA"
+            autoFocus
+            autoCapitalize="characters"
+            onChange={(e) => { setV(e.target.value); if (touched) setTouched(false) }}
+            aria-invalid={showHint}
+          />
+          {showHint && (
+            <div className="cmp-modal-hint">
+              That doesn't look like a UK postcode. Try the full form, e.g. <code>SW1A 1AA</code>.
+            </div>
+          )}
+          <div className="cmp-modal-actions">
+            <button type="button" className="btn ghost" onClick={onCancel}>Cancel</button>
+            <button type="submit" className="btn" disabled={!isValid}>
+              Continue<span className="arrow" aria-hidden="true"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ─── Picker modal ────────────────────────────────────────────────────────────
+
+function PickerModal({ allCars, selectedCars, onClose, onAdd }) {
+  const [query, setQuery]                 = useState('')
+  const [bodyFilters, setBodyFilters]     = useState(new Set())
+  const debouncedQuery                    = useDebounced(query, 150)
+
+  // ESC closes the modal
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  function toggleBody(b) {
+    setBodyFilters(prev => {
+      const next = new Set(prev)
+      if (next.has(b)) next.delete(b)
+      else next.add(b)
+      return next
+    })
+  }
+  function clearBodyFilters() { setBodyFilters(new Set()) }
+
+  const selectedKeys = useMemo(
+    () => new Set(selectedCars.map(c => `${c.make}|${c.model}|${c.generationName}`)),
+    [selectedCars]
+  )
+
+  const filtered = useMemo(() => {
+    const q = debouncedQuery.trim().toLowerCase()
+    return allCars
+      .filter(car => {
+        // Body filter — multi-select OR. Empty set = no filter.
+        if (bodyFilters.size > 0 && !bodyFilters.has(car.bodyType)) return false
+        if (!q) return true
+        // Search — make / model / body / fuel / generation name. Case-insensitive.
+        const haystack = [
+          car.make, car.model, car.bodyType, car.fuelType,
+          car.transmission, car.generationName, car.generationYears
+        ].filter(Boolean).join(' ').toLowerCase()
+        return haystack.includes(q)
+      })
+      .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
+  }, [allCars, debouncedQuery, bodyFilters])
+
+  const totalShown = filtered.length
+  const totalIndex = allCars.length
+  const slotsLeft  = MAX_CARS - selectedCars.length
+
+  return (
+    <div className="cmp-modal-backdrop" onClick={onClose}>
+      <div className="cmp-picker-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="cmp-picker-head">
+          <div>
+            <div className="cmp-modal-kicker">
+              ◆ Add to comparison · {selectedCars.length}/{MAX_CARS} slots used
+            </div>
+            <h2 className="cmp-modal-h2">
+              Which car <em>next?</em>
+            </h2>
+          </div>
+          <button className="cmp-picker-close" onClick={onClose} aria-label="Close">×</button>
         </div>
 
-        {selectedCars.length > 0 && (
-          <div className="cmp-select-pills">
-            <span className="cmp-select-pills-lab">SELECTED · {selectedCars.length} of 3</span>
-            <div className="cmp-select-pills-row">
-              {selectedCars.map((car, i) => (
-                <span key={`${car.make}${car.model}${i}`} className="cmp-select-pill">
-                  <span className="opt">{COL_LETTERS[i]}</span>
-                  {car.make} {car.model}
-                  <button onClick={() => toggle(car)} aria-label="Remove">×</button>
-                </span>
-              ))}
-            </div>
+        <div className="cmp-picker-controls">
+          <div className="cmp-picker-search">
+            <span className="cmp-picker-search-glyph" aria-hidden="true">⌕</span>
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by make, model or body style…"
+              autoFocus
+            />
           </div>
-        )}
+          <div className="cmp-picker-chips">
+            <button
+              type="button"
+              className={'cmp-picker-chip' + (bodyFilters.size === 0 ? ' on' : '')}
+              onClick={clearBodyFilters}
+            >
+              All
+            </button>
+            {BODY_TYPES.map(b => (
+              <button
+                key={b}
+                type="button"
+                className={'cmp-picker-chip' + (bodyFilters.has(b) ? ' on' : '')}
+                onClick={() => toggleBody(b)}
+              >
+                {b}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <div className="cmp-select-list">
+        <div className="cmp-picker-grid">
           {filtered.map(car => {
-            const key = `${car.make} ${car.model} ${car.generationName}`
-            const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}` === key)
-            const disabled = !selected && selectedCars.length >= 3
+            const key = `${car.make}|${car.model}|${car.generationName}`
+            const isSelected = selectedKeys.has(key)
+            const isFull     = !isSelected && slotsLeft <= 0
+            const score      = Math.round((Number(car.reliabilityPct) || 0))
             return (
               <button
                 key={key}
                 type="button"
-                className={'cmp-select-row' + (selected ? ' selected' : '') + (disabled ? ' disabled' : '')}
-                onClick={() => !disabled && toggle(car)}
+                className={'cmp-picker-card'
+                  + (isSelected ? ' selected' : '')
+                  + (isFull ? ' disabled' : '')}
+                onClick={() => { if (!isSelected && !isFull) onAdd(car) }}
+                disabled={isSelected || isFull}
               >
-                <span className="cmp-select-row-name">
-                  <strong>{car.make} {car.model}</strong>
-                  <span className="trim">{car.generationName} · {car.generationYears}</span>
+                <div className="cmp-picker-card-photo">
+                  <img
+                    src={imaginUrl(car)}
+                    alt={`${car.make} ${car.model}`}
+                    loading="lazy"
+                    onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
+                  />
+                </div>
+                <div className="cmp-picker-card-body">
+                  <div className="cmp-picker-card-brand">
+                    ◆ {(car.make || '').toUpperCase()}
+                  </div>
+                  <div className="cmp-picker-card-name">{car.model}</div>
+                  <div className="cmp-picker-card-meta">
+                    {fmtGBP(getRepresentativePrice(car))} · {car.bodyType} · {car.fuelType?.split(',')[0]?.trim()} · {score}/100
+                  </div>
+                </div>
+                <span className="cmp-picker-card-add" aria-hidden="true">
+                  {isSelected ? '✓' : '+'}
                 </span>
-                <span className="cmp-select-row-price">{fmtGBP(getRepresentativePrice(car))}</span>
               </button>
             )
           })}
+          {filtered.length === 0 && (
+            <div className="cmp-picker-empty">
+              No cars match your filters. Try clearing them or searching for a make.
+            </div>
+          )}
         </div>
 
-        <div className="cmp-select-cta">
-          <button className="btn ghost" onClick={onBack}>
-            <span className="arrow back" aria-hidden="true"></span> Back
-          </button>
-          <button className="btn lg" onClick={onCompare} disabled={selectedCars.length < 1}>
-            Compare {selectedCars.length} {selectedCars.length === 1 ? 'car' : 'cars'}
-            <span className="arrow" aria-hidden="true"></span>
-          </button>
+        <div className="cmp-picker-foot">
+          <span>Showing <strong>{totalShown}</strong> of {totalIndex} in index</span>
+          <span>◆ Press Esc or click outside to close</span>
         </div>
       </div>
     </div>
   )
 }
 
-// ─── Comparison view (the big one) ───────────────────────────────────────────
+// ─── Comparison view (largely unchanged from Session 3) ──────────────────────
 
 function CompareResults({
   cars, answers, viewMode, setViewMode,
   onClearAll, onRemoveCar, onAddCar, onSelectCar,
   onHome, onCompare,
 }) {
-  // Build the metric grid + verdict once per render.
-  // useMemo ensures we don't recompute on cosmetic state changes.
   const { sections, totalMetrics } = useMemo(
     () => buildComparison(cars, answers),
     [cars, answers]
   )
   const verdict = useMemo(
-    () => getOverallVerdict(cars, answers),
+    () => (cars.length >= 2 ? getOverallVerdict(cars, answers) : null),
     [cars, answers]
   )
 
-  // Filter rows when view mode is 'differences'. A row "differs" if at least
-  // one cell carries a 'best' or 'worst' verdict — i.e. there's spread in
-  // the values. All-middle rows get hidden.
   const visibleSections = useMemo(() => {
     if (viewMode === 'full') return sections
     return sections.map(s => ({
@@ -340,32 +456,17 @@ function CompareResults({
     })).filter(s => s.rows.length > 0)
   }, [sections, viewMode])
 
-  if (cars.length === 0) {
-    return (
-      <div className="motifi-screen compare">
-        <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompare} />
-        <div className="cmp-empty">
-          <h1>No cars selected.</h1>
-          <p>Add at least one car to start comparing.</p>
-          <button className="btn lg" onClick={onAddCar}>
-            Add a car<span className="arrow" aria-hidden="true"></span>
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  const slotsLeft = Math.max(0, 3 - cars.length)
+  const slotsLeft = Math.max(0, MAX_CARS - cars.length)
 
   return (
     <div className="motifi-screen compare">
       <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompare} />
 
-      {/* ─── Page header ───────────────────────────────────────────────────── */}
+      {/* Page header */}
       <div className="cmp-head">
         <div className="cmp-head-l">
           <div className="cmp-head-kicker">
-            ◆ Comparison · {cars.length} of up to 3 cars · {totalMetrics} metrics
+            ◆ Comparison · {cars.length} of up to {MAX_CARS} cars · {totalMetrics} metrics
           </div>
           <h1 className="cmp-head-h1">
             Head <br />to <em>head.</em>
@@ -390,10 +491,16 @@ function CompareResults({
             >Differences only</button>
           </div>
           <button className="btn ghost sm" onClick={onClearAll}>Clear all</button>
+          <button className="btn ghost sm" onClick={() => { /* TODO Session 7 */ }}>
+            Share results<span className="arrow" aria-hidden="true"></span>
+          </button>
+          <button className="btn ghost sm" onClick={() => { /* TODO Session 7 */ }}>
+            Export PDF<span className="arrow" aria-hidden="true"></span>
+          </button>
         </div>
       </div>
 
-      {/* ─── Selected pills row ────────────────────────────────────────────── */}
+      {/* Selected pills */}
       <div className="cmp-selected">
         <span className="cmp-selected-lab">◆ Selected</span>
         <div className="cmp-selected-row">
@@ -412,9 +519,9 @@ function CompareResults({
         </div>
       </div>
 
-      {/* ─── Hero strip — metric column + 1–3 car columns ─────────────────── */}
+      {/* Hero strip */}
       <div className="cmp-hero">
-        <CompareGrid cars={cars}>
+        <CompareGrid>
           <div className="cmp-hero-meta">
             <div className="cmp-hero-meta-kicker">◆ Metric</div>
             <h2 className="cmp-hero-meta-h2">{totalMetrics} points <br />of truth</h2>
@@ -432,11 +539,18 @@ function CompareResults({
               answers={answers}
             />
           ))}
-          {slotsLeft > 0 && <EmptySlotHero slotsLeft={slotsLeft} onAdd={onAddCar} />}
+          {Array.from({ length: slotsLeft }).map((_, i) => (
+            <EmptySlotHero
+              key={`empty-${i}`}
+              slotsLeft={slotsLeft}
+              isFirstEmpty={i === 0}
+              onAdd={onAddCar}
+            />
+          ))}
         </CompareGrid>
       </div>
 
-      {/* ─── Metric sections ───────────────────────────────────────────────── */}
+      {/* Metric sections */}
       {visibleSections.map(section => (
         <Section key={section.id} section={section} cars={cars} slotsLeft={slotsLeft} />
       ))}
@@ -447,25 +561,17 @@ function CompareResults({
         </div>
       )}
 
-      {/* ─── Verdict panel ─────────────────────────────────────────────────── */}
+      {/* Verdict panel — only with 2+ cars */}
       {verdict && cars.length >= 2 && (
-        <VerdictPanel
-          verdict={verdict}
-          onSelectCar={onSelectCar}
-        />
+        <VerdictPanel verdict={verdict} onSelectCar={onSelectCar} />
       )}
     </div>
   )
 }
 
-// ─── Compare grid — shared layout primitive ──────────────────────────────────
-// 4 fixed columns (label + 3 cars) regardless of how many cars are picked.
-// Empty slots fade visually so the rhythm stays consistent.
 function CompareGrid({ children }) {
   return <div className="cmp-grid">{children}</div>
 }
-
-// ─── Car column hero ─────────────────────────────────────────────────────────
 
 function CarColumnHero({ car, optLetter, onRemove, answers }) {
   const cy        = getYearOneCost(car, answers)
@@ -483,12 +589,10 @@ function CarColumnHero({ car, optLetter, onRemove, answers }) {
         </span>
         <button className="cmp-col-x" onClick={onRemove} aria-label="Remove">×</button>
       </div>
-
       <h3 className="cmp-col-name">{car.model}</h3>
       <div className="cmp-col-trim">
         {[car.generationName, car.transmission, car.generationYears].filter(Boolean).join(' · ')}
       </div>
-
       <div className="cmp-col-photo">
         <img
           src={imaginUrl(car)}
@@ -496,7 +600,6 @@ function CarColumnHero({ car, optLetter, onRemove, answers }) {
           onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
         />
       </div>
-
       <div className="cmp-col-price">
         <span className="v">{fmtGBP(repPrice)}</span>
         {monthly && <span className="mo">{fmtGBP(monthly)}/mo</span>}
@@ -505,19 +608,23 @@ function CarColumnHero({ car, optLetter, onRemove, answers }) {
   )
 }
 
-// ─── Empty slot ──────────────────────────────────────────────────────────────
-
-function EmptySlotHero({ slotsLeft, onAdd }) {
+// Empty slot in the hero strip — large hollow mint circle. Hover grey→mint.
+// Only the first empty slot gets the interactive treatment; subsequent empty
+// slots render as quiet placeholders so the row visual doesn't get noisy.
+function EmptySlotHero({ slotsLeft, isFirstEmpty, onAdd }) {
+  if (!isFirstEmpty) {
+    return <div className="cmp-col cmp-col-empty quiet" aria-hidden="true" />
+  }
   return (
-    <button className="cmp-col cmp-col-empty" onClick={onAdd}>
-      <div className="cmp-col-empty-plus">+</div>
+    <button className="cmp-col cmp-col-empty interactive" onClick={onAdd}>
+      <div className="cmp-col-empty-circle">
+        <span className="cmp-col-empty-plus">+</span>
+      </div>
       <div className="cmp-col-empty-lab">Add another</div>
       <div className="cmp-col-empty-sub">{slotsLeft} slot{slotsLeft === 1 ? '' : 's'} left</div>
     </button>
   )
 }
-
-// ─── Section block ───────────────────────────────────────────────────────────
 
 function Section({ section, cars, slotsLeft }) {
   return (
@@ -527,15 +634,12 @@ function Section({ section, cars, slotsLeft }) {
         <h2 className="cmp-section-title">{section.title}</h2>
         <span className="cmp-section-count">{section.rows.length} metrics</span>
       </div>
-
       {section.rows.map((row, ri) => (
         <Row key={ri} row={row} cars={cars} slotsLeft={slotsLeft} />
       ))}
     </div>
   )
 }
-
-// ─── Row ─────────────────────────────────────────────────────────────────────
 
 function Row({ row, cars, slotsLeft }) {
   return (
@@ -545,20 +649,16 @@ function Row({ row, cars, slotsLeft }) {
           <div className="cmp-row-lab-k">{row.label}</div>
           {row.sub && <div className="cmp-row-lab-sub">{row.sub}</div>}
         </div>
-
         {row.cells.map((cell, ci) => (
           <Cell key={ci} cell={cell} />
         ))}
-
-        {slotsLeft > 0 && Array.from({ length: slotsLeft }).map((_, i) => (
+        {Array.from({ length: slotsLeft }).map((_, i) => (
           <div key={`empty-${i}`} className="cmp-cell empty" />
         ))}
       </CompareGrid>
     </div>
   )
 }
-
-// ─── Cell ────────────────────────────────────────────────────────────────────
 
 function Cell({ cell }) {
   const cls = ['cmp-cell']
@@ -567,7 +667,6 @@ function Cell({ cell }) {
   if (cell.verdict === 'middle') cls.push('middle')
   if (cell.verdict === null)     cls.push('plain')
 
-  // Verdict tag glyph + label
   let verdictTag = null
   if (cell.verdict === 'best')   verdictTag = <span className="cmp-tag best">↑ Best of set</span>
   if (cell.verdict === 'worst')  verdictTag = <span className="cmp-tag worst">↓ Trails</span>
@@ -587,12 +686,9 @@ function Cell({ cell }) {
   )
 }
 
-// ─── Verdict panel (light cream pull-quote band) ─────────────────────────────
-
 function VerdictPanel({ verdict, onSelectCar }) {
   const { winnerCar, copy, recommendedReasons } = verdict
   const repPrice = getRepresentativePrice(winnerCar)
-  const retained = Math.round(getRetainedAfter48Months(winnerCar) * 100)
 
   return (
     <div className="cmp-verdict">
@@ -616,18 +712,15 @@ function VerdictPanel({ verdict, onSelectCar }) {
                 onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
               />
             </div>
-
             <div className="cmp-verdict-card-tags">
               <span className="dot" /> Recommended · Lowest true cost
             </div>
-
             <h3 className="cmp-verdict-card-name">
               {winnerCar.make} {winnerCar.model}
             </h3>
             <div className="cmp-verdict-card-meta">
               {fmtGBP(repPrice)} · {winnerCar.generationYears}
             </div>
-
             <div className="cmp-verdict-card-reasons">
               {recommendedReasons.map((r, i) => (
                 <div key={i} className="cmp-reason">
@@ -639,7 +732,6 @@ function VerdictPanel({ verdict, onSelectCar }) {
                 </div>
               ))}
             </div>
-
             <div className="cmp-verdict-card-cta">
               <button className="btn" onClick={() => onSelectCar(winnerCar)}>
                 Full review<span className="arrow" aria-hidden="true"></span>
