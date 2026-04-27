@@ -1,43 +1,65 @@
-// ChatInterface.jsx — v4
-// Changes from v3:
-// - Advisor renamed to Cooper
-// - Body type chips show SVG silhouettes + label (visual cards)
-// - All other chip sets remain as text pills
+// ChatInterface.jsx — v5 (Session 2)
+// Changes from v4:
+// - Shared <TopNav> replaces bespoke nav strip
+// - Hands off to ReviewScreen instead of straight to LoadingScreen
+// - Markdown parser for **bold** + *italic* in Cooper's bubbles
+// - Cooper avatar: "Co" → "C"
+// - LoadingScreen retreated to editorial Fraunces + staged check-steps
 
 import { useState, useRef, useEffect } from 'react'
-import { applyHardFilters } from './scoring/filters'
-import { getTopMatches } from './scoring/engine'
-import carsData from './data/cars.json'
+import TopNav from './TopNav'
+import './design/tokens.css'
+import './design/screens.css'
 
-const C = {
-  midnight: '#0F1D35',
-  navy:     '#1A2E50',
-  teal:     '#00C896',
-  offwhite: '#F5F7FA',
-  muted:    '#A8B8CC',
-  dim:      '#4A6080',
+// ─── Tiny markdown parser ─────────────────────────────────────────────────────
+// Cooper's API responses sometimes contain **bold** and *italic* spans.
+// Render them as actual <strong> / <em> instead of literal asterisks.
+// Keeps to two patterns — anything richer (lists, links, code) is out of scope.
+
+function renderMarkdown(text) {
+  if (!text) return null
+  // Tokenize: split on **bold** first (since * inside ** would break),
+  // then on *italic* within the resulting non-bold runs.
+  const out = []
+  let key = 0
+  const boldSplit = text.split(/(\*\*[^*]+\*\*)/g)
+  for (const seg of boldSplit) {
+    if (!seg) continue
+    if (seg.startsWith('**') && seg.endsWith('**')) {
+      out.push(<strong key={key++}>{seg.slice(2, -2)}</strong>)
+    } else {
+      // Italic pass within plain segment
+      const italSplit = seg.split(/(\*[^*]+\*)/g)
+      for (const piece of italSplit) {
+        if (!piece) continue
+        if (piece.startsWith('*') && piece.endsWith('*')) {
+          out.push(<em key={key++}>{piece.slice(1, -1)}</em>)
+        } else {
+          out.push(<span key={key++}>{piece}</span>)
+        }
+      }
+    }
+  }
+  return out
 }
 
 // ─── Body type SVG silhouettes ────────────────────────────────────────────────
-// Detailed line-art silhouettes loaded from /public — one per body type
 
 const BODY_ICONS = {
-  Hatchback: <img src="/hatchback.svg" alt="Hatchback" className="w-full h-full object-contain" />,
-  SUV:       <img src="/suv.svg"       alt="SUV"       className="w-full h-full object-contain" />,
-  Estate:    <img src="/estate.svg"    alt="Estate"    className="w-full h-full object-contain" />,
-  Saloon:    <img src="/saloon.svg"    alt="Saloon"    className="w-full h-full object-contain" />,
-  MPV:       <img src="/mpv.svg"       alt="MPV"       className="w-full h-full object-contain" />,
-  Coupe:     <img src="/coupe.svg"     alt="Coupe"     className="w-full h-full object-contain" />,
-  Van:       <img src="/van.svg"       alt="Van"       className="w-full h-full object-contain" />,
-  Crossover: <img src="/crossover.svg" alt="Crossover" className="w-full h-full object-contain" />,
+  Hatchback: <img src="/hatchback.svg" alt="Hatchback" />,
+  SUV:       <img src="/suv.svg"       alt="SUV" />,
+  Estate:    <img src="/estate.svg"    alt="Estate" />,
+  Saloon:    <img src="/saloon.svg"    alt="Saloon" />,
+  MPV:       <img src="/mpv.svg"       alt="MPV" />,
+  Coupe:     <img src="/coupe.svg"     alt="Coupe" />,
+  Van:       <img src="/van.svg"       alt="Van" />,
+  Crossover: <img src="/crossover.svg" alt="Crossover" />,
   'No preference': (
-    <svg viewBox="0 0 80 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <text x="40" y="26" textAnchor="middle" fontSize="20" fill="currentColor" fontFamily="Satoshi,sans-serif">✓</text>
+    <svg viewBox="0 0 80 40" xmlns="http://www.w3.org/2000/svg">
+      <text x="40" y="26" textAnchor="middle" fontSize="20" fill="currentColor">✓</text>
     </svg>
   ),
 }
-
-const BODY_TYPE_OPTIONS = ['Hatchback', 'SUV', 'Estate', 'Saloon', 'MPV', 'Coupe', 'Van', 'Crossover', 'No preference']
 
 // ─── System prompt ────────────────────────────────────────────────────────────
 
@@ -137,65 +159,43 @@ function isBodyTypeChips(chips) {
   return chips.some(c => ["Hatchback","SUV","Estate","Saloon","MPV","Coupe","Van","Crossover"].includes(c))
 }
 
-// ─── Loading screen ───────────────────────────────────────────────────────────
+// ─── Loading screen — editorial handoff ───────────────────────────────────────
+// Big serif headline + three staged check-steps. ~2.5s total before navigating
+// to the review screen. Replaces the previous spinner-rings treatment.
 
 function LoadingScreen() {
-  const [count, setCount] = useState(0)
-  const messages = [
-    'Filtering 353 cars to your budget…',
-    'Scoring fuel efficiency & running costs…',
-    'Weighing up reliability & safety…',
-    'Ranking your best matches…',
+  const [shown, setShown] = useState([false, false, false])
+  const steps = [
+    'Filtering on fit',
+    'Scoring on cost honesty',
+    'Assembling your matches',
   ]
 
   useEffect(() => {
-    const t = setInterval(() => setCount(c => Math.min(c + 1, messages.length - 1)), 700)
-    return () => clearInterval(t)
+    const timers = [
+      setTimeout(() => setShown([true, false, false]), 200),
+      setTimeout(() => setShown([true, true, false]), 800),
+      setTimeout(() => setShown([true, true, true]), 1400),
+    ]
+    return () => timers.forEach(clearTimeout)
   }, [])
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, backgroundColor: C.midnight,
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'center', fontFamily: 'Satoshi, sans-serif', zIndex: 100,
-    }}>
-      <div style={{ position: 'relative', width: '80px', height: '80px', marginBottom: '40px' }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            position: 'absolute', inset: `${i * 12}px`,
-            border: `2px solid ${i === 0 ? C.teal : i === 1 ? 'rgba(0,200,150,0.4)' : 'rgba(0,200,150,0.15)'}`,
-            borderRadius: '50%',
-            animation: `spin ${1.2 + i * 0.4}s linear infinite`,
-            animationDirection: i % 2 === 0 ? 'normal' : 'reverse',
-          }} />
-        ))}
-        <div style={{
-          position: 'absolute', inset: '28px', backgroundColor: C.teal,
-          borderRadius: '50%', display: 'flex', alignItems: 'center',
-          justifyContent: 'center', fontSize: '14px', fontWeight: '900', color: C.midnight,
-        }}>M</div>
+    <div className="motifi-screen">
+      <div className="loader-overlay">
+        <div className="loader-av">C</div>
+        <div className="loader-h">
+          I've got enough — <em>loading your matches…</em>
+        </div>
+        <div className="loader-steps">
+          {steps.map((s, i) => (
+            <div key={i} className={'loader-step' + (shown[i] ? ' shown' : '')}>
+              <span className="check">✓</span>
+              <span>{s}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div style={{ textAlign: 'center', maxWidth: '280px' }}>
-        {messages.slice(0, count + 1).map((msg, i) => (
-          <div key={i} style={{
-            fontSize: i === count ? '16px' : '13px',
-            fontWeight: i === count ? '600' : '400',
-            color: i === count ? C.offwhite : C.dim,
-            marginBottom: '8px', transition: 'all 0.3s ease',
-          }}>{msg}</div>
-        ))}
-      </div>
-      <div style={{
-        marginTop: '40px', width: '200px', height: '3px',
-        backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden',
-      }}>
-        <div style={{
-          height: '100%', backgroundColor: C.teal, borderRadius: '2px',
-          width: `${((count + 1) / messages.length) * 100}%`,
-          transition: 'width 0.7s ease',
-        }} />
-      </div>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }
@@ -204,36 +204,9 @@ function LoadingScreen() {
 
 function TextChips({ chips, onSelect }) {
   return (
-    <div style={{
-      display: 'flex', flexWrap: 'wrap', gap: '8px',
-      paddingLeft: '36px', paddingTop: '10px',
-    }}>
+    <div className="chips-row">
       {chips.map(opt => (
-        <button
-          key={opt}
-          onClick={() => onSelect(opt)}
-          style={{
-            backgroundColor: 'transparent',
-            border: `1.5px solid ${C.teal}`,
-            borderRadius: '20px',
-            padding: '8px 16px',
-            color: C.teal,
-            fontSize: '14px', fontWeight: '600',
-            cursor: 'pointer',
-            fontFamily: 'Satoshi, sans-serif',
-            minHeight: '44px',
-            transition: 'all 0.15s ease',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = C.teal
-            e.currentTarget.style.color = C.midnight
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = C.teal
-          }}
-        >
+        <button key={opt} className="chip" onClick={() => onSelect(opt)}>
           {opt}
         </button>
       ))}
@@ -243,46 +216,13 @@ function TextChips({ chips, onSelect }) {
 
 function BodyTypeChips({ chips, onSelect }) {
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))',
-      gap: '8px',
-      paddingLeft: '36px',
-      paddingTop: '10px',
-      paddingRight: '8px',
-    }}>
+    <div className="body-chips">
       {chips.map(opt => (
-        <button
-          key={opt}
-          onClick={() => onSelect(opt)}
-          style={{
-            backgroundColor: 'transparent',
-            border: `1.5px solid rgba(0,200,150,0.5)`,
-            borderRadius: '12px',
-            padding: '10px 6px 8px',
-            color: C.teal,
-            cursor: 'pointer',
-            fontFamily: 'Satoshi, sans-serif',
-            display: 'flex', flexDirection: 'column',
-            alignItems: 'center', gap: '6px',
-            transition: 'all 0.15s ease',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.backgroundColor = 'rgba(0,200,150,0.1)'
-            e.currentTarget.style.borderColor = C.teal
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.borderColor = 'rgba(0,200,150,0.5)'
-          }}
-        >
-          <div style={{ width: '56px', height: '28px', color: C.teal }}>
+        <button key={opt} className="body-chip" onClick={() => onSelect(opt)}>
+          <div className="body-chip-icon">
             {BODY_ICONS[opt] || BODY_ICONS['No preference']}
           </div>
-          <span style={{ fontSize: '11px', fontWeight: '600', textAlign: 'center', lineHeight: '1.2' }}>
-            {opt}
-          </span>
+          <span className="body-chip-label">{opt}</span>
         </button>
       ))}
     </div>
@@ -291,11 +231,11 @@ function BodyTypeChips({ chips, onSelect }) {
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export default function ChatInterface({ onResults }) {
+export default function ChatInterface({ onReview, onHome, onCompare }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: "Hi! I'm Cooper, your Motifi car advisor — I'll find your perfect used car in just a few questions. First up, what's your budget?",
+      content: "Hi! I'm **Cooper**, your Motifi car advisor — I'll find your perfect used car in just a few questions. First up, what's your budget?",
       chips: null,
     }
   ])
@@ -345,13 +285,12 @@ export default function ChatInterface({ onResults }) {
       }])
       setLoading(false)
 
+      // When Cooper produces the JSON block, transition into the editorial
+      // loading handoff for ~2.5s then route to the review screen, where
+      // the user can sanity-check all 16 answers before scoring runs.
       if (answers) {
         setShowLoader(true)
-        setTimeout(() => {
-          const filtered = applyHardFilters(carsData, answers)
-          const top      = getTopMatches(filtered, answers, { maxResults: 10, minScore: 6.0 })
-          onResults({ results: top, answers })
-        }, 3000)
+        setTimeout(() => onReview({ answers }), 2500)
       }
     } catch (err) {
       setError('Something went wrong — please try again.')
@@ -368,59 +307,25 @@ export default function ChatInterface({ onResults }) {
   if (showLoader) return <LoadingScreen />
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column',
-      height: '100dvh',
-      backgroundColor: C.midnight,
-      fontFamily: 'Satoshi, sans-serif',
-    }}>
+    <div className="motifi-screen chat">
+      <TopNav
+        current="find"
+        onHome={onHome}
+        onStart={() => { /* already here */ }}
+        onCompare={onCompare}
+      />
 
-      {/* Nav */}
-      <nav style={{
-        backgroundColor: C.navy, padding: '0 20px', height: '56px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
-      }}>
-        <div style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>
-          Mo<span style={{ color: C.teal }}>ti</span>fi
-        </div>
-        <div style={{ fontSize: '12px', color: C.muted }}>Cooper · Your car advisor</div>
-      </nav>
-
-      {/* Messages */}
-      <div style={{
-        flex: 1, overflowY: 'auto', padding: '16px 16px 8px',
-        display: 'flex', flexDirection: 'column', gap: '12px',
-        WebkitOverflowScrolling: 'touch',
-      }}>
+      <div className="chat-body">
         {messages.map((msg, i) => (
           <div key={i}>
-            <div style={{
-              display: 'flex',
-              flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-              alignItems: 'flex-end', gap: '8px',
-            }}>
-              {msg.role === 'assistant' && (
-                <div style={{
-                  width: '28px', height: '28px', borderRadius: '50%',
-                  backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', fontSize: '11px', fontWeight: '700',
-                  color: C.midnight, flexShrink: 0, letterSpacing: '-0.02em',
-                }}>Co</div>
-              )}
-              <div style={{
-                maxWidth: 'min(78%, 480px)',
-                backgroundColor: msg.role === 'user' ? C.teal : C.navy,
-                color: msg.role === 'user' ? C.midnight : C.offwhite,
-                borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                padding: '12px 16px',
-                fontSize: '15px', lineHeight: '1.6',
-                fontWeight: msg.role === 'user' ? '500' : '400',
-              }}>
-                {msg.content}
+            <div className={'msg-row ' + (msg.role === 'user' ? 'user' : 'assistant')}>
+              {msg.role === 'assistant' && <span className="av">C</span>}
+              <div className={'bubble ' + msg.role}>
+                {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
               </div>
             </div>
 
-            {/* Chips — only on last assistant message */}
+            {/* Chips — only on the latest assistant message */}
             {msg.role === 'assistant' && msg.chips && i === messages.length - 1 && !loading && (
               isBodyTypeChips(msg.chips)
                 ? <BodyTypeChips chips={msg.chips} onSelect={send} />
@@ -429,28 +334,10 @@ export default function ChatInterface({ onResults }) {
           </div>
         ))}
 
-        {/* Typing indicator */}
         {loading && (
-          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
-            <div style={{
-              width: '28px', height: '28px', borderRadius: '50%',
-              backgroundColor: C.teal, display: 'flex', alignItems: 'center',
-              justifyContent: 'center', fontSize: '11px', fontWeight: '700',
-              color: C.midnight, flexShrink: 0,
-            }}>Co</div>
-            <div style={{
-              backgroundColor: C.navy, borderRadius: '18px 18px 18px 4px',
-              padding: '14px 18px', display: 'flex', gap: '5px', alignItems: 'center',
-            }}>
-              {[0, 1, 2].map(i => (
-                <div key={i} style={{
-                  width: '6px', height: '6px', borderRadius: '50%',
-                  backgroundColor: C.muted,
-                  animation: 'dot-pulse 1.2s ease-in-out infinite',
-                  animationDelay: `${i * 0.2}s`,
-                }} />
-              ))}
-            </div>
+          <div className="msg-row assistant">
+            <span className="av">C</span>
+            <div className="typing"><i></i><i></i><i></i></div>
           </div>
         )}
 
@@ -463,13 +350,7 @@ export default function ChatInterface({ onResults }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <form onSubmit={handleSubmit} style={{
-        padding: '12px 16px 20px',
-        paddingBottom: 'max(20px, env(safe-area-inset-bottom))',
-        backgroundColor: C.navy,
-        display: 'flex', gap: '10px', flexShrink: 0,
-      }}>
+      <form onSubmit={handleSubmit} className="composer">
         <input
           type="text"
           value={input}
@@ -477,39 +358,11 @@ export default function ChatInterface({ onResults }) {
           placeholder="Type your answer…"
           disabled={loading}
           autoFocus
-          style={{
-            flex: 1, backgroundColor: C.midnight, color: C.offwhite,
-            border: '1.5px solid #2A4060', borderRadius: '12px',
-            padding: '14px 16px', fontSize: '16px',
-            outline: 'none', fontFamily: 'Satoshi, sans-serif',
-            minHeight: '48px', WebkitAppearance: 'none',
-          }}
         />
-        <button
-          type="submit"
-          disabled={loading || !input.trim()}
-          style={{
-            backgroundColor: input.trim() && !loading ? C.teal : '#2A4060',
-            color: input.trim() && !loading ? C.midnight : C.dim,
-            border: 'none', borderRadius: '12px',
-            padding: '0 20px', fontSize: '15px', fontWeight: '700',
-            cursor: input.trim() && !loading ? 'pointer' : 'default',
-            transition: 'all 0.15s ease',
-            fontFamily: 'Satoshi, sans-serif',
-            minHeight: '48px', minWidth: '72px',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
+        <button type="submit" className="send" disabled={loading || !input.trim()}>
           Send
         </button>
       </form>
-
-      <style>{`
-        @keyframes dot-pulse {
-          0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-          40% { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
     </div>
   )
 }
