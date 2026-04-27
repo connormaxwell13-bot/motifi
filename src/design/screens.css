@@ -1128,3 +1128,359 @@
   .motifi-screen .hc-id-l { grid-template-columns: 1fr; gap: 16px; }
   .motifi-screen .hc-rank { font-size: 56px; }
 }
+/* ============================================================
+   COOPER — Editorial chat retreatment (Session 2.5)
+   New variant: .motifi-screen.cooper
+   Adds page-level chrome (kicker strip + Fraunces hero), retreats
+   bubbles, chips and composer to match the prototype.
+   ============================================================ */
+
+.motifi-screen.cooper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+/* ── "What Cooper knows so far" strip ─────────────────────── */
+/* Sits directly below TopNav. Builds up live as Cooper learns. */
+
+.motifi-screen.cooper .cooper-strip {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 22px 40px 18px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 32px;
+  border-bottom: 1px solid var(--rule);
+}
+.motifi-screen.cooper .cooper-strip-l {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.motifi-screen.cooper .cooper-strip-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--mint);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.motifi-screen.cooper .cooper-strip-kicker .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--mint);
+  flex-shrink: 0;
+}
+
+.motifi-screen.cooper .cooper-strip-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.motifi-screen.cooper .cooper-slot {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  white-space: nowrap;
+  /* gentle entrance as each slot lands */
+  animation: cooper-slot-in 280ms ease-out;
+}
+@keyframes cooper-slot-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.motifi-screen.cooper .cooper-slot-k {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+}
+.motifi-screen.cooper .cooper-slot-v {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* Right rail — live cars-match counter */
+.motifi-screen.cooper .cooper-strip-r {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.motifi-screen.cooper .cooper-count {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(40px, 4.5vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--mint);
+}
+.motifi-screen.cooper .cooper-count-lab {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ── Editorial hero (above the transcript) ────────────────── */
+
+.motifi-screen.cooper .cooper-hero {
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 56px 40px 32px;
+  text-align: center;
+}
+.motifi-screen.cooper .cooper-hero h1 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(48px, 6.5vw, 92px);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  margin: 0 0 18px;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.motifi-screen.cooper .cooper-hero h1 em {
+  font-style: italic;
+  color: var(--mint);
+  font-weight: 300;
+}
+.motifi-screen.cooper .cooper-hero p {
+  max-width: 56ch;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* ── Transcript width override (centred, narrower than .chat) ─ */
+
+.motifi-screen.cooper .chat-body {
+  flex: 1;
+  overflow-y: visible; /* page scrolls instead of inner scroll on cooper */
+  padding: 12px 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 880px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ── Avatar — green status dot ────────────────────────────── */
+
+.motifi-screen.cooper .av {
+  position: relative;
+  width: 38px; height: 38px;
+  font-size: 15px;
+  background: var(--midnight, #0F1D35);
+  color: var(--mint);
+  border: 1.5px solid var(--mint);
+}
+.motifi-screen.cooper .av-dot {
+  position: absolute;
+  bottom: -1px; right: -1px;
+  width: 11px; height: 11px;
+  border-radius: 50%;
+  background: var(--mint);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 1px var(--mint);
+}
+
+/* ── Bubbles — retreated to match prototype ───────────────── */
+
+.motifi-screen.cooper .msg-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.motifi-screen.cooper .msg-row.user {
+  flex-direction: row-reverse;
+}
+
+.motifi-screen.cooper .bubble {
+  max-width: min(82%, 640px);
+  padding: 16px 22px;
+  font-size: 16px;
+  line-height: 1.55;
+  border-radius: 14px;
+  font-family: var(--sans);
+}
+.motifi-screen.cooper .bubble.assistant {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 4px 14px 14px 14px;
+}
+.motifi-screen.cooper .bubble.user {
+  background: var(--mint);
+  color: var(--mint-deep);
+  border-radius: 14px 4px 14px 14px;
+  font-weight: 500;
+}
+.motifi-screen.cooper .bubble strong { font-weight: 700; }
+.motifi-screen.cooper .bubble em     { font-style: italic; }
+
+/* Typing indicator — rebuild over the new bubble bg */
+.motifi-screen.cooper .typing {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 4px 14px 14px 14px;
+  padding: 18px 22px;
+}
+
+/* ── Quick-reply chips — "+ Daily commute" style ──────────── */
+
+.motifi-screen.cooper .chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 6px 0 0 52px; /* line up with bubble after avatar */
+}
+.motifi-screen.cooper .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 10px 18px;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--sans);
+  min-height: 42px;
+  transition: all 150ms ease;
+}
+.motifi-screen.cooper .chip:hover {
+  background: rgba(0, 200, 150, 0.08);
+  border-color: var(--mint);
+  color: var(--mint);
+}
+.motifi-screen.cooper .chip-plus {
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--ink-3);
+  line-height: 1;
+}
+.motifi-screen.cooper .chip:hover .chip-plus {
+  color: var(--mint);
+}
+
+/* Body-type chip grid — keep the icon style, restyle borders */
+.motifi-screen.cooper .body-chips {
+  padding: 6px 0 0 52px;
+}
+
+/* ── Composer — pill input with circular mint send ────────── */
+
+.motifi-screen.cooper .composer {
+  padding: 24px 40px 32px;
+  padding-bottom: max(32px, env(safe-area-inset-bottom));
+  background: transparent;
+  border-top: 0;
+  display: block;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+}
+.motifi-screen.cooper .composer-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 8px 8px 8px 28px;
+  transition: border-color 150ms ease;
+}
+.motifi-screen.cooper .composer-pill:focus-within {
+  border-color: var(--mint);
+}
+.motifi-screen.cooper .composer-pill input {
+  flex: 1;
+  background: transparent;
+  color: var(--ink);
+  border: 0;
+  outline: none;
+  padding: 12px 0;
+  font-size: 16px;
+  font-family: var(--sans);
+}
+.motifi-screen.cooper .composer-pill input::placeholder {
+  color: var(--ink-3);
+}
+.motifi-screen.cooper .composer-send {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--mint);
+  color: var(--mint-deep);
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 150ms ease, background 150ms ease;
+}
+.motifi-screen.cooper .composer-send:hover {
+  transform: translateY(-1px);
+  background: var(--mint-hi);
+}
+.motifi-screen.cooper .composer-send:disabled {
+  background: var(--bg-3);
+  color: var(--ink-4);
+  cursor: not-allowed;
+  transform: none;
+}
+.motifi-screen.cooper .composer-send .arrow {
+  width: 16px; height: 11px;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 1000px) {
+  .motifi-screen.cooper .cooper-strip {
+    grid-template-columns: 1fr;
+    padding: 18px 24px 16px;
+  }
+  .motifi-screen.cooper .cooper-strip-r {
+    align-items: flex-start;
+    text-align: left;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .motifi-screen.cooper .cooper-count { font-size: 36px; }
+  .motifi-screen.cooper .cooper-hero { padding: 40px 24px 24px; }
+  .motifi-screen.cooper .chat-body   { padding: 12px 24px 24px; }
+  .motifi-screen.cooper .composer    { padding: 20px 24px 28px; }
+}
+
+@media (max-width: 700px) {
+  .motifi-screen.cooper .cooper-strip-l { gap: 14px; }
+  .motifi-screen.cooper .cooper-strip-slots { gap: 6px; }
+  .motifi-screen.cooper .cooper-slot { font-size: 12.5px; padding: 6px 12px; }
+  .motifi-screen.cooper .cooper-hero h1 { font-size: clamp(36px, 9vw, 56px); }
+  .motifi-screen.cooper .chips-row,
+  .motifi-screen.cooper .body-chips { padding-left: 0; }
+}
