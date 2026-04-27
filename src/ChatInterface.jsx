@@ -217,7 +217,7 @@ function LoadingScreen() {
     return () => timers.forEach(clearTimeout)
   }, [])
   return (
-    <div className="motifi-screen">
+    <div className="motifi-screen light">
       <div className="loader-overlay">
         <div className="loader-av">C</div>
         <div className="loader-h">I've got enough — <em>loading your matches…</em></div>
