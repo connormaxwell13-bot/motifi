@@ -1,25 +1,21 @@
-// ChatInterface.jsx — v5 (Session 2)
-// Changes from v4:
-// - Shared <TopNav> replaces bespoke nav strip
-// - Hands off to ReviewScreen instead of straight to LoadingScreen
-// - Markdown parser for **bold** + *italic* in Cooper's bubbles
-// - Cooper avatar: "Co" → "C"
-// - LoadingScreen retreated to editorial Fraunces + staged check-steps
+// ChatInterface.jsx — v6 (Session 2.5)
+// Editorial Cooper retreatment.
+// Adds the page header (kicker + Fraunces hero + lede), the live
+// "What Cooper knows so far" profile strip, and the cars-match
+// counter that drops as constraints accumulate. Bubble styling,
+// chip styling and composer shape rebuilt to match the prototype.
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import TopNav from './TopNav'
+import carsData from './data/cars.json'
+import { applyHardFilters } from './scoring/filters.jsx'
 import './design/tokens.css'
 import './design/screens.css'
 
-// ─── Tiny markdown parser ─────────────────────────────────────────────────────
-// Cooper's API responses sometimes contain **bold** and *italic* spans.
-// Render them as actual <strong> / <em> instead of literal asterisks.
-// Keeps to two patterns — anything richer (lists, links, code) is out of scope.
+// ─── Markdown parser (bold + italic only, no library) ────────────────────────
 
 function renderMarkdown(text) {
   if (!text) return null
-  // Tokenize: split on **bold** first (since * inside ** would break),
-  // then on *italic* within the resulting non-bold runs.
   const out = []
   let key = 0
   const boldSplit = text.split(/(\*\*[^*]+\*\*)/g)
@@ -28,7 +24,6 @@ function renderMarkdown(text) {
     if (seg.startsWith('**') && seg.endsWith('**')) {
       out.push(<strong key={key++}>{seg.slice(2, -2)}</strong>)
     } else {
-      // Italic pass within plain segment
       const italSplit = seg.split(/(\*[^*]+\*)/g)
       for (const piece of italSplit) {
         if (!piece) continue
@@ -43,7 +38,7 @@ function renderMarkdown(text) {
   return out
 }
 
-// ─── Body type SVG silhouettes ────────────────────────────────────────────────
+// ─── Body type SVG silhouettes ───────────────────────────────────────────────
 
 const BODY_ICONS = {
   Hatchback: <img src="/hatchback.svg" alt="Hatchback" />,
@@ -61,7 +56,7 @@ const BODY_ICONS = {
   ),
 }
 
-// ─── System prompt ────────────────────────────────────────────────────────────
+// ─── System prompt (unchanged from v5) ───────────────────────────────────────
 
 const SYSTEM_PROMPT = `You are Cooper, Motifi's friendly car advisor. Your job is to collect exactly 16 answers from the user through friendly conversation, then return them as structured JSON.
 
@@ -94,6 +89,14 @@ QUESTION ORDER (collect these in sequence):
 
 CHIPS — whenever you ask a fixed-choice question, end your message with a chips tag:
 <CHIPS>Option1|Option2|Option3</CHIPS>
+
+PARTIAL ANSWERS — every time you receive a user reply, IF you can confidently extract one or more answers from it, end your message with a partial-answers tag BEFORE any <CHIPS> tag, like this:
+<MOTIFI_PARTIAL>{"key":"value","key2":"value2"}</MOTIFI_PARTIAL>
+
+Example after the user gives their budget: <MOTIFI_PARTIAL>{"budgetMin":10000,"budgetMax":14000}</MOTIFI_PARTIAL>
+Example after the user picks fuel: <MOTIFI_PARTIAL>{"fuelType":"Electric"}</MOTIFI_PARTIAL>
+
+Use the EXACT keys from the question list. Numbers as numbers, strings as strings. Only emit keys you are confident about.
 
 Examples:
 - Payment: <CHIPS>Cash|Part Exchange|Hire Purchase|Bank Loan</CHIPS>
@@ -133,10 +136,16 @@ WHEN YOU HAVE ALL 16 ANSWERS, respond with a brief closing message then end with
 }
 </MOTIFI_ANSWERS>`
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Tag extractors ──────────────────────────────────────────────────────────
 
 function extractAnswers(text) {
   const match = text.match(/<MOTIFI_ANSWERS>([\s\S]*?)<\/MOTIFI_ANSWERS>/)
+  if (!match) return null
+  try { return JSON.parse(match[1].trim()) } catch { return null }
+}
+
+function extractPartial(text) {
+  const match = text.match(/<MOTIFI_PARTIAL>([\s\S]*?)<\/MOTIFI_PARTIAL>/)
   if (!match) return null
   try { return JSON.parse(match[1].trim()) } catch { return null }
 }
@@ -150,6 +159,7 @@ function extractChips(text) {
 function cleanText(text) {
   return text
     .replace(/<MOTIFI_ANSWERS>[\s\S]*?<\/MOTIFI_ANSWERS>/, '')
+    .replace(/<MOTIFI_PARTIAL>[\s\S]*?<\/MOTIFI_PARTIAL>/, '')
     .replace(/<CHIPS>.*?<\/CHIPS>/, '')
     .trim()
 }
@@ -159,18 +169,45 @@ function isBodyTypeChips(chips) {
   return chips.some(c => ["Hatchback","SUV","Estate","Saloon","MPV","Coupe","Van","Crossover"].includes(c))
 }
 
-// ─── Loading screen — editorial handoff ───────────────────────────────────────
-// Big serif headline + three staged check-steps. ~2.5s total before navigating
-// to the review screen. Replaces the previous spinner-rings treatment.
+// ─── Profile strip — derived from accumulated partial answers ────────────────
+// Five slots, populated as Cooper learns. Only filled slots render —
+// the strip builds up left-to-right as the conversation progresses.
+
+function buildProfile(partial) {
+  const slots = []
+  if (partial.drivingContext) {
+    slots.push({ k: 'Use', v: partial.drivingContext.replace(/^Mostly /, '') + ' miles' })
+  }
+  if (partial.paymentMethod) {
+    const short = ({
+      'Cash': 'Cash',
+      'Part Exchange': 'Part-ex',
+      'Hire Purchase': 'HP',
+      'Bank Loan': 'Loan',
+    })[partial.paymentMethod] || partial.paymentMethod
+    slots.push({ k: 'Finance', v: short })
+  }
+  if (partial.budgetMax) {
+    slots.push({ k: 'Budget', v: '£' + Number(partial.budgetMax).toLocaleString() })
+  }
+  if (partial.fuelType) {
+    slots.push({ k: 'Fuel', v: partial.fuelType })
+  }
+  if (partial.postcode || partial.ulezRequired) {
+    let loc = '—'
+    if (partial.ulezRequired === 'Yes') loc = 'Inside ULEZ'
+    else if (partial.ulezRequired === 'No') loc = 'Outside ULEZ'
+    else if (partial.postcode) loc = String(partial.postcode).toUpperCase().slice(0, 4).trim()
+    slots.push({ k: 'Location', v: loc })
+  }
+  return slots
+}
+
+// ─── Loading handoff (unchanged from v5) ─────────────────────────────────────
 
 function LoadingScreen() {
   const [shown, setShown] = useState([false, false, false])
-  const steps = [
-    'Filtering on fit',
-    'Scoring on cost honesty',
-    'Assembling your matches',
-  ]
-
+  const steps = ['Filtering on fit', 'Scoring on cost honesty', 'Assembling your matches']
   useEffect(() => {
     const timers = [
       setTimeout(() => setShown([true, false, false]), 200),
@@ -179,14 +216,11 @@ function LoadingScreen() {
     ]
     return () => timers.forEach(clearTimeout)
   }, [])
-
   return (
     <div className="motifi-screen">
       <div className="loader-overlay">
         <div className="loader-av">C</div>
-        <div className="loader-h">
-          I've got enough — <em>loading your matches…</em>
-        </div>
+        <div className="loader-h">I've got enough — <em>loading your matches…</em></div>
         <div className="loader-steps">
           {steps.map((s, i) => (
             <div key={i} className={'loader-step' + (shown[i] ? ' shown' : '')}>
@@ -200,14 +234,14 @@ function LoadingScreen() {
   )
 }
 
-// ─── Chip renderers ───────────────────────────────────────────────────────────
+// ─── Chips ───────────────────────────────────────────────────────────────────
 
 function TextChips({ chips, onSelect }) {
   return (
     <div className="chips-row">
       {chips.map(opt => (
         <button key={opt} className="chip" onClick={() => onSelect(opt)}>
-          {opt}
+          <span className="chip-plus">+</span>{opt}
         </button>
       ))}
     </div>
@@ -229,16 +263,15 @@ function BodyTypeChips({ chips, onSelect }) {
   )
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main component ──────────────────────────────────────────────────────────
 
 export default function ChatInterface({ onReview, onHome, onCompare }) {
   const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      content: "Hi! I'm **Cooper**, your Motifi car advisor — I'll find your perfect used car in just a few questions. First up, what's your budget?",
-      chips: null,
-    }
+    { role: 'assistant', content: "Hi, I'm *Cooper* — your Motifi advisor.", chips: null },
+    { role: 'assistant', content: "Instead of a 40-field form, tell me what's going on and I'll narrow down the 353 cars in our index to the few that actually fit.", chips: null },
+    { role: 'assistant', content: "Let's start easy — what's your budget?", chips: null },
   ])
+  const [partial, setPartial]       = useState({})
   const [input, setInput]           = useState('')
   const [loading, setLoading]       = useState(false)
   const [showLoader, setShowLoader] = useState(false)
@@ -248,6 +281,19 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
+
+  // Cars matching the live partial answers — recomputed only when answers
+  // change. Starts at the full dataset size and narrows as Cooper learns.
+  const carsMatch = useMemo(() => {
+    if (Object.keys(partial).length === 0) return carsData.length
+    try {
+      return applyHardFilters(carsData, partial).length
+    } catch {
+      return carsData.length
+    }
+  }, [partial])
+
+  const profileSlots = useMemo(() => buildProfile(partial), [partial])
 
   async function send(text) {
     const content = (text || input).trim()
@@ -275,8 +321,15 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
       const data    = await res.json()
       const raw     = data.content?.[0]?.text || ''
       const answers = extractAnswers(raw)
+      const partialUpdate = extractPartial(raw)
       const chips   = extractChips(raw)
       const display = cleanText(raw)
+
+      // Merge partial updates into the running state — drives both the
+      // profile strip and the cars-match counter.
+      if (partialUpdate) {
+        setPartial(prev => ({ ...prev, ...partialUpdate }))
+      }
 
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -285,12 +338,10 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
       }])
       setLoading(false)
 
-      // When Cooper produces the JSON block, transition into the editorial
-      // loading handoff for ~2.5s then route to the review screen, where
-      // the user can sanity-check all 16 answers before scoring runs.
       if (answers) {
+        // Final answers merge over partial — Cooper's terminal JSON wins.
         setShowLoader(true)
-        setTimeout(() => onReview({ answers }), 2500)
+        setTimeout(() => onReview({ answers: { ...partial, ...answers } }), 2500)
       }
     } catch (err) {
       setError('Something went wrong — please try again.')
@@ -307,7 +358,7 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
   if (showLoader) return <LoadingScreen />
 
   return (
-    <div className="motifi-screen chat">
+    <div className="motifi-screen cooper">
       <TopNav
         current="find"
         onHome={onHome}
@@ -315,17 +366,50 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
         onCompare={onCompare}
       />
 
+      {/* Live profile strip — fills as Cooper learns */}
+      <div className="cooper-strip">
+        <div className="cooper-strip-l">
+          <span className="cooper-strip-kicker">
+            <span className="dot" aria-hidden="true"></span>
+            What Cooper knows so far
+          </span>
+          <div className="cooper-strip-slots">
+            {profileSlots.map((s, i) => (
+              <div key={i} className="cooper-slot">
+                <span className="cooper-slot-k">{s.k}</span>
+                <span className="cooper-slot-v">{s.v}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="cooper-strip-r">
+          <div className="cooper-count">{carsMatch}</div>
+          <div className="cooper-count-lab">Cars match</div>
+        </div>
+      </div>
+
+      {/* Editorial hero */}
+      <div className="cooper-hero">
+        <h1>Hi, I'm <em>Cooper</em>.</h1>
+        <p>Tell me what's going on and I'll find the car that actually fits — no
+          showroom theatre, no dealer funnel. About two minutes.</p>
+      </div>
+
+      {/* Transcript */}
       <div className="chat-body">
         {messages.map((msg, i) => (
           <div key={i}>
             <div className={'msg-row ' + (msg.role === 'user' ? 'user' : 'assistant')}>
-              {msg.role === 'assistant' && <span className="av">C</span>}
+              {msg.role === 'assistant' && (
+                <span className="av">
+                  C<span className="av-dot" aria-hidden="true"></span>
+                </span>
+              )}
               <div className={'bubble ' + msg.role}>
                 {msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
               </div>
             </div>
 
-            {/* Chips — only on the latest assistant message */}
             {msg.role === 'assistant' && msg.chips && i === messages.length - 1 && !loading && (
               isBodyTypeChips(msg.chips)
                 ? <BodyTypeChips chips={msg.chips} onSelect={send} />
@@ -336,7 +420,7 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
 
         {loading && (
           <div className="msg-row assistant">
-            <span className="av">C</span>
+            <span className="av">C<span className="av-dot" aria-hidden="true"></span></span>
             <div className="typing"><i></i><i></i><i></i></div>
           </div>
         )}
@@ -350,18 +434,21 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
         <div ref={bottomRef} />
       </div>
 
+      {/* Composer — pill input + circular send */}
       <form onSubmit={handleSubmit} className="composer">
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Type your answer…"
-          disabled={loading}
-          autoFocus
-        />
-        <button type="submit" className="send" disabled={loading || !input.trim()}>
-          Send
-        </button>
+        <div className="composer-pill">
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Type your reply to Cooper…"
+            disabled={loading}
+            autoFocus
+          />
+          <button type="submit" className="composer-send" disabled={loading || !input.trim()} aria-label="Send">
+            <span className="arrow" aria-hidden="true"></span>
+          </button>
+        </div>
       </form>
     </div>
   )
