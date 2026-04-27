@@ -1651,3 +1651,68 @@
   line-height: 1;
   padding-top: 2px;
 }
+/* ============================================================
+   COOPER AVATAR — final
+   Circular midnight disc, mint ring, Fraunces italic mint C,
+   mint status dot notched into the bottom-right edge.
+   ============================================================ */
+
+.motifi-screen.cooper .av,
+.motifi-screen.light.cooper .av {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #0F1D35;             /* midnight */
+  color: var(--mint);
+  border: 1.5px solid var(--mint); /* mint ring */
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* Optical: italic C sits a touch high in its line box */
+  padding-top: 1px;
+}
+
+/* Status dot — sits as a notch out of the bottom-right corner.
+   The "ring" is the page bg, so it visually subtracts from the
+   avatar edge instead of sitting on top of it. */
+.motifi-screen.cooper .av-dot,
+.motifi-screen.light.cooper .av-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--mint);
+  border: 3px solid var(--bg);     /* halo = page bg, creates the notch */
+  box-shadow: none;                 /* drop the earlier mint outer ring */
+}
+
+/* Loader handoff — same mark, scaled to 64px. */
+.motifi-screen .loader-overlay .loader-av,
+.motifi-screen.light .loader-overlay .loader-av {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #0F1D35;
+  color: var(--mint);
+  border: 1.5px solid var(--mint);
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 32px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+}
