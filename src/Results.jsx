@@ -10,7 +10,7 @@
 import { useState, useEffect, useRef } from 'react'
 import TopNav from './TopNav'
 import { generateOneLiners } from './scoring/oneliners.jsx'
-import { getYearOneCost } from './scoring/costs.jsx'
+import { getYearOneCost, getRepresentativePrice } from './scoring/costs.jsx''
 import './design/tokens.css'
 import './design/screens.css'
 
@@ -216,7 +216,7 @@ function HeroCard({ car, runnerUp, answers, explanation, loading, onSelectCar, o
         </div>
 
         <div className="hc-price">
-          <span className="v">{fmtGBP(car.priceLow || 0)}</span>
+          <span className="v">{fmtGBP(getRepresentativePrice(car))}</span>
           <span className="k">Rep. price</span>
         </div>
 
@@ -317,7 +317,7 @@ function CompactRow({ rank, car, answers, oneLiner, onSelectCar }) {
   const isFinance = ['Hire Purchase', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)']
     .includes(answers.paymentMethod || answers.purchaseMethod)
   const scorePct = Math.round((car.scores?.finalScore || 0) * 10)
-  const true4yr = Math.round(((car.priceLow || 0) + (costs.insuranceMin * 4) + (costs.roadTax * 4)) / 100) / 10
+  const true4yr = Math.round((getRepresentativePrice(car) + (costs.insuranceMin * 4) + (costs.roadTax * 4)) / 100) / 10
 
   return (
     <div className="tm-row" onClick={() => onSelectCar(car)} role="button" tabIndex={0}>
@@ -334,7 +334,7 @@ function CompactRow({ rank, car, answers, oneLiner, onSelectCar }) {
       </div>
 
       <div className="tm-price">
-        <div className="v">{fmtGBP(car.priceLow || 0)}</div>
+        <div className="v">{fmtGBP(getRepresentativePrice(car))}</div>
         {isFinance && <div className="mo">{fmtGBP(costs.financeMonthly)}/mo HP</div>}
         <div className="true">TRUE 4YR: £{true4yr.toFixed(1)}K</div>
       </div>
