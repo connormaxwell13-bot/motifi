@@ -1608,3 +1608,46 @@
 .motifi-screen.light .loader-overlay .loader-steps {
   color: var(--ink-3);
 }
+/* ============================================================
+   COOPER AVATAR — typographic signature
+   Fraunces italic C in mint, on a midnight navy circle.
+   Applied on top of the .light variant — the navy circle is
+   the same on both palettes, only the surrounding page changes.
+   ============================================================ */
+
+.motifi-screen.cooper .av,
+.motifi-screen.light.cooper .av {
+  background: #0F1D35;          /* midnight — branded navy */
+  color: var(--mint);
+  border: 0;                    /* drop the mint ring — solid disc reads cleaner */
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;             /* Fraunces light italic — more editorial */
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  /* Optical adjustment — italic C sits high in its line box, nudge it down */
+  line-height: 1;
+  padding-top: 1px;
+}
+
+/* Status dot keeps its mint pop, but its ring matches the page bg
+   on each palette so it reads as a halo, not an outline. */
+.motifi-screen.cooper .av-dot {
+  border-color: var(--bg);
+  box-shadow: 0 0 0 1px var(--mint);
+}
+
+/* The loader handoff uses the same mark, scaled up. */
+.motifi-screen.light .loader-overlay .loader-av,
+.motifi-screen .loader-overlay .loader-av {
+  background: #0F1D35;
+  color: var(--mint);
+  border: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  padding-top: 2px;
+}
