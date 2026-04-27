@@ -6,6 +6,14 @@
 // Variety pass: when generating for an array of cars, if the same rule
 // is about to fire on two consecutive rows we fall through to that
 // car's next-best rule. Keeps determinism, kills visual repetition.
+//
+// Highlight markup: rule texts may include [mint:...] and [amber:...]
+// tokens around spans the renderer should colour. The renderer in
+// Results.jsx strips the tokens and applies span classes; consumers
+// that don't render rich text will see plain bracketed text instead.
+//   - [mint:...]  → positive numeric edges, savings, advantageous gaps
+//   - [amber:...] → known issues, gotchas, costs to watch
+// Unmarked text renders normally.
 
 // Each rule returns { id, priority, text } if it applies, else null.
 // id is used for variety-pass bookkeeping so two different rules can
@@ -19,8 +27,8 @@ function ruleMpgStandout(car, answers) {
     id: 'mpg',
     priority: highMileage ? 9 : 6,
     text: highMileage
-      ? 'Outstanding fuel economy — pays back fast at your mileage.'
-      : 'Outstanding fuel economy keeps running costs low.',
+      ? '[mint:Outstanding fuel economy] — pays back fast at your mileage.'
+      : '[mint:Outstanding fuel economy] keeps running costs low.',
   }
 }
 
@@ -30,7 +38,7 @@ function ruleReliabilityHighMileage(car, answers) {
   return {
     id: 'reliability-highmileage',
     priority: 9,
-    text: 'Proven reliability track record — built for high-mileage driving.',
+    text: '[mint:Proven reliability] — built for high-mileage driving.',
   }
 }
 
@@ -40,7 +48,7 @@ function ruleSafetyMotorway(car, answers) {
   return {
     id: 'safety-motorway',
     priority: 9,
-    text: '5-star NCAP safety — strong pick for motorway miles.',
+    text: '[mint:5-star NCAP safety] — strong pick for motorway miles.',
   }
 }
 
@@ -50,7 +58,7 @@ function ruleDepreciationPriority(car, answers) {
   return {
     id: 'depreciation-priority',
     priority: 9,
-    text: 'Holds value well — resale-friendly if selling within 3 years.',
+    text: '[mint:Holds value well] — resale-friendly if selling within 3 years.',
   }
 }
 
@@ -59,7 +67,7 @@ function ruleInsuranceLow(car, answers) {
   return {
     id: 'insurance-low',
     priority: 7,
-    text: 'Low insurance group keeps running costs down.',
+    text: '[mint:Low insurance group] keeps running costs down.',
   }
 }
 
@@ -72,7 +80,7 @@ function ruleBudgetHeadroom(car, answers) {
   return {
     id: 'budget-headroom',
     priority: 7,
-    text: 'Comfortably within budget — leaves room for a better trim or lower miles.',
+    text: '[mint:Comfortably within budget] — leaves room for a better trim or lower miles.',
   }
 }
 
@@ -85,7 +93,7 @@ function ruleBootSpace(car, answers) {
     return {
       id: 'boot-space',
       priority: 8,
-      text: `Genuine ${has.toLowerCase()} boot — practical day to day.`,
+      text: `[mint:Genuine ${has.toLowerCase()} boot] — practical day to day.`,
     }
   }
   return null
@@ -97,7 +105,7 @@ function ruleOwnershipEase(car, answers) {
   return {
     id: 'ownership-ease',
     priority: 6,
-    text: 'Low-stress ownership — reliable and cheap to live with.',
+    text: '[mint:Low-stress ownership] — reliable and cheap to live with.',
   }
 }
 
@@ -107,7 +115,7 @@ function ruleSafetyFamily(car, answers) {
   return {
     id: 'safety-family',
     priority: 6,
-    text: '5-star safety with strong adult protection scores.',
+    text: '[mint:5-star safety] with strong adult protection scores.',
   }
 }
 
@@ -117,7 +125,7 @@ function ruleCityParking(car, answers) {
   return {
     id: 'city-parking',
     priority: 8,
-    text: 'Compact footprint — easy to park in tight city spaces.',
+    text: '[mint:Compact footprint] — easy to park in tight city spaces.',
   }
 }
 
@@ -127,7 +135,7 @@ function ruleRuralBody(car, answers) {
   return {
     id: 'rural-body',
     priority: 7,
-    text: `${car.bodyType} body suits rural driving and rougher roads.`,
+    text: `[mint:${car.bodyType} body] suits rural driving and rougher roads.`,
   }
 }
 
@@ -136,7 +144,24 @@ function ruleEVUlez(car, answers) {
   return {
     id: 'ev-ulez',
     priority: 6,
-    text: 'Zero road tax, ULEZ-free, cheap to charge at home.',
+    text: '[mint:Zero road tax], ULEZ-free, cheap to charge at home.',
+  }
+}
+
+// Known-issues rule — fires when the dataset has flagged caveats for this
+// car. Priority sits above the fallback and below the standout positives,
+// so it surfaces only when nothing more flattering applies. Highlights the
+// first issue in amber so the eye lands on the gotcha.
+function ruleKnownIssue(car, answers) {
+  const issues = Array.isArray(car.knownIssues) ? car.knownIssues : null
+  if (!issues || issues.length === 0) return null
+  // Skip the "no significant issues" sentinel some entries use.
+  const first = issues[0] || ''
+  if (/none significant/i.test(first)) return null
+  return {
+    id: 'known-issue',
+    priority: 5,
+    text: `Watch for [amber:${first}] — worth checking on inspection.`,
   }
 }
 
@@ -146,7 +171,7 @@ function ruleFallback(car, answers) {
   return {
     id: 'fallback',
     priority: 1,
-    text: `Solid all-round match at ${score}/100 based on your priorities.`,
+    text: `Solid all-round match at [mint:${score}/100] based on your priorities.`,
   }
 }
 
@@ -163,6 +188,7 @@ const RULES = [
   ruleCityParking,
   ruleRuralBody,
   ruleEVUlez,
+  ruleKnownIssue,
   ruleFallback,
 ]
 
