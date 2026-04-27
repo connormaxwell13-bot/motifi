@@ -358,7 +358,7 @@ export default function ChatInterface({ onReview, onHome, onCompare }) {
   if (showLoader) return <LoadingScreen />
 
   return (
-    <div className="motifi-screen cooper">
+    <div className="motifi-screen cooper light">
       <TopNav
         current="find"
         onHome={onHome}
