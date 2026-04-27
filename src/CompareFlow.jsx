@@ -1,42 +1,233 @@
-// CompareFlow.jsx — Session 2
-// Extracted from App.jsx unchanged, plus one addition:
-//   `preloaded={{ cars, answers }}` — when present, mount directly in
-//   the comparison view with those cars pre-selected. Used by Results'
-//   "Compare top 3 →" button. Absent → original Home flow unchanged.
+// CompareFlow.jsx — Session 3
+// Full editorial rebuild.
+//
+// Three steps preserved from v1:
+//   - 'details' — postcode + payment method + deposit (cold-from-Home entry)
+//   - 'select'  — pick up to 3 cars
+//   - 'results' — the comparison view itself (the big rebuild)
+//
+// New `preloaded={{ cars, answers }}` prop (from Session 2) still works:
+//   when present, mount directly in 'results' with those cars/answers.
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import TopNav from './TopNav'
 import carsData from './data/cars.json'
-import { getYearOneCost } from './scoring/costs.jsx'
+import { getYearOneCost, getRepresentativePrice, getRetainedAfter48Months } from './scoring/costs.jsx'
+import { buildComparison, getOverallVerdict } from './scoring/verdict.jsx'
+import './design/tokens.css'
+import './design/screens.css'
 
-const C = {
-  midnight: '#0F1D35',
-  navy: '#1A2E50',
-  teal: '#00C896',
-  offwhite: '#F5F7FA',
-  muted: '#A8B8CC',
-  dim: '#4A6080',
-  white: '#FFFFFF',
+// ─── Markdown helper (bold + italic) ──────────────────────────────────────────
+// Used to render the verdict panel's prose with **bold** and *italic* spans.
+function renderMarkdown(text) {
+  if (!text) return null
+  const out = []
+  let key = 0
+  const boldSplit = text.split(/(\*\*[^*]+\*\*)/g)
+  for (const seg of boldSplit) {
+    if (!seg) continue
+    if (seg.startsWith('**') && seg.endsWith('**')) {
+      out.push(<strong key={key++}>{seg.slice(2, -2)}</strong>)
+    } else {
+      const italSplit = seg.split(/(\*[^*]+\*)/g)
+      for (const piece of italSplit) {
+        if (!piece) continue
+        if (piece.startsWith('*') && piece.endsWith('*')) {
+          out.push(<em key={key++}>{piece.slice(1, -1)}</em>)
+        } else {
+          out.push(<span key={key++}>{piece}</span>)
+        }
+      }
+    }
+  }
+  return out
 }
 
-export default function CompareFlow({ onBack, onSelectCar, preloaded }) {
-  // Initial step + state are seeded from `preloaded` when present so the
-  // "Compare top 3 →" entry skips straight into the comparison view.
-  const [step, setStep] = useState(preloaded ? 'results' : 'details')
-  const [answers, setAnswers] = useState(preloaded?.answers || {})
-  const [selectedCars, setSelectedCars] = useState(preloaded?.cars?.slice(0, 3) || [])
-  const [brandFilter, setBrandFilter] = useState('')
-  const [bodyFilter, setBodyFilter] = useState('')
-  const [results, setResults] = useState(preloaded?.cars?.slice(0, 3) || [])
+// ─── Imagin URL builder (stays inline, matches existing pattern) ──────────────
+function imaginUrl(car) {
+  const make    = (car.make || '').toLowerCase()
+  const family  = (car.model || '').split(' ')[0].toLowerCase()
+  const year    = car.generationYears?.split(/[—-]/)[0]?.trim() || '2022'
+  return `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(make)}&modelFamily=${encodeURIComponent(family)}&modelYear=${year}&angle=23&paintdescription=grey`
+}
 
-  const brands = [...new Set(carsData.map(c => c.make))].sort()
+const fmtGBP = (n) => '£' + Math.round(Number(n) || 0).toLocaleString('en-GB')
 
-  const filteredCars = carsData.filter(car => {
-    const matchBrand = !brandFilter || car.make === brandFilter
-    const matchBody = !bodyFilter || (car.bodyType || '').toLowerCase().includes(bodyFilter.toLowerCase())
-    return matchBrand && matchBody
-  }).sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`))
+// Letters used to label car columns in the prototype: A / B / C.
+const COL_LETTERS = ['A', 'B', 'C']
 
-  function toggleCar(car) {
+// ─── Main component ──────────────────────────────────────────────────────────
+
+export default function CompareFlow({ onBack, onSelectCar, onHome, onCompare, preloaded }) {
+  const [step, setStep]                   = useState(preloaded ? 'results' : 'details')
+  const [answers, setAnswers]             = useState(preloaded?.answers || {})
+  const [selectedCars, setSelectedCars]   = useState(preloaded?.cars?.slice(0, 3) || [])
+  const [brandFilter, setBrandFilter]     = useState('')
+  const [bodyFilter, setBodyFilter]       = useState('')
+  const [results, setResults]             = useState(preloaded?.cars?.slice(0, 3) || [])
+  const [viewMode, setViewMode]           = useState('full') // 'full' | 'differences'
+
+  const isFinance = ['Hire Purchase', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)']
+    .includes(answers?.purchaseMethod || answers?.paymentMethod)
+
+  // ─── Step routing ──────────────────────────────────────────────────────────
+
+  if (step === 'results') {
+    return (
+      <CompareResults
+        cars={results}
+        answers={answers}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        onClearAll={() => {
+          setResults([])
+          setSelectedCars([])
+          if (preloaded) onBack()
+          else setStep('select')
+        }}
+        onRemoveCar={(idx) => {
+          const next = results.filter((_, i) => i !== idx)
+          setResults(next)
+          setSelectedCars(next)
+          if (next.length === 0) {
+            if (preloaded) onBack()
+            else setStep('select')
+          }
+        }}
+        onAddCar={() => setStep('select')}
+        onSelectCar={onSelectCar}
+        onHome={onHome}
+        onCompare={onCompare}
+      />
+    )
+  }
+
+  if (step === 'select') {
+    return (
+      <CompareSelect
+        cars={carsData}
+        selectedCars={selectedCars}
+        setSelectedCars={setSelectedCars}
+        brandFilter={brandFilter}
+        setBrandFilter={setBrandFilter}
+        bodyFilter={bodyFilter}
+        setBodyFilter={setBodyFilter}
+        onBack={() => setStep('details')}
+        onCompare={() => {
+          setResults(selectedCars)
+          setStep('results')
+        }}
+        onHome={onHome}
+        onCompareNav={onCompare}
+      />
+    )
+  }
+
+  // step === 'details'
+  return (
+    <CompareDetails
+      answers={answers}
+      setAnswers={setAnswers}
+      isFinance={isFinance}
+      onBack={onBack}
+      onContinue={() => setStep('select')}
+      onHome={onHome}
+      onCompare={onCompare}
+    />
+  )
+}
+
+// ─── Details step ────────────────────────────────────────────────────────────
+
+function CompareDetails({ answers, setAnswers, isFinance, onBack, onContinue, onHome, onCompare }) {
+  return (
+    <div className="motifi-screen compare-pre">
+      <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompare} />
+
+      <div className="cmp-pre">
+        <div className="kicker">◆ Compare cars · Step 1 of 2</div>
+        <h1>Already know what you're <em>looking for?</em></h1>
+        <p className="lede">
+          Tell us a bit about how you're paying and we'll show you the true four-year
+          cost for every car you put head-to-head.
+        </p>
+
+        <div className="cmp-pre-form">
+          <label>
+            <span className="lbl">Your postcode</span>
+            <input
+              type="text"
+              placeholder="e.g. SW1A 1AA"
+              value={answers.postcode || ''}
+              onChange={e => setAnswers(p => ({ ...p, postcode: e.target.value }))}
+            />
+          </label>
+
+          <label>
+            <span className="lbl">How are you planning to pay?</span>
+            <div className="cmp-pre-chips">
+              {['Cash', 'Part Exchange', 'Hire Purchase', 'Bank Loan'].map(opt => {
+                const selected = (answers.paymentMethod || answers.purchaseMethod) === opt
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    className={'cmp-pre-chip' + (selected ? ' selected' : '')}
+                    onClick={() => setAnswers(p => ({ ...p, paymentMethod: opt, purchaseMethod: opt }))}
+                  >
+                    {opt}
+                  </button>
+                )
+              })}
+            </div>
+          </label>
+
+          {isFinance && (
+            <label>
+              <span className="lbl">Deposit amount (£)</span>
+              <input
+                type="number"
+                placeholder="e.g. 2000"
+                value={answers.depositAmount || ''}
+                onChange={e => setAnswers(p => ({ ...p, depositAmount: e.target.value }))}
+              />
+            </label>
+          )}
+
+          <button
+            className="btn lg"
+            onClick={onContinue}
+            disabled={!(answers.paymentMethod || answers.purchaseMethod)}
+          >
+            Choose my cars<span className="arrow" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Select step ─────────────────────────────────────────────────────────────
+
+function CompareSelect({
+  cars, selectedCars, setSelectedCars,
+  brandFilter, setBrandFilter, bodyFilter, setBodyFilter,
+  onBack, onCompare, onHome, onCompareNav,
+}) {
+  const brands = useMemo(() => [...new Set(cars.map(c => c.make))].sort(), [cars])
+  const bodyTypes = ['Hatchback', 'Saloon', 'Estate', 'SUV', 'Crossover', 'MPV', 'Coupe', 'Van']
+
+  const filtered = useMemo(() => cars
+    .filter(car => {
+      const matchBrand = !brandFilter || car.make === brandFilter
+      const matchBody  = !bodyFilter  || (car.bodyType || '').toLowerCase().includes(bodyFilter.toLowerCase())
+      return matchBrand && matchBody
+    })
+    .sort((a, b) => `${a.make} ${a.model}`.localeCompare(`${b.make} ${b.model}`)),
+    [cars, brandFilter, bodyFilter]
+  )
+
+  function toggle(car) {
     const key = `${car.make} ${car.model} ${car.generationName}`
     const exists = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}` === key)
     if (exists) {
@@ -46,221 +237,419 @@ export default function CompareFlow({ onBack, onSelectCar, preloaded }) {
     }
   }
 
-  function handleCompare() {
-    setResults(selectedCars)
-    setStep('results')
-  }
+  return (
+    <div className="motifi-screen compare-pre">
+      <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompareNav} />
 
-  // Honour both keys — Cooper writes paymentMethod, the bespoke details
-  // step writes purchaseMethod. Either should mean "treat this as finance".
-  const isFinance = ['Hire Purchase (HP)', 'Personal Contract Purchase (PCP)', 'Hire Purchase']
-    .includes(answers.purchaseMethod || answers.paymentMethod)
+      <div className="cmp-pre">
+        <div className="kicker">◆ Compare cars · Step 2 of 2</div>
+        <h1>Choose up to <em>three.</em></h1>
+        <p className="lede">
+          Filter by brand or body type to narrow the list. The order you pick them in
+          becomes the column order on the comparison page.
+        </p>
 
-  if (step === 'results') {
-    return (
-      <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, minHeight: '100vh', color: C.midnight }}>
-        <nav style={{ backgroundColor: C.midnight, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
-          <button onClick={() => preloaded ? onBack() : setStep('select')} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
-        </nav>
-
-        <div style={{ backgroundColor: C.midnight, padding: '40px 5% 48px', textAlign: 'center' }}>
-          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>YOUR COMPARISON</div>
-          <h2 style={{ fontSize: 'clamp(24px, 4vw, 40px)', fontWeight: '900', letterSpacing: '-0.03em', color: C.offwhite, lineHeight: '1.2' }}>Here's how your chosen cars compare.</h2>
+        <div className="cmp-select-filters">
+          <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)}>
+            <option value="">All brands</option>
+            {brands.map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
+          <select value={bodyFilter} onChange={e => setBodyFilter(e.target.value)}>
+            <option value="">All body types</option>
+            {bodyTypes.map(b => <option key={b} value={b}>{b}</option>)}
+          </select>
         </div>
 
-        <div style={{ backgroundColor: '#1A2E50', padding: '0 5%', display: 'grid', gridTemplateColumns: `repeat(${results.length}, 1fr)`, gap: '1px' }}>
-          {results.map((car, i) => {
-            const generationYear = car.generationYears?.split(/[—-]/)[0]?.trim() || '2020'
-            const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
+        {selectedCars.length > 0 && (
+          <div className="cmp-select-pills">
+            <span className="cmp-select-pills-lab">SELECTED · {selectedCars.length} of 3</span>
+            <div className="cmp-select-pills-row">
+              {selectedCars.map((car, i) => (
+                <span key={`${car.make}${car.model}${i}`} className="cmp-select-pill">
+                  <span className="opt">{COL_LETTERS[i]}</span>
+                  {car.make} {car.model}
+                  <button onClick={() => toggle(car)} aria-label="Remove">×</button>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="cmp-select-list">
+          {filtered.map(car => {
+            const key = `${car.make} ${car.model} ${car.generationName}`
+            const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}` === key)
+            const disabled = !selected && selectedCars.length >= 3
             return (
-              <div key={i} style={{ padding: '24px 16px', textAlign: 'center', borderRight: i < results.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
-                <div style={{ height: '120px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-                  <img src={imaginUrl} alt={`${car.make} ${car.model}`} style={{ maxHeight: '120px', maxWidth: '100%', objectFit: 'contain' }} onError={(e) => { e.target.style.display = 'none' }} />
-                </div>
-                <div style={{ fontSize: '16px', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.02em' }}>{car.make} {car.model}</div>
-                <div style={{ fontSize: '12px', color: C.muted, marginTop: '4px' }}>{car.generationName}</div>
-                <div style={{ fontSize: '14px', fontWeight: '700', color: C.teal, marginTop: '6px' }}>£{Number(car.priceLow).toLocaleString()}–£{Number(car.priceHigh).toLocaleString()}</div>
-              </div>
+              <button
+                key={key}
+                type="button"
+                className={'cmp-select-row' + (selected ? ' selected' : '') + (disabled ? ' disabled' : '')}
+                onClick={() => !disabled && toggle(car)}
+              >
+                <span className="cmp-select-row-name">
+                  <strong>{car.make} {car.model}</strong>
+                  <span className="trim">{car.generationName} · {car.generationYears}</span>
+                </span>
+                <span className="cmp-select-row-price">{fmtGBP(getRepresentativePrice(car))}</span>
+              </button>
             )
           })}
         </div>
 
-        <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 5% 80px' }}>
-          <div style={{ backgroundColor: C.white, borderRadius: '16px', border: '1px solid #E8ECF0', overflow: 'hidden', marginBottom: '20px' }}>
-            <div style={{ backgroundColor: C.midnight, padding: '14px 20px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em' }}>KEY SPECS</div>
-            </div>
-            {[
-              { label: 'Body type', key: 'bodyType' },
-              { label: 'Fuel type', key: 'fuelType' },
-              { label: 'Transmission', key: 'transmission' },
-              { label: 'MPG', key: 'mpgBand' },
-              { label: 'Boot size', key: 'bootBand' },
-              { label: 'Insurance risk', key: 'insuranceBand' },
-              { label: 'Reliability', fn: car => car.reliabilityBand },
-              { label: 'Safety', fn: car => `${car.ncapStars}★ NCAP` },
-              { label: 'ULEZ', key: 'ulezCompliant' },
-              { label: 'Ownership stress', key: 'ownershipStress' },
-            ].map(({ label, key, fn }, rowI) => (
-              <div key={label} style={{ display: 'grid', gridTemplateColumns: `180px repeat(${results.length}, 1fr)`, borderTop: '1px solid #E8ECF0', backgroundColor: rowI % 2 === 0 ? '#FAFBFC' : C.white }}>
-                <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: '600', color: '#5A7090', borderRight: '1px solid #E8ECF0' }}>{label}</div>
-                {results.map((car, i) => (
-                  <div key={i} style={{ padding: '12px 16px', fontSize: '13px', color: C.midnight, borderRight: i < results.length - 1 ? '1px solid #E8ECF0' : 'none' }}>
-                    {fn ? fn(car) : car[key] || '—'}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ backgroundColor: C.white, borderRadius: '16px', border: '1px solid #E8ECF0', overflow: 'hidden', marginBottom: '20px' }}>
-            <div style={{ backgroundColor: C.midnight, padding: '14px 20px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em' }}>COST OF OWNERSHIP</div>
-            </div>
-            {(isFinance ? [
-              { label: 'Deposit', fn: (car) => `£${Number(getYearOneCost(car, answers).deposit).toLocaleString()}` },
-              { label: 'Finance/mo', fn: (car) => `~£${getYearOneCost(car, answers).financeMonthly}/mo` },
-              { label: 'Insurance/mo', fn: (car) => `~£${getYearOneCost(car, answers).insuranceMonthly}/mo` },
-              { label: 'Road tax/mo', fn: (car) => getYearOneCost(car, answers).roadTax === 0 ? 'Free (EV)' : `£${getYearOneCost(car, answers).roadTaxMonthly}/mo` },
-              { label: 'Monthly total', fn: (car) => { const c = getYearOneCost(car, answers); return `~£${c.totalMonthlyMin}–£${c.totalMonthlyMax}/mo` }, highlight: true },
-              { label: '48-month total', fn: (car) => { const c = getYearOneCost(car, answers); return `~£${Number(c.deposit + (c.financeMonthly * 48) + (c.insuranceMonthly * 48) + (c.roadTax * 4)).toLocaleString()}` }, highlight: true },
-            ] : [
-              { label: 'Car price', fn: (car) => `£${Number(car.priceLow).toLocaleString()}` },
-              { label: 'Road tax/yr', fn: (car) => getYearOneCost(car, answers).roadTax === 0 ? 'Free (EV)' : `£${getYearOneCost(car, answers).roadTax}` },
-              { label: 'Insurance/yr', fn: (car) => { const c = getYearOneCost(car, answers); return `£${c.insuranceMin}–£${c.insuranceMax}` } },
-              { label: 'Year 1 total', fn: (car) => { const c = getYearOneCost(car, answers); return `£${c.yearOneMin.toLocaleString()}–£${c.yearOneMax.toLocaleString()}` }, highlight: true },
-              { label: '4-year total', fn: (car) => { const c = getYearOneCost(car, answers); return `~£${Number(c.carPrice + (c.insuranceMin * 4) + (c.roadTax * 4)).toLocaleString()}–£${Number(c.carPrice + (c.insuranceMax * 4) + (c.roadTax * 4)).toLocaleString()}` }, highlight: true },
-            ]).map(({ label, fn, highlight }, rowI) => (
-              <div key={label} style={{ display: 'grid', gridTemplateColumns: `180px repeat(${results.length}, 1fr)`, borderTop: '1px solid #E8ECF0', backgroundColor: highlight ? '#F0FDF9' : rowI % 2 === 0 ? '#FAFBFC' : C.white }}>
-                <div style={{ padding: '12px 16px', fontSize: '13px', fontWeight: '600', color: highlight ? C.teal : '#5A7090', borderRight: '1px solid #E8ECF0' }}>{label}</div>
-                {results.map((car, i) => (
-                  <div key={i} style={{ padding: '12px 16px', fontSize: '13px', fontWeight: highlight ? '700' : '400', color: highlight ? C.teal : C.midnight, borderRight: i < results.length - 1 ? '1px solid #E8ECF0' : 'none' }}>
-                    {fn(car)}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${results.length}, 1fr)`, gap: '12px', marginBottom: '24px' }}>
-            {results.map((car, i) => (
-              <button key={i} onClick={() => onSelectCar(car)} style={{ backgroundColor: C.midnight, color: C.offwhite, border: 'none', borderRadius: '10px', padding: '14px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>
-                View {car.make} {car.model} →
-              </button>
-            ))}
-          </div>
-
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '12px', color: '#8A9AB0', marginBottom: '8px' }}>Cost estimates are indicative. Insurance based on risk band. Finance calculated at 9.9% APR over 48 months.</p>
-            <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.midnight, border: '1px solid #E8ECF0', borderRadius: '10px', padding: '12px 28px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '14px', cursor: 'pointer', marginTop: '8px' }}>Start again</button>
-          </div>
+        <div className="cmp-select-cta">
+          <button className="btn ghost" onClick={onBack}>
+            <span className="arrow back" aria-hidden="true"></span> Back
+          </button>
+          <button className="btn lg" onClick={onCompare} disabled={selectedCars.length < 1}>
+            Compare {selectedCars.length} {selectedCars.length === 1 ? 'car' : 'cars'}
+            <span className="arrow" aria-hidden="true"></span>
+          </button>
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
-  if (step === 'select') {
+// ─── Comparison view (the big one) ───────────────────────────────────────────
+
+function CompareResults({
+  cars, answers, viewMode, setViewMode,
+  onClearAll, onRemoveCar, onAddCar, onSelectCar,
+  onHome, onCompare,
+}) {
+  // Build the metric grid + verdict once per render.
+  // useMemo ensures we don't recompute on cosmetic state changes.
+  const { sections, totalMetrics } = useMemo(
+    () => buildComparison(cars, answers),
+    [cars, answers]
+  )
+  const verdict = useMemo(
+    () => getOverallVerdict(cars, answers),
+    [cars, answers]
+  )
+
+  // Filter rows when view mode is 'differences'. A row "differs" if at least
+  // one cell carries a 'best' or 'worst' verdict — i.e. there's spread in
+  // the values. All-middle rows get hidden.
+  const visibleSections = useMemo(() => {
+    if (viewMode === 'full') return sections
+    return sections.map(s => ({
+      ...s,
+      rows: s.rows.filter(r => r.cells.some(c => c.verdict === 'best' || c.verdict === 'worst')),
+    })).filter(s => s.rows.length > 0)
+  }, [sections, viewMode])
+
+  if (cars.length === 0) {
     return (
-      <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
-        <nav style={{ backgroundColor: C.navy, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
-          <button onClick={() => setStep('details')} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
-        </nav>
-        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px 80px' }}>
-          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>COMPARE CARS</div>
-          <h2 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em', marginBottom: '8px' }}>Select up to 3 cars to compare.</h2>
-          <p style={{ fontSize: '14px', color: C.muted, marginBottom: '32px' }}>Filter by brand or body type to narrow the list.</p>
-
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            <select value={brandFilter} onChange={e => setBrandFilter(e.target.value)} style={{ flex: '1', minWidth: '140px', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', outline: 'none' }}>
-              <option value=''>All brands</option>
-              {brands.map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
-            <select value={bodyFilter} onChange={e => setBodyFilter(e.target.value)} style={{ flex: '1', minWidth: '140px', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', outline: 'none' }}>
-              <option value=''>All body types</option>
-              {['Hatchback', 'Saloon', 'Estate', 'SUV', 'Crossover', 'MPV', 'Coupe', 'Van'].map(b => <option key={b} value={b}>{b}</option>)}
-            </select>
-          </div>
-
-          {selectedCars.length > 0 && (
-            <div style={{ backgroundColor: C.navy, borderRadius: '10px', padding: '12px 16px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '11px', color: C.teal, fontWeight: '600', marginBottom: '8px' }}>SELECTED ({selectedCars.length}/3)</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {selectedCars.map(car => (
-                  <div key={`${car.make}${car.model}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600' }}>{car.make} {car.model}</span>
-                    <button onClick={() => toggleCar(car)} style={{ backgroundColor: 'transparent', color: C.muted, border: 'none', cursor: 'pointer', fontSize: '18px', lineHeight: 1 }}>×</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto', marginBottom: '24px' }}>
-            {filteredCars.map(car => {
-              const key = `${car.make} ${car.model} ${car.generationName}`
-              const selected = selectedCars.find(c => `${c.make} ${c.model} ${c.generationName}` === key)
-              const disabled = !selected && selectedCars.length >= 3
-              return (
-                <button key={key} onClick={() => !disabled && toggleCar(car)} style={{ backgroundColor: selected ? C.teal : C.navy, color: selected ? C.midnight : disabled ? C.dim : C.offwhite, border: `1.5px solid ${selected ? C.teal : '#2A4060'}`, borderRadius: '10px', padding: '12px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: selected ? '700' : '400', cursor: disabled ? 'not-allowed' : 'pointer', textAlign: 'left', opacity: disabled ? 0.5 : 1 }}>
-                  <span style={{ fontWeight: '600' }}>{car.make} {car.model}</span>
-                  <span style={{ fontSize: '12px', marginLeft: '8px', opacity: 0.7 }}>{car.generationName}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          <button onClick={handleCompare} disabled={selectedCars.length < 1} style={{ width: '100%', backgroundColor: selectedCars.length > 0 ? C.teal : '#1A2E50', color: selectedCars.length > 0 ? C.midnight : C.dim, border: 'none', borderRadius: '10px', padding: '16px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: selectedCars.length > 0 ? 'pointer' : 'not-allowed' }}>
-            Compare {selectedCars.length > 0 ? `${selectedCars.length} car${selectedCars.length > 1 ? 's' : ''}` : 'cars'} →
+      <div className="motifi-screen compare">
+        <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompare} />
+        <div className="cmp-empty">
+          <h1>No cars selected.</h1>
+          <p>Add at least one car to start comparing.</p>
+          <button className="btn lg" onClick={onAddCar}>
+            Add a car<span className="arrow" aria-hidden="true"></span>
           </button>
         </div>
       </div>
     )
   }
+
+  const slotsLeft = Math.max(0, 3 - cars.length)
 
   return (
-    <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.midnight, minHeight: '100vh', color: C.offwhite }}>
-      <nav style={{ backgroundColor: C.navy, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em' }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
-        <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back</button>
-      </nav>
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '48px 24px 80px' }}>
-        <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>COMPARE CARS</div>
-        <h2 style={{ fontSize: '28px', fontWeight: '700', letterSpacing: '-0.02em', marginBottom: '8px' }}>Already know what you're looking for?</h2>
-        <p style={{ fontSize: '14px', color: C.muted, marginBottom: '32px', lineHeight: '1.6' }}>Tell us a bit about yourself and we'll show you the true cost of ownership for each car you choose.</p>
+    <div className="motifi-screen compare">
+      <TopNav current="compare" onHome={onHome} onStart={() => {}} onCompare={onCompare} />
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>Your postcode</label>
-            <input type="text" placeholder="e.g. SW1A 1AA" value={answers.postcode || ''} onChange={e => setAnswers(p => ({ ...p, postcode: e.target.value }))} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '14px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }} />
+      {/* ─── Page header ───────────────────────────────────────────────────── */}
+      <div className="cmp-head">
+        <div className="cmp-head-l">
+          <div className="cmp-head-kicker">
+            ◆ Comparison · {cars.length} of up to 3 cars · {totalMetrics} metrics
           </div>
-
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>How are you planning to pay?</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {['Cash', 'Part exchange', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)'].map(opt => {
-                const selected = answers.purchaseMethod === opt
-                return (
-                  <button key={opt} onClick={() => setAnswers(p => ({ ...p, purchaseMethod: opt }))} style={{ backgroundColor: selected ? C.teal : C.navy, color: selected ? C.midnight : C.offwhite, border: `1.5px solid ${selected ? C.teal : '#2A4060'}`, borderRadius: '10px', padding: '14px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '14px', fontWeight: selected ? '700' : '400', cursor: 'pointer', textAlign: 'left' }}>
-                    {opt}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {isFinance && (
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', color: C.muted, marginBottom: '8px', fontWeight: '500' }}>Deposit amount (£)</label>
-              <input type="number" placeholder="e.g. 2000" value={answers.deposit || ''} onChange={e => setAnswers(p => ({ ...p, deposit: e.target.value }))} style={{ width: '100%', backgroundColor: C.navy, color: C.offwhite, border: '1.5px solid #2A4060', borderRadius: '10px', padding: '14px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '15px', outline: 'none', boxSizing: 'border-box' }} />
-            </div>
-          )}
-
-          <button onClick={() => setStep('select')} disabled={!answers.purchaseMethod} style={{ backgroundColor: answers.purchaseMethod ? C.teal : '#1A2E50', color: answers.purchaseMethod ? C.midnight : C.dim, border: 'none', borderRadius: '10px', padding: '16px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '16px', cursor: answers.purchaseMethod ? 'pointer' : 'not-allowed', marginTop: '8px' }}>
-            Choose my cars →
-          </button>
+          <h1 className="cmp-head-h1">
+            Head <br />to <em>head.</em>
+          </h1>
         </div>
+        <div className="cmp-head-r">
+          <div className="cmp-view-toggle" role="radiogroup" aria-label="View mode">
+            <span className="cmp-view-lab">View</span>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'full'}
+              className={'cmp-view-btn' + (viewMode === 'full' ? ' on' : '')}
+              onClick={() => setViewMode('full')}
+            >Full</button>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={viewMode === 'differences'}
+              className={'cmp-view-btn' + (viewMode === 'differences' ? ' on' : '')}
+              onClick={() => setViewMode('differences')}
+            >Differences only</button>
+          </div>
+          <button className="btn ghost sm" onClick={onClearAll}>Clear all</button>
+        </div>
+      </div>
+
+      {/* ─── Selected pills row ────────────────────────────────────────────── */}
+      <div className="cmp-selected">
+        <span className="cmp-selected-lab">◆ Selected</span>
+        <div className="cmp-selected-row">
+          {cars.map((car, i) => (
+            <span key={i} className="cmp-selected-pill">
+              <span className="opt">{COL_LETTERS[i]}</span>
+              {car.make} {car.model}
+              <button onClick={() => onRemoveCar(i)} aria-label={`Remove ${car.make} ${car.model}`}>×</button>
+            </span>
+          ))}
+          {slotsLeft > 0 && (
+            <button className="cmp-selected-add" onClick={onAddCar}>
+              + Add car
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ─── Hero strip — metric column + 1–3 car columns ─────────────────── */}
+      <div className="cmp-hero">
+        <CompareGrid cars={cars}>
+          <div className="cmp-hero-meta">
+            <div className="cmp-hero-meta-kicker">◆ Metric</div>
+            <h2 className="cmp-hero-meta-h2">{totalMetrics} points <br />of truth</h2>
+            <p className="cmp-hero-meta-lede">
+              Mint = best in set. Coral = trails. Switch to "Differences only"
+              to fade rows where all cars match.
+            </p>
+          </div>
+          {cars.map((car, i) => (
+            <CarColumnHero
+              key={i}
+              car={car}
+              optLetter={COL_LETTERS[i]}
+              onRemove={() => onRemoveCar(i)}
+              answers={answers}
+            />
+          ))}
+          {slotsLeft > 0 && <EmptySlotHero slotsLeft={slotsLeft} onAdd={onAddCar} />}
+        </CompareGrid>
+      </div>
+
+      {/* ─── Metric sections ───────────────────────────────────────────────── */}
+      {visibleSections.map(section => (
+        <Section key={section.id} section={section} cars={cars} slotsLeft={slotsLeft} />
+      ))}
+
+      {visibleSections.length === 0 && (
+        <div className="cmp-no-diff">
+          <p>These cars match on every metric we measure. Try adding a different one.</p>
+        </div>
+      )}
+
+      {/* ─── Verdict panel ─────────────────────────────────────────────────── */}
+      {verdict && cars.length >= 2 && (
+        <VerdictPanel
+          verdict={verdict}
+          onSelectCar={onSelectCar}
+        />
+      )}
+    </div>
+  )
+}
+
+// ─── Compare grid — shared layout primitive ──────────────────────────────────
+// 4 fixed columns (label + 3 cars) regardless of how many cars are picked.
+// Empty slots fade visually so the rhythm stays consistent.
+function CompareGrid({ children }) {
+  return <div className="cmp-grid">{children}</div>
+}
+
+// ─── Car column hero ─────────────────────────────────────────────────────────
+
+function CarColumnHero({ car, optLetter, onRemove, answers }) {
+  const cy        = getYearOneCost(car, answers)
+  const repPrice  = getRepresentativePrice(car)
+  const isFinance = ['Hire Purchase', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)']
+    .includes(answers?.paymentMethod || answers?.purchaseMethod)
+  const monthly   = isFinance && cy?.financeMonthly ? cy.financeMonthly : null
+
+  return (
+    <div className="cmp-col cmp-col-hero">
+      <div className="cmp-col-top">
+        <span className="cmp-col-brand">
+          ◆ <strong>{(car.make || '').toUpperCase()}</strong>
+          <span className="opt">OPT {optLetter}</span>
+        </span>
+        <button className="cmp-col-x" onClick={onRemove} aria-label="Remove">×</button>
+      </div>
+
+      <h3 className="cmp-col-name">{car.model}</h3>
+      <div className="cmp-col-trim">
+        {[car.generationName, car.transmission, car.generationYears].filter(Boolean).join(' · ')}
+      </div>
+
+      <div className="cmp-col-photo">
+        <img
+          src={imaginUrl(car)}
+          alt={`${car.make} ${car.model}`}
+          onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
+        />
+      </div>
+
+      <div className="cmp-col-price">
+        <span className="v">{fmtGBP(repPrice)}</span>
+        {monthly && <span className="mo">{fmtGBP(monthly)}/mo</span>}
+      </div>
+    </div>
+  )
+}
+
+// ─── Empty slot ──────────────────────────────────────────────────────────────
+
+function EmptySlotHero({ slotsLeft, onAdd }) {
+  return (
+    <button className="cmp-col cmp-col-empty" onClick={onAdd}>
+      <div className="cmp-col-empty-plus">+</div>
+      <div className="cmp-col-empty-lab">Add another</div>
+      <div className="cmp-col-empty-sub">{slotsLeft} slot{slotsLeft === 1 ? '' : 's'} left</div>
+    </button>
+  )
+}
+
+// ─── Section block ───────────────────────────────────────────────────────────
+
+function Section({ section, cars, slotsLeft }) {
+  return (
+    <div className="cmp-section">
+      <div className="cmp-section-head">
+        <div className="cmp-section-num">§ {section.number}</div>
+        <h2 className="cmp-section-title">{section.title}</h2>
+        <span className="cmp-section-count">{section.rows.length} metrics</span>
+      </div>
+
+      {section.rows.map((row, ri) => (
+        <Row key={ri} row={row} cars={cars} slotsLeft={slotsLeft} />
+      ))}
+    </div>
+  )
+}
+
+// ─── Row ─────────────────────────────────────────────────────────────────────
+
+function Row({ row, cars, slotsLeft }) {
+  return (
+    <div className={'cmp-row' + (row.headline ? ' headline' : '')}>
+      <CompareGrid>
+        <div className="cmp-row-lab">
+          <div className="cmp-row-lab-k">{row.label}</div>
+          {row.sub && <div className="cmp-row-lab-sub">{row.sub}</div>}
+        </div>
+
+        {row.cells.map((cell, ci) => (
+          <Cell key={ci} cell={cell} />
+        ))}
+
+        {slotsLeft > 0 && Array.from({ length: slotsLeft }).map((_, i) => (
+          <div key={`empty-${i}`} className="cmp-cell empty" />
+        ))}
+      </CompareGrid>
+    </div>
+  )
+}
+
+// ─── Cell ────────────────────────────────────────────────────────────────────
+
+function Cell({ cell }) {
+  const cls = ['cmp-cell']
+  if (cell.verdict === 'best')   cls.push('best')
+  if (cell.verdict === 'worst')  cls.push('worst')
+  if (cell.verdict === 'middle') cls.push('middle')
+  if (cell.verdict === null)     cls.push('plain')
+
+  // Verdict tag glyph + label
+  let verdictTag = null
+  if (cell.verdict === 'best')   verdictTag = <span className="cmp-tag best">↑ Best of set</span>
+  if (cell.verdict === 'worst')  verdictTag = <span className="cmp-tag worst">↓ Trails</span>
+  if (cell.verdict === 'middle') verdictTag = <span className="cmp-tag middle">— Middle of pack</span>
+
+  return (
+    <div className={cls.join(' ')}>
+      <div className="cmp-cell-v">{cell.displayValue}</div>
+      {cell.subValue && <div className="cmp-cell-sub">{cell.subValue}</div>}
+      {verdictTag}
+      {cell.verdict && (
+        <div className="cmp-cell-bar">
+          <i style={{ width: `${Math.round((cell.position || 0) * 100)}%` }} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Verdict panel (light cream pull-quote band) ─────────────────────────────
+
+function VerdictPanel({ verdict, onSelectCar }) {
+  const { winnerCar, copy, recommendedReasons } = verdict
+  const repPrice = getRepresentativePrice(winnerCar)
+  const retained = Math.round(getRetainedAfter48Months(winnerCar) * 100)
+
+  return (
+    <div className="cmp-verdict">
+      <div className="cmp-verdict-inner">
+        <div className="cmp-verdict-l">
+          <div className="cmp-verdict-kicker">◆ Our verdict</div>
+          <h2 className="cmp-verdict-h2">
+            On true four-year cost,<br />
+            the <em>{winnerCar.make} {winnerCar.model}</em><br />
+            takes it.
+          </h2>
+          <p className="cmp-verdict-copy">{renderMarkdown(copy)}</p>
+        </div>
+
+        <aside className="cmp-verdict-r">
+          <div className="cmp-verdict-card">
+            <div className="cmp-verdict-card-photo">
+              <img
+                src={imaginUrl(winnerCar)}
+                alt={`${winnerCar.make} ${winnerCar.model}`}
+                onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
+              />
+            </div>
+
+            <div className="cmp-verdict-card-tags">
+              <span className="dot" /> Recommended · Lowest true cost
+            </div>
+
+            <h3 className="cmp-verdict-card-name">
+              {winnerCar.make} {winnerCar.model}
+            </h3>
+            <div className="cmp-verdict-card-meta">
+              {fmtGBP(repPrice)} · {winnerCar.generationYears}
+            </div>
+
+            <div className="cmp-verdict-card-reasons">
+              {recommendedReasons.map((r, i) => (
+                <div key={i} className="cmp-reason">
+                  <span className="cmp-reason-arrow">→</span>
+                  <div>
+                    <div className="cmp-reason-lab">{r.label}</div>
+                    <div className="cmp-reason-val">{r.value}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="cmp-verdict-card-cta">
+              <button className="btn" onClick={() => onSelectCar(winnerCar)}>
+                Full review<span className="arrow" aria-hidden="true"></span>
+              </button>
+              <button className="btn ghost" onClick={() => onSelectCar(winnerCar)}>
+                Find local stock
+              </button>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   )
