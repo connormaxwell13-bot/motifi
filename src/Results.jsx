@@ -10,7 +10,7 @@
 import { useState, useEffect, useRef } from 'react'
 import TopNav from './TopNav'
 import { generateOneLiners } from './scoring/oneliners.jsx'
-import { getYearOneCost, getRepresentativePrice } from './scoring/costs.jsx''
+import { getYearOneCost, getRepresentativePrice } from './scoring/costs.jsx'
 import './design/tokens.css'
 import './design/screens.css'
 
