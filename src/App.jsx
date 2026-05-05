@@ -9,6 +9,7 @@ import ChatInterface from './ChatInterface'
 import ReviewScreen from './ReviewScreen'
 import Results from './Results'
 import CompareFlow from './CompareFlow'
+import CarPage from './CarPage'
 import TopNav from './TopNav'
 import './design/tokens.css'
 import './design/home.css'
@@ -633,90 +634,4 @@ function Home({ onStart, onCompare }) {
 // ─── CarPage ──────────────────────────────────────────────────────────────────
 // Existing detail view, unchanged. Session 4 will rebuild this editorially.
 
-function CarPage({ car, answers, onBack }) {
-  const costs = getYearOneCost(car, answers)
-  const isFinance = ['Hire Purchase', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)']
-    .includes(answers.paymentMethod || answers.purchaseMethod)
-  const postcode = (answers.postcode || '').replace(/\s/g, '')
-  const radius = String(answers.searchRadius || 25)
-  const autotraderUrl = `https://www.autotrader.co.uk/car-search?make=${encodeURIComponent(car.make)}&model=${encodeURIComponent(car.model)}&postcode=${postcode}&radius=${radius}&year-from=${car.generationYears?.split(/[-–]/)[0]?.trim() || ''}`
-  const ebayUrl = `https://www.ebay.co.uk/sch/Cars/9801/i.html?_nkw=${encodeURIComponent(car.make + ' ' + car.model)}`
-  const insuranceUrl = `https://www.comparethemarket.com/car-insurance/`
-  const financeUrl = `https://www.zuto.com/apply/`
-  const generationYear = car.generationYears?.split(/[—-]/)[0]?.trim() || '2020'
-  const imaginUrl = `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make.toLowerCase())}&modelFamily=${encodeURIComponent(car.model.split(' ')[0].toLowerCase())}&zoomType=fullscreen&modelYear=${generationYear}&angle=23`
 
-  return (
-    <div style={{ fontFamily: 'Satoshi, sans-serif', backgroundColor: C.offwhite, minHeight: '100vh', color: C.midnight }}>
-      <nav style={{ backgroundColor: C.midnight, padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.02em', color: C.offwhite }}>Mo<span style={{ color: C.teal }}>ti</span>fi</div>
-        <button onClick={onBack} style={{ backgroundColor: 'transparent', color: C.muted, border: '1.5px solid #2A4060', borderRadius: '8px', padding: '8px 16px', fontFamily: 'Satoshi, sans-serif', fontSize: '13px', cursor: 'pointer' }}>← Back to results</button>
-      </nav>
-      <div style={{ backgroundColor: '#1A2E50', padding: '0 5%', minHeight: '240px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' }}>
-        <div style={{ flex: 1, paddingTop: '32px', paddingBottom: '32px' }}>
-          <div style={{ fontSize: '12px', fontWeight: '600', color: C.teal, letterSpacing: '0.06em', marginBottom: '12px' }}>{car.bodyType?.toUpperCase()}</div>
-          <h1 style={{ fontSize: 'clamp(28px, 5vw, 48px)', fontWeight: '900', color: C.offwhite, letterSpacing: '-0.03em', marginBottom: '8px', lineHeight: '1.05' }}>{car.make} {car.model}</h1>
-          <div style={{ fontSize: '14px', color: C.muted }}>{car.generationName} · {car.fuelType} · {car.transmission}</div>
-        </div>
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end', alignItems: 'flex-end', maxWidth: '360px', height: '200px', overflow: 'hidden' }}>
-          <img src={imaginUrl} alt={`${car.make} ${car.model}`} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'bottom right' }} onError={(e) => { e.target.style.display = 'none' }} />
-        </div>
-      </div>
-      <div style={{ maxWidth: '780px', margin: '0 auto', padding: '32px 24px 80px' }}>
-        <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '16px' }}>KEY SPECS</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-            {[
-              { label: 'Price from', value: car.priceLow ? `£${Number(car.priceLow).toLocaleString()}` : 'N/A' },
-              { label: 'MPG', value: car.mpgBand },
-              { label: 'Boot size', value: car.bootBand },
-              { label: 'Insurance risk', value: car.insuranceBand },
-              { label: 'Reliability', value: car.reliabilityBand },
-              { label: 'Safety', value: `${car.ncapStars}★ NCAP (${car.ncapAdultPct}%)` },
-              { label: 'ULEZ', value: car.ulezCompliant },
-              { label: 'Ownership stress', value: car.ownershipStress },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ backgroundColor: C.offwhite, borderRadius: '8px', padding: '12px' }}>
-                <div style={{ fontSize: '11px', color: '#8A9AB0', marginBottom: '4px' }}>{label}</div>
-                <div style={{ fontSize: '14px', fontWeight: '600', color: C.midnight }}>{value}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>FIND THIS CAR NEAR YOU</div>
-          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Search live listings within {answers.searchRadius || 50} miles of {answers.postcode || 'your location'}.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {[
-              { label: 'Search on AutoTrader', url: autotraderUrl, primary: true },
-              { label: 'Search on eBay Motors', url: ebayUrl, primary: false },
-            ].map(({ label, url, primary }) => (
-              <a key={label} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: primary ? C.teal : C.offwhite, color: C.midnight, border: primary ? 'none' : '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
-                {label} →
-              </a>
-            ))}
-          </div>
-        </div>
-        <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
-          <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>GET AN INSURANCE QUOTE</div>
-          <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Based on your car's insurance risk band ({car.insuranceBand}), estimated annual cost is £{costs.insuranceMin}–£{costs.insuranceMax}. Get a personalised quote below.</p>
-          <a href={insuranceUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: C.offwhite, color: C.midnight, border: '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
-            Compare insurance quotes →
-          </a>
-        </div>
-        {isFinance && (
-          <div style={{ backgroundColor: C.white, borderRadius: '16px', padding: '24px', border: '1px solid #E8ECF0', marginBottom: '20px' }}>
-            <div style={{ fontSize: '11px', fontWeight: '700', color: C.teal, letterSpacing: '0.06em', marginBottom: '6px' }}>GET A FINANCE QUOTE</div>
-            <p style={{ fontSize: '13px', color: '#8A9AB0', marginBottom: '16px', lineHeight: '1.6' }}>Based on a £{Number(costs.deposit).toLocaleString()} deposit over 48 months, estimated monthly finance is ~£{costs.financeMonthly}. Get a personalised quote below.</p>
-            <a href={financeUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'block', backgroundColor: C.offwhite, color: C.midnight, border: '1px solid #E8ECF0', borderRadius: '10px', padding: '14px 20px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
-              Get a finance quote →
-            </a>
-          </div>
-        )}
-        <div style={{ textAlign: 'center', marginTop: '32px' }}>
-          <button onClick={onBack} style={{ backgroundColor: C.midnight, color: C.offwhite, border: 'none', borderRadius: '10px', padding: '14px 32px', fontFamily: 'Satoshi, sans-serif', fontWeight: '700', fontSize: '15px', cursor: 'pointer' }}>← Back to your results</button>
-        </div>
-      </div>
-    </div>
-  )
-}
