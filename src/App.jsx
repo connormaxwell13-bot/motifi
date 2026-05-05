@@ -150,7 +150,12 @@ export default function App() {
       <CarPage
         car={selectedCar}
         answers={answers}
+        results={results}
+        fromResults={results.length > 0}
         onBack={() => setScreen(results.length > 0 ? 'results' : 'home')}
+        onHome={startOver}
+        onCompare={handleCompareFromHome}
+        onSelectCar={(car) => { setSelectedCar(car); setScreen('car') }}
       />
     )
   }
