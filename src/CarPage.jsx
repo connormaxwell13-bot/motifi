@@ -289,4 +289,358 @@ function CostBreakdown({ car, answers, cy }) {
       </div>
       <div className="car-cost">
         <div className="car-cost-col">
-          <h4><span>On the road cost</span><span className="meta-pill">{isFinance ? 'Hire Purchase' : 'Ca
+          <h4><span>On the road cost</span><span className="meta-pill">{isFinance ? 'Hire Purchase' : 'Cash'}</span></h4>
+          {onRoadRows.map(r => (
+            <div key={r.k} className="car-cost-row">
+              <span className="k">{r.k}</span>
+              <span className="v">{r.v}</span>
+            </div>
+          ))}
+          <div className="car-cost-total">
+            <span className="lab">Month 1 outlay</span>
+            <span className="v">{fmtGBP(onRoadTotal)}</span>
+          </div>
+        </div>
+        <div className="car-cost-col">
+          <h4><span>Ownership cost</span><span className="meta-pill">48 months</span></h4>
+          {ownershipRows.map(r => (
+            <div key={r.k} className="car-cost-row">
+              <span className="k">{r.k}</span>
+              <span className="v">{r.v}</span>
+            </div>
+          ))}
+          <div className="car-cost-row">
+            <span className="k">Depreciation (4 years)</span>
+            <span className="v">−{fmtGBP(ownershipDepreciation)}</span>
+          </div>
+          <div className="car-cost-row positive">
+            <span className="k">↑ Est. resale value (48 months)</span>
+            <span className="v">{fmtGBP(ownershipResale)}</span>
+          </div>
+          <div className="car-cost-total">
+            <span className="lab">True 48-month cost</span>
+            <span className="v">{fmtGBP(ownershipTotal)}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Retailer module ─────────────────────────────────────────────────────────
+
+function RetailerModule({ car, answers }) {
+  const cards  = useMemo(() => getRetailerCards(car, answers), [car, answers])
+  const radius = Number(answers?.searchRadius) || 25
+  const radLabel = radius >= 1500 ? 'nationwide' : `within ${radius} miles`
+  const postcode = (answers?.postcode || '').toUpperCase() || 'your area'
+
+  return (
+    <section className="car-section">
+      <div className="car-section-head">
+        <span className="num">§ 02</span>
+        <h2>Search available stock</h2>
+        <span className="count">3 retailers</span>
+      </div>
+      <p className="car-section-lede">
+        Live listings near you. Estimates updated weekly — click through for the real count.
+      </p>
+      <div className="car-retailers">
+        {cards.map(c => (
+          
+            key={c.id}
+            href={c.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="car-retailer-card"
+            style={{ '--accent': c.accent }}
+          >
+            <div className="car-retailer-name" style={{ color: c.accent }}>{c.name}</div>
+            <div className="car-retailer-count">{c.countLabel}</div>
+            <div className="car-retailer-sub">listings {radLabel}</div>
+            {c.avgPrice && (
+              <div className="car-retailer-avg">Avg. price {fmtGBP(c.avgPrice)}</div>
+            )}
+            <div className="car-retailer-cta">
+              Search {c.name}<span className="arrow" aria-hidden="true"></span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div className="car-section-foot">
+        Searching in {postcode} {radLabel}.
+      </div>
+    </section>
+  )
+}
+
+// ─── Insurance module ────────────────────────────────────────────────────────
+
+function InsuranceModule({ car, answers }) {
+  const est    = getInsuranceEstimate(car)
+  const hero   = getInsuranceHero(car, answers)
+  const direct = getInsuranceDirect(car, answers)
+
+  return (
+    <section className="car-section">
+      <div className="car-section-head">
+        <span className="num">§ 03</span>
+        <h2>Get insured</h2>
+        <span className="count">{est.band} risk band</span>
+      </div>
+
+      <div className="car-insurance">
+        <div className="car-insurance-cost">
+          <div className="kicker">◆ Estimated annual insurance</div>
+          <div className="range">
+            <span className="lo">{fmtGBP(est.min)}</span>
+            <span className="dash">–</span>
+            <span className="hi">{fmtGBP(est.max)}</span>
+          </div>
+          <div className="disclaimer">
+            Estimates based on this car's risk band. Your real quote depends on driver profile.
+          </div>
+        </div>
+
+        <div className="car-insurance-cta">
+          <a href={hero.url} target="_blank" rel="noopener noreferrer" className="btn lg primary-cta">
+            <span>{hero.label} on {hero.name}</span>
+            <span className="arrow" aria-hidden="true"></span>
+          </a>
+          <div className="car-insurance-cta-sub">{hero.sub}</div>
+
+          <div className="car-insurance-direct">
+            <span className="or">Or go direct:</span>
+            {direct.map(d => (
+              
+                key={d.id}
+                href={d.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="car-insurance-direct-btn"
+              >
+                {d.name}
+                {d.pcFill && <span className="pcfill">postcode pre-filled</span>}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Finance module (HP only) ────────────────────────────────────────────────
+
+function FinanceModule({ car, answers, cy }) {
+  const hero   = getFinanceHero(car, answers)
+  const direct = getFinanceDirect(car, answers)
+
+  const deposit  = cy?.deposit ?? Math.round(getRepresentativePrice(car) * 0.10)
+  const monthly  = cy?.financeMonthly ?? 0
+  const total    = deposit + (monthly * 48)
+
+  return (
+    <section className="car-section">
+      <div className="car-section-head">
+        <span className="num">§ 04</span>
+        <h2>Explore finance</h2>
+        <span className="count">9.9% APR · 48 months</span>
+      </div>
+
+      <div className="car-finance">
+        <div className="car-finance-cost">
+          <div className="kicker">◆ Estimated HP terms</div>
+          <div className="row"><span className="k">Deposit (10%)</span><span className="v">{fmtGBP(deposit)}</span></div>
+          <div className="row"><span className="k">Monthly</span><span className="v">{fmtGBP(monthly)} / mo</span></div>
+          <div className="row total"><span className="k">Total over 48 months</span><span className="v">{fmtGBP(total)}</span></div>
+          <div className="disclaimer">
+            Real rates depend on your credit profile. Quote engines below run a soft search.
+          </div>
+        </div>
+
+        <div className="car-finance-cta">
+          <a href={hero.url} target="_blank" rel="noopener noreferrer" className="btn lg primary-cta">
+            <span>{hero.label} on {hero.name}</span>
+            <span className="arrow" aria-hidden="true"></span>
+          </a>
+          <div className="car-finance-cta-sub">{hero.sub}</div>
+
+          <div className="car-finance-direct">
+            <span className="or">Or try:</span>
+            {direct.map(d => (
+              <a key={d.id} href={d.url} target="_blank" rel="noopener noreferrer" className="car-finance-direct-btn">
+                {d.name}
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ─── Known issues ────────────────────────────────────────────────────────────
+
+function KnownIssuesModule({ car }) {
+  const notes = parseNotes(car.notes)
+  if (notes.length === 0) {
+    return (
+      <section className="car-section">
+        <div className="car-section-head">
+          <span className="num">§ 05</span>
+          <h2>Known issues & history</h2>
+          <span className="count">Clean</span>
+        </div>
+        <p className="car-section-lede">
+          Nothing significant flagged on this generation. Standard pre-purchase
+          inspection still recommended.
+        </p>
+      </section>
+    )
+  }
+
+  return (
+    <section className="car-section">
+      <div className="car-section-head">
+        <span className="num">§ 05</span>
+        <h2>Known issues & history</h2>
+        <span className="count">{notes.length} flag{notes.length === 1 ? '' : 's'}</span>
+      </div>
+      <p className="car-section-lede">
+        Things to check before buying — sourced from owner forums and MOT data.
+      </p>
+      <div className="car-issues">
+        {notes.map((n, i) => (
+          <div key={i} className="car-issue-pill">
+            <span className="warn" aria-hidden="true">⚠</span>
+            <span>{n}</span>
+            <span className="check">CHECK BEFORE BUYING</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// ─── Right rail — Price ──────────────────────────────────────────────────────
+
+function PriceRail({
+  car, answers, repPrice, cy, trueCost, resale, matchScore, isFinance,
+  onSearchStock, onGetFinance, onGetInsurance,
+}) {
+  const monthly = isFinance && cy?.financeMonthly ? cy.financeMonthly : null
+  const month1  = isFinance
+    ? (cy.deposit + cy.financeMonthly + cy.insuranceMonthly + cy.roadTax)
+    : null
+
+  return (
+    <div className="car-rail-block car-rail-price">
+      <div className="car-rail-price-v">{fmtGBP(repPrice)}</div>
+      <div className="car-rail-price-meta">
+        Representative price · {car.generationYears?.split(/[-–—]/)[1]?.trim() || ''} · ~48,000 miles
+      </div>
+
+      <div className="car-rail-stats">
+        <div className="row">
+          <span className="k">Match score</span>
+          <span className="v"><strong>{matchScore}</strong> / 100</span>
+        </div>
+        {monthly && (
+          <div className="row">
+            <span className="k">HP monthly</span>
+            <span className="v"><strong>{fmtGBP(monthly)}</strong> / mo</span>
+          </div>
+        )}
+        {month1 && (
+          <div className="row">
+            <span className="k">Month 1 outlay</span>
+            <span className="v"><strong>{fmtGBP(month1)}</strong></span>
+          </div>
+        )}
+        <div className="row">
+          <span className="k">True 48-month cost</span>
+          <span className="v"><strong>{fmtGBP(trueCost)}</strong></span>
+        </div>
+        <div className="row">
+          <span className="k">Est. resale value</span>
+          <span className="v positive"><strong>−{fmtGBP(resale)}</strong></span>
+        </div>
+      </div>
+
+      <button className="btn lg" onClick={onSearchStock}>
+        Search available stock<span className="arrow" aria-hidden="true"></span>
+      </button>
+      {onGetFinance && (
+        <button className="btn ghost" onClick={onGetFinance}>
+          Get finance quote<span className="arrow" aria-hidden="true"></span>
+        </button>
+      )}
+      <button className="btn ghost" onClick={onGetInsurance}>
+        Get insurance quote<span className="arrow" aria-hidden="true"></span>
+      </button>
+      <button
+        className="btn ghost disabled"
+        disabled
+        title="Coming soon — sign in to save cars"
+      >
+        Save this car
+      </button>
+    </div>
+  )
+}
+
+// ─── Right rail — Verdict ────────────────────────────────────────────────────
+
+function VerdictRail({ car, matchScore }) {
+  const rel = Number(car.reliabilityPct) || 0
+  const dep = car.depreciationBand
+  const reliabilityStrength = rel >= 90 ? 'excellent' : rel >= 85 ? 'strong' : rel >= 80 ? 'fair' : 'mixed'
+  const depreciationLine = dep === 'Low'
+    ? 'predictable running costs and strong residuals'
+    : dep === 'Medium'
+    ? 'middle-of-pack residuals'
+    : 'higher-than-average value loss'
+
+  return (
+    <div className="car-rail-block car-rail-verdict">
+      <div className="kicker">◆ Motifi verdict</div>
+      <div className="score">{matchScore}</div>
+      <p>
+        The <strong>{car.make} {car.model}</strong> is a {reliabilityStrength} all-round
+        performer in your search. {reliabilityStrength === 'excellent' ? 'Excellent' : reliabilityStrength === 'strong' ? 'Strong' : 'Workable'} reliability,
+        and {depreciationLine}.
+      </p>
+      {parseNotes(car.notes).length > 0 && (
+        <p className="muted">
+          Check the known-issues panel below before pulling the trigger.
+        </p>
+      )}
+    </div>
+  )
+}
+
+// ─── Right rail — Other matches ──────────────────────────────────────────────
+
+function OtherMatchesRail({ cars, onSelectCar }) {
+  return (
+    <div className="car-rail-block car-rail-others">
+      <div className="kicker">◆ Your other matches</div>
+      {cars.map((c, i) => {
+        const score = Math.round((c.scores?.finalScore || 0) * 10)
+        const price = getRepresentativePrice(c)
+        return (
+          <button
+            key={`${c.make}-${c.model}-${i}`}
+            className="car-rail-other"
+            onClick={() => onSelectCar?.(c)}
+          >
+            <div className="name">{c.make} {c.model}</div>
+            <div className="meta">{fmtGBP(price)} · {score}/100</div>
+            <span className="go">View<span className="arrow" aria-hidden="true"></span></span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
