@@ -1,33 +1,5 @@
 // CarPage.jsx — Session 4
 // Editorial per-car detail page.
-//
-// Layout (desktop, ~1280px):
-//   ┌───────────────────────────────────────────────────────────────┐
-//   │ TopNav                                                        │
-//   ├───────────────────────────────────────────────────────────────┤
-//   │ ← Back / Your results / VW Golf 1.5 TSI                       │
-//   │                                                               │
-//   │ ┌─────────────────────────────────────┐  ┌──────────────────┐ │
-//   │ │ ◆ MAKE · YEARS · BODY              │  │ £10,995          │ │
-//   │ │                                     │  │ £228/mo HP       │ │
-//   │ │ Volkswagen Golf 1.5 TSI            │  │                  │ │
-//   │ │ trim line · capability chips       │  │ Match score 93   │ │
-//   │ │                                     │  │ Month 1   £1,412 │ │
-//   │ │ 93                                  │  │ 4-yr cost £15.1k │ │
-//   │ │ MOTIFI SCORE / 100                  │  │ Resale    £7,800 │ │
-//   │ │                                     │  │                  │ │
-//   │ │ [imagin photo]                      │  │ [Search stock]   │ │
-//   │ │                                     │  │ [Get finance]    │ │
-//   │ │                                     │  │ [Save this car]  │ │
-//   │ └─────────────────────────────────────┘  │                  │ │
-//   │                                          │ ◆ MOTIFI VERDICT │ │
-//   │ § 01 · Cost breakdown                    │ 93 / prose       │ │
-//   │ § 02 · Search available stock            │                  │ │
-//   │ § 03 · Get insured                       │ ◆ OTHER MATCHES  │ │
-//   │ § 04 · Explore finance (HP only)         │ mini cards…      │ │
-//   │ § 05 · Known issues & history            │                  │ │
-//   │                                          └──────────────────┘ │
-//   └───────────────────────────────────────────────────────────────┘
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import TopNav from './TopNav'
@@ -55,7 +27,6 @@ import './design/screens.css'
 
 const fmtGBP = (n) => '£' + Math.round(Number(n) || 0).toLocaleString('en-GB')
 
-// Imagin URL — same pattern used elsewhere across the app.
 function imaginUrl(car) {
   const make    = (car?.make || '').toLowerCase()
   const family  = (car?.model || '').split(' ')[0].toLowerCase()
@@ -63,10 +34,6 @@ function imaginUrl(car) {
   return `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(make)}&modelFamily=${encodeURIComponent(family)}&modelYear=${year}&angle=23&paintdescription=grey`
 }
 
-// Parse the dataset's notes field — comma/period separated lists of caveats —
-// into individual chips. The dataset's notes look like:
-//   "Timing chain (1.6 TDCi). Power steering pump. Avoid pre-2010 1.6 diesel."
-// Split on sentence boundaries, drop empties, dedupe.
 function parseNotes(notes) {
   if (!notes || typeof notes !== 'string') return []
   return notes
@@ -76,36 +43,23 @@ function parseNotes(notes) {
     .filter(s => !/^none\s+significant/i.test(s))
 }
 
-// Capability chips derived from the car. Tier-A reliability when reliabilityPct
-// >= 90, Tier B 85-90, Tier C below. NCAP year banded for honesty.
 function capabilityChips(car) {
   const out = []
   if (car.ulezCompliant === 'Yes') out.push('ULEZ compliant')
-
   const stars = Number(car.ncapStars)
   const ncapYr = car.ncapYear
   if (stars && ncapYr) out.push(`${stars}-star NCAP ${ncapYr}`)
   else if (stars)      out.push(`${stars}-star NCAP`)
-
   const rel = Number(car.reliabilityPct)
   if (rel >= 90)      out.push('Reliability tier A')
   else if (rel >= 85) out.push('Reliability tier B')
   else if (rel)       out.push('Reliability tier C')
-
   return out
 }
 
-// ─── Main component ──────────────────────────────────────────────────────────
-
 export default function CarPage({
-  car,
-  answers,
-  results,
-  fromResults,
-  onBack,
-  onHome,
-  onCompare,
-  onSelectCar,
+  car, answers, results, fromResults,
+  onBack, onHome, onCompare, onSelectCar,
 }) {
   if (!car) return null
 
@@ -115,12 +69,10 @@ export default function CarPage({
   const trueCost = getTrue48MonthCost(car, answers || {})
   const matchScore = Math.round((car.scores?.finalScore || 0) * 10)
   const isFinance  = shouldShowFinance(answers)
-  const showFinanceModule = isFinance
 
-  // Anchors for in-page nav from the right rail
-  const stockRef    = useRef(null)
+  const stockRef     = useRef(null)
   const insuranceRef = useRef(null)
-  const financeRef  = useRef(null)
+  const financeRef   = useRef(null)
 
   function scrollTo(ref) {
     ref?.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -128,14 +80,8 @@ export default function CarPage({
 
   return (
     <div className="motifi-screen car">
-      <TopNav
-        current="find"
-        onHome={onHome}
-        onStart={() => onHome?.()}
-        onCompare={onCompare}
-      />
+      <TopNav current="find" onHome={onHome} onStart={() => onHome?.()} onCompare={onCompare} />
 
-      {/* Breadcrumb */}
       <div className="car-crumb">
         <button className="car-crumb-back" onClick={onBack}>
           <span className="arrow back" aria-hidden="true"></span> Back to results
@@ -147,47 +93,33 @@ export default function CarPage({
       </div>
 
       <div className="car-layout">
-        {/* ─── Main column ─────────────────────────────────────────────── */}
         <main className="car-main">
           <CarHeader car={car} matchScore={matchScore} />
-
           <CostBreakdown car={car} answers={answers} cy={cy} />
-
           <div ref={stockRef}>
             <RetailerModule car={car} answers={answers} />
           </div>
-
           <div ref={insuranceRef}>
             <InsuranceModule car={car} answers={answers} />
           </div>
-
-          {showFinanceModule && (
+          {isFinance && (
             <div ref={financeRef}>
               <FinanceModule car={car} answers={answers} cy={cy} />
             </div>
           )}
-
           <KnownIssuesModule car={car} />
         </main>
 
-        {/* ─── Right rail ──────────────────────────────────────────────── */}
         <aside className="car-rail">
           <PriceRail
-            car={car}
-            answers={answers}
-            repPrice={repPrice}
-            cy={cy}
-            trueCost={trueCost}
-            resale={resale}
-            matchScore={matchScore}
+            car={car} answers={answers} repPrice={repPrice} cy={cy}
+            trueCost={trueCost} resale={resale} matchScore={matchScore}
             isFinance={isFinance}
             onSearchStock={() => scrollTo(stockRef)}
             onGetFinance={isFinance ? () => scrollTo(financeRef) : null}
             onGetInsurance={() => scrollTo(insuranceRef)}
           />
-
           <VerdictRail car={car} matchScore={matchScore} />
-
           {fromResults && results?.length > 1 && (
             <OtherMatchesRail
               cars={results.filter(c =>
@@ -203,8 +135,6 @@ export default function CarPage({
   )
 }
 
-// ─── Header ──────────────────────────────────────────────────────────────────
-
 function CarHeader({ car, matchScore }) {
   const chips = capabilityChips(car)
   return (
@@ -213,9 +143,7 @@ function CarHeader({ car, matchScore }) {
         <div className="car-hero-meta">
           ◆ {(car.make || '').toUpperCase()} · {car.generationYears || ''} · {(car.bodyType || '').toUpperCase()}
         </div>
-        <h1 className="car-hero-h1">
-          {car.make} {car.model}
-        </h1>
+        <h1 className="car-hero-h1">{car.make} {car.model}</h1>
         <div className="car-hero-trim">
           {[car.generationName, car.fuelType, car.transmission].filter(Boolean).join(' · ')}
         </div>
@@ -231,18 +159,13 @@ function CarHeader({ car, matchScore }) {
       </div>
       <div className="car-hero-r">
         <div className="car-hero-photo">
-          <img
-            src={imaginUrl(car)}
-            alt={`${car.make} ${car.model}`}
-            onError={(e) => { e.currentTarget.style.opacity = '0.15' }}
-          />
+          <img src={imaginUrl(car)} alt={`${car.make} ${car.model}`}
+            onError={(e) => { e.currentTarget.style.opacity = '0.15' }} />
         </div>
       </div>
     </section>
   )
 }
-
-// ─── Cost breakdown ──────────────────────────────────────────────────────────
 
 function CostBreakdown({ car, answers, cy }) {
   const isFinance = ['Hire Purchase', 'Hire Purchase (HP)', 'Personal Contract Purchase (PCP)']
@@ -327,8 +250,6 @@ function CostBreakdown({ car, answers, cy }) {
   )
 }
 
-// ─── Retailer module ─────────────────────────────────────────────────────────
-
 function RetailerModule({ car, answers }) {
   const cards  = useMemo(() => getRetailerCards(car, answers), [car, answers])
   const radius = Number(answers?.searchRadius) || 25
@@ -374,8 +295,6 @@ function RetailerModule({ car, answers }) {
   )
 }
 
-// ─── Insurance module ────────────────────────────────────────────────────────
-
 function InsuranceModule({ car, answers }) {
   const est    = getInsuranceEstimate(car)
   const hero   = getInsuranceHero(car, answers)
@@ -388,7 +307,6 @@ function InsuranceModule({ car, answers }) {
         <h2>Get insured</h2>
         <span className="count">{est.band} risk band</span>
       </div>
-
       <div className="car-insurance">
         <div className="car-insurance-cost">
           <div className="kicker">◆ Estimated annual insurance</div>
@@ -401,14 +319,12 @@ function InsuranceModule({ car, answers }) {
             Estimates based on this car's risk band. Your real quote depends on driver profile.
           </div>
         </div>
-
         <div className="car-insurance-cta">
           <a href={hero.url} target="_blank" rel="noopener noreferrer" className="btn lg primary-cta">
             <span>{hero.label} on {hero.name}</span>
             <span className="arrow" aria-hidden="true"></span>
           </a>
           <div className="car-insurance-cta-sub">{hero.sub}</div>
-
           <div className="car-insurance-direct">
             <span className="or">Or go direct:</span>
             {direct.map(d => (
@@ -430,15 +346,12 @@ function InsuranceModule({ car, answers }) {
   )
 }
 
-// ─── Finance module (HP only) ────────────────────────────────────────────────
-
 function FinanceModule({ car, answers, cy }) {
   const hero   = getFinanceHero(car, answers)
   const direct = getFinanceDirect(car, answers)
-
-  const deposit  = cy?.deposit ?? Math.round(getRepresentativePrice(car) * 0.10)
-  const monthly  = cy?.financeMonthly ?? 0
-  const total    = deposit + (monthly * 48)
+  const deposit = cy?.deposit ?? Math.round(getRepresentativePrice(car) * 0.10)
+  const monthly = cy?.financeMonthly ?? 0
+  const total   = deposit + (monthly * 48)
 
   return (
     <section className="car-section">
@@ -447,7 +360,6 @@ function FinanceModule({ car, answers, cy }) {
         <h2>Explore finance</h2>
         <span className="count">9.9% APR · 48 months</span>
       </div>
-
       <div className="car-finance">
         <div className="car-finance-cost">
           <div className="kicker">◆ Estimated HP terms</div>
@@ -458,14 +370,12 @@ function FinanceModule({ car, answers, cy }) {
             Real rates depend on your credit profile. Quote engines below run a soft search.
           </div>
         </div>
-
         <div className="car-finance-cta">
           <a href={hero.url} target="_blank" rel="noopener noreferrer" className="btn lg primary-cta">
             <span>{hero.label} on {hero.name}</span>
             <span className="arrow" aria-hidden="true"></span>
           </a>
           <div className="car-finance-cta-sub">{hero.sub}</div>
-
           <div className="car-finance-direct">
             <span className="or">Or try:</span>
             {direct.map(d => (
@@ -479,8 +389,6 @@ function FinanceModule({ car, answers, cy }) {
     </section>
   )
 }
-
-// ─── Known issues ────────────────────────────────────────────────────────────
 
 function KnownIssuesModule({ car }) {
   const notes = parseNotes(car.notes)
@@ -499,7 +407,6 @@ function KnownIssuesModule({ car }) {
       </section>
     )
   }
-
   return (
     <section className="car-section">
       <div className="car-section-head">
@@ -523,8 +430,6 @@ function KnownIssuesModule({ car }) {
   )
 }
 
-// ─── Right rail — Price ──────────────────────────────────────────────────────
-
 function PriceRail({
   car, answers, repPrice, cy, trueCost, resale, matchScore, isFinance,
   onSearchStock, onGetFinance, onGetInsurance,
@@ -540,7 +445,6 @@ function PriceRail({
       <div className="car-rail-price-meta">
         Representative price · {car.generationYears?.split(/[-–—]/)[1]?.trim() || ''} · ~48,000 miles
       </div>
-
       <div className="car-rail-stats">
         <div className="row">
           <span className="k">Match score</span>
@@ -567,7 +471,6 @@ function PriceRail({
           <span className="v positive"><strong>−{fmtGBP(resale)}</strong></span>
         </div>
       </div>
-
       <button className="btn lg" onClick={onSearchStock}>
         Search available stock<span className="arrow" aria-hidden="true"></span>
       </button>
@@ -579,18 +482,12 @@ function PriceRail({
       <button className="btn ghost" onClick={onGetInsurance}>
         Get insurance quote<span className="arrow" aria-hidden="true"></span>
       </button>
-      <button
-        className="btn ghost disabled"
-        disabled
-        title="Coming soon — sign in to save cars"
-      >
+      <button className="btn ghost disabled" disabled title="Coming soon — sign in to save cars">
         Save this car
       </button>
     </div>
   )
 }
-
-// ─── Right rail — Verdict ────────────────────────────────────────────────────
 
 function VerdictRail({ car, matchScore }) {
   const rel = Number(car.reliabilityPct) || 0
@@ -619,8 +516,6 @@ function VerdictRail({ car, matchScore }) {
     </div>
   )
 }
-
-// ─── Right rail — Other matches ──────────────────────────────────────────────
 
 function OtherMatchesRail({ cars, onSelectCar }) {
   return (
