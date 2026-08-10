@@ -1,0 +1,9 @@
+# Strategic documents — kept local only, never committed
+docs/CONTEXT.md
+docs/*.docx
+
+# Standard ignores (safety net — these may already be ignored elsewhere)
+node_modules/
+.env
+.env.local
+.DS_Store
